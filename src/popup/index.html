@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Sozu Wallet</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        width: 375px;
+        height: 600px;
+        background: #000000;
+        color: #ffffff;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      }
+      
+      #app {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header {
+        padding: 16px;
+        border-bottom: 1px solid #333;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        display: none;
+      }
+
+      .header.visible {
+        display: flex;
+      }
+
+      .content {
+        flex: 1;
+        padding: 20px;
+      }
+
+      .nav-buttons {
+        display: flex;
+        gap: 10px;
+      }
+
+      button {
+        background: #8A2BE2;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #9B30FF;
+      }
+
+      h2, h3 {
+        margin: 0;
+      }
+
+      .balance-display {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 20px 0;
+      }
+
+      input {
+        background: #333;
+        border: 1px solid #444;
+        color: white;
+        border-radius: 4px;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      .login-container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding: 32px 24px;
+        background: transparent;
+        position: relative;
+      }
+
+      .brand-container {
+        margin-top: 40px;
+        margin-bottom: 80px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .brand-title {
+        font-size: 48px;
+        font-weight: 700;
+        letter-spacing: -1px;
+        line-height: 1;
+        color: #fff;
+      }
+
+      .content-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-text {
+        margin-top: auto;
+        margin-bottom: 24px;
+      }
+
+      .hero-title {
+        font-size: 36px;
+        font-weight: 600;
+        line-height: 1.2;
+        margin-bottom: 16px;
+      }
+
+      .hero-subtitle {
+        font-size: 16px;
+        color: #888;
+        line-height: 1.4;
+      }
+
+      .get-started-button {
+        background: #7C3AED;
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        width: 100%;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .get-started-button:hover {
+        background: #6D28D9;
+      }
+
+      .spline-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .spline-background iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+
+      .twitter-login {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #1DA1F2;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 25px;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 1;
+        transition: transform 0.2s;
+      }
+
+      .twitter-login:hover {
+        transform: scale(1.05);
+      }
+
+      .home-container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .balance-section {
+        text-align: center;
+        padding: 30px 0;
+      }
+
+      .balance-label {
+        color: #888;
+        margin: 0;
+      }
+
+      .balance-amount {
+        font-size: 36px;
+        margin: 10px 0;
+      }
+
+      .main-actions {
+        display: flex;
+        gap: 16px;
+        padding: 20px;
+        justify-content: center;
+      }
+
+      .bottom-nav {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-around;
+        padding: 16px;
+        border-top: 1px solid #333;
+      }
+
+      .navigation-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        padding: 16px;
+      }
+
+      .nav-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #444;
+        transition: background-color 0.3s;
+      }
+
+      .nav-dot.active {
+        background: #8A2BE2;
+      }
+
+      .bottom-nav button {
+        background: transparent;
+        border: none;
+        color: #888;
+        padding: 8px 16px;
+      }
+
+      .bottom-nav button.active {
+        color: #8A2BE2;
+      }
+
+      .auth0-button {
+        background: #000000;
+        color: white;
+        border: 1px solid #333;
+        padding: 20px;
+        border-radius: 12px;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .auth0-button:hover {
+        border-color: #7C3AED;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
+      }
+
+      .auth0-button-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .auth0-logo {
+        width: 24px;
+        height: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="header">
+        <h2>Sozu Wallet</h2>
+        <div class="nav-buttons">
+          <button id="settingsBtn">Settings</button>
+        </div>
+      </div>
+      <div class="content" id="mainContent">
+        <!-- Dynamic content will be inserted here -->
+      </div>
+    </div>
+    <script type="module" src="./index.ts"></script>
+  </body>
+</html> 

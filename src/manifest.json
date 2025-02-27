@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Phantom Wallet",
+  "version": "1.0.0",
+  "description": "Phantom Wallet Chrome Extension",
+  "action": {
+    "default_popup": "popup/index.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentScript.js"]
+    }
+  ],
+  "permissions": [
+    "storage"
+  ]
+} 
