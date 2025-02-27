@@ -2,16 +2,21 @@
   "name": "phantom-crx",
   "private": true,
   "scripts": {
-    "dev": "vite",
+    "dev": "vite build --watch",
     "build": "vite build",
-    "preview": "vite preview"
+    "clean": "rm -rf dist node_modules .vite",
+    "rebuild": "yarn clean && yarn install && yarn build"
   },
   "dependencies": {
+    "@auth0/auth0-spa-js": "^2.1.3",
     "@types/chrome": "^0.0.260"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "typescript": "^5.0.0",
     "vite": "^5.4.9",
-    "@types/node": "^20.0.0"
+    "nodemon": "^3.0.1",
+    "chokidar": "^3.5.3",
+    "concurrently": "^8.2.2"
   }
-} 
+}

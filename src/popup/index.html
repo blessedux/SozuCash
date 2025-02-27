@@ -4,20 +4,30 @@
     <meta charset="UTF-8">
     <title>Sozu Wallet</title>
     <style>
-      body {
+      /* Reset and base styles */
+      * {
         margin: 0;
         padding: 0;
+        box-sizing: border-box;
+      }
+
+      html, body {
         width: 375px;
         height: 600px;
+        overflow: hidden;
+      }
+
+      body {
         background: #000000;
         color: #ffffff;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       }
-      
+
       #app {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
+        position: relative;
+        width: 375px;
+        height: 600px;
+        overflow: hidden;
       }
 
       .header {
@@ -36,6 +46,9 @@
       .content {
         flex: 1;
         padding: 20px;
+        position: relative;
+        z-index: 1;
+        background: transparent;
       }
 
       .nav-buttons {
@@ -80,13 +93,54 @@
         margin-top: 20px;
       }
 
+      /* Spline background styles */
+      .spline-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 375px;  /* Match window width */
+        height: 600px; /* Match window height */
+        overflow: hidden;
+        z-index: 0;
+      }
+
+      .spline-background iframe {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 1000px;    /* Much wider */
+        height: 1500px;   /* Much taller */
+        transform: translate(-50%, -50%); /* Center it */
+        border: none;
+      }
+
+      /* Ensure main container is above the background */
+      #mainContent {
+        position: relative;
+        z-index: 1;
+        width: 375px;
+        height: 600px;
+      }
+
+      /* Make all content float above the background */
       .login-container {
-        height: 100%;
+        position: relative;
+        z-index: 2;
+        width: 375px;
+        height: 600px;
         display: flex;
         flex-direction: column;
         padding: 32px 24px;
         background: transparent;
+      }
+
+      /* Ensure all interactive elements are above the background */
+      .brand-container,
+      .content-section,
+      .hero-text,
+      .auth0-button {
         position: relative;
+        z-index: 3;
       }
 
       .brand-container {
@@ -146,22 +200,6 @@
 
       .get-started-button:hover {
         background: #6D28D9;
-      }
-
-      .spline-background {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 0;
-        pointer-events: none;
-      }
-
-      .spline-background iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
       }
 
       .twitter-login {

@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "Phantom Wallet",
+  "name": "Sozu Wallet",
   "version": "1.0.0",
-  "description": "Phantom Wallet Chrome Extension",
+  "description": "Sozu Wallet Chrome Extension",
   "action": {
-    "default_popup": "popup/index.html"
+    "default_popup": "popup.html"
   },
   "background": {
     "service_worker": "background.js"
@@ -16,6 +16,14 @@
     }
   ],
   "permissions": [
-    "storage"
-  ]
+    "storage",
+    "identity"
+  ],
+  "host_permissions": [
+    "https://*.auth0.com/*",
+    "https://your-backend-url/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
 } 
