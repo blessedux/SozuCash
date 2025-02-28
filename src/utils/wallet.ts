@@ -1,8 +1,14 @@
 import { ethers } from 'ethers';
-import { HDNode } from '@ethersproject/hdnode';
-import { encrypt } from '@metamask/browser-passworder';
+import { HDNodeWallet } from 'ethers';
+import { encrypt, decrypt } from '@metamask/browser-passworder';
 import { MantleService } from '../services/MantleService';
 import { PasswordService } from '../services/PasswordService';
+
+export interface WalletData {
+  address: string;
+  privateKey: string;
+  mnemonic: string;
+}
 
 export async function createOrLoadWallet(userId: string) {
   try {
@@ -13,7 +19,7 @@ export async function createOrLoadWallet(userId: string) {
     }
 
     // Generate new wallet
-    const wallet = await generateNewEVMWallet(userId);
+    const wallet = await generateWallet();
     
     // Store wallet securely
     await storeWallet(wallet);
@@ -36,44 +42,77 @@ export async function createOrLoadWallet(userId: string) {
   }
 }
 
-async function generateNewEVMWallet(userId: string) {
+export async function generateWallet(): Promise<WalletData> {
+  // In ethers v6, we use HDNodeWallet.createRandom() instead of Wallet.createRandom()
+  const wallet = HDNodeWallet.createRandom();
+  
+  return {
+    address: wallet.address,
+    privateKey: wallet.privateKey,
+    mnemonic: wallet.mnemonic?.phrase || ''
+  };
+}
+
+export async function encryptWallet(wallet: WalletData, password: string): Promise<string> {
+  return encrypt(password, JSON.stringify(wallet));
+}
+
+export async function decryptWallet(encryptedWallet: string, password: string): Promise<WalletData> {
+  const decryptedString = await decrypt(password, encryptedWallet);
+  if (typeof decryptedString !== 'string') {
+    throw new Error('Decrypted data is not a string');
+  }
+  
+  const parsed = JSON.parse(decryptedString) as WalletData;
+  
+  if (!isWalletData(parsed)) {
+    throw new Error('Invalid wallet data format');
+  }
+  
+  return parsed;
+}
+
+// Type guard to validate WalletData shape
+function isWalletData(data: any): data is WalletData {
+  return (
+    typeof data === 'object' &&
+    typeof data.address === 'string' &&
+    typeof data.privateKey === 'string' &&
+    typeof data.mnemonic === 'string'
+  );
+}
+
+export async function importWallet(mnemonic: string): Promise<WalletData> {
+  // In ethers v6, we use HDNodeWallet.fromPhrase() instead of Wallet.fromMnemonic()
+  const wallet = HDNodeWallet.fromPhrase(mnemonic);
+  
+  return {
+    address: wallet.address,
+    privateKey: wallet.privateKey,
+    mnemonic: wallet.mnemonic?.phrase || ''
+  };
+}
+
+export async function validateMnemonic(mnemonic: string): Promise<boolean> {
   try {
-    // Generate random mnemonic
-    const mnemonic = ethers.Wallet.createRandom().mnemonic?.phrase;
-    if (!mnemonic) throw new Error('Failed to generate mnemonic');
-
-    // Create HD wallet
-    const hdNode = HDNode.fromMnemonic(mnemonic);
-    
-    // Derive path for Mantle (using standard Ethereum path)
-    // m/44'/60'/0'/0/0 is the standard Ethereum derivation path
-    const derivationPath = `m/44'/60'/0'/0/${userId}`;
-    const wallet = ethers.Wallet.fromMnemonic(mnemonic, derivationPath);
-
-    return {
-      address: wallet.address,
-      privateKey: wallet.privateKey,
-      mnemonic: mnemonic,
-      derivationPath
-    };
+    await importWallet(mnemonic);
+    return true;
   } catch (error) {
-    console.error('Error generating wallet:', error);
-    throw new Error('Failed to generate wallet');
+    return false;
   }
 }
 
-async function storeWallet(wallet: any) {
+async function storeWallet(wallet: WalletData) {
   try {
     // Encrypt sensitive data
-    const encryptedPrivateKey = await encryptData(wallet.privateKey);
-    const encryptedMnemonic = await encryptData(wallet.mnemonic);
+    const encryptedPrivateKey = await encryptWallet(wallet, 'your-secure-password');
+    const encryptedMnemonic = await encryptWallet(wallet, 'your-secure-password');
     
     await chrome.storage.local.set({
       wallets: [{
         address: wallet.address,
         encryptedPrivateKey,
         encryptedMnemonic,
-        derivationPath: wallet.derivationPath,
         network: 'mantle',
         chainId: 5000
       }]
@@ -81,18 +120,6 @@ async function storeWallet(wallet: any) {
   } catch (error) {
     console.error('Error storing wallet:', error);
     throw new Error('Failed to store wallet');
-  }
-}
-
-async function encryptData(data: any): Promise<string> {
-  try {
-    // Use MetaMask's browser-passworder for proper encryption
-    // This is a secure way to store sensitive data in the browser
-    const password = 'your-secure-password'; // TODO: Implement proper password management
-    return await encrypt(password, data);
-  } catch (error) {
-    console.error('Error encrypting data:', error);
-    throw new Error('Failed to encrypt wallet data');
   }
 }
 

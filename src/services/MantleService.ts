@@ -1,12 +1,12 @@
-import { ethers } from 'ethers';
-import { MANTLE_NETWORK } from '../utils/wallet';
+import { JsonRpcProvider, Wallet, formatEther, parseEther, formatUnits } from 'ethers';
+import { MANTLE_NETWORK } from '../config/networks';
 
 export class MantleService {
   private static instance: MantleService;
-  private provider: ethers.providers.JsonRpcProvider;
+  private provider: JsonRpcProvider;
   
   private constructor() {
-    this.provider = new ethers.providers.JsonRpcProvider(MANTLE_NETWORK.rpcUrls[0]);
+    this.provider = new JsonRpcProvider(MANTLE_NETWORK.rpcUrls[0]);
   }
 
   static getInstance(): MantleService {
@@ -19,7 +19,7 @@ export class MantleService {
   async getBalance(address: string): Promise<string> {
     try {
       const balance = await this.provider.getBalance(address);
-      return ethers.utils.formatEther(balance);
+      return formatEther(balance);
     } catch (error) {
       console.error('Error getting balance:', error);
       throw new Error('Failed to fetch balance');
@@ -31,12 +31,12 @@ export class MantleService {
     to: string,
     amount: string,
     privateKey: string
-  ): Promise<ethers.providers.TransactionResponse> {
+  ): Promise<any> {
     try {
-      const wallet = new ethers.Wallet(privateKey, this.provider);
+      const wallet = new Wallet(privateKey, this.provider);
       const tx = await wallet.sendTransaction({
         to,
-        value: ethers.utils.parseEther(amount),
+        value: parseEther(amount),
         gasLimit: 21000,
       });
       return tx;
@@ -47,8 +47,8 @@ export class MantleService {
   }
 
   async getGasPrice(): Promise<string> {
-    const gasPrice = await this.provider.getGasPrice();
-    return ethers.utils.formatUnits(gasPrice, 'gwei');
+    const feeData = await this.provider.getFeeData();
+    return formatUnits(feeData.gasPrice || 0, 'gwei');
   }
 
   async estimateGas(
@@ -59,7 +59,7 @@ export class MantleService {
     const estimate = await this.provider.estimateGas({
       from,
       to,
-      value: ethers.utils.parseEther(amount)
+      value: parseEther(amount)
     });
     return estimate.toString();
   }

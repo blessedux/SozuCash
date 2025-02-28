@@ -3,10 +3,7 @@
 console.log('Popup script loaded')
 
 import '../utils/polyfills';
-import { AuthState, User, Wallet } from '../types/auth';
-import { SessionManager } from '../utils/SessionManager';
-import { handleAuthError } from '../utils/errors';
-import { AuthError, AuthErrorCode } from '../utils/errors';
+import type { Wallet } from '../types/auth';
 
 // Screen management
 type Screen = 'login' | 'home' | 'settings' | 'send' | 'receive' | 'nfts' | 'poaps';
