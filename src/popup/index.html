@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <title>Sozu Wallet</title>
+    <link href="./styles/main.css" rel="stylesheet">
     <style>
       /* Reset and base styles */
       * {
@@ -12,22 +13,23 @@
       }
 
       html, body {
-        width: 375px;
+        width: 400px;
         height: 600px;
         overflow: hidden;
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(74, 0, 224, 0.2) 100%);
       }
 
       body {
-        background: #000000;
         color: #ffffff;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       }
 
       #app {
         position: relative;
-        width: 375px;
-        height: 600px;
+        width: 100%;
+        height: 100%;
         overflow: hidden;
+        isolation: isolate; /* Create new stacking context */
       }
 
       .header {
@@ -88,148 +90,130 @@
 
       .action-buttons {
         display: flex;
-        gap: 10px;
+        gap: 16px;
         justify-content: center;
-        margin-top: 20px;
+        margin: 16px 16px;
       }
 
-      /* Spline background styles */
-      .spline-background {
+      /* Spline container - make it fixed and larger than viewport */
+      .spline-container {
         position: fixed;
         top: 0;
         left: 0;
-        width: 375px;  /* Match window width */
-        height: 600px; /* Match window height */
-        overflow: hidden;
-        z-index: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
       }
 
-      .spline-background iframe {
+      .spline-container iframe {
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 1000px;    /* Much wider */
-        height: 1500px;   /* Much taller */
-        transform: translate(-50%, -50%); /* Center it */
+        width: 150%;
+        height: 150%;
+        transform: translate(-50%, -50%) scale(1.2);
         border: none;
+        pointer-events: all;
       }
 
-      /* Ensure main container is above the background */
+      /* Content layer - floats above spline */
       #mainContent {
         position: relative;
-        z-index: 1;
-        width: 375px;
-        height: 600px;
-      }
-
-      /* Make all content float above the background */
-      .login-container {
-        position: relative;
         z-index: 2;
-        width: 375px;
-        height: 600px;
-        display: flex;
-        flex-direction: column;
-        padding: 32px 24px;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
         background: transparent;
       }
 
-      /* Ensure all interactive elements are above the background */
-      .brand-container,
-      .content-section,
-      .hero-text,
-      .auth0-button {
-        position: relative;
-        z-index: 3;
-      }
-
-      .brand-container {
-        margin-top: 40px;
-        margin-bottom: 80px;
-        position: relative;
-        z-index: 1;
-      }
-
-      .brand-title {
-        font-size: 48px;
-        font-weight: 700;
-        letter-spacing: -1px;
-        line-height: 1;
-        color: #fff;
-      }
-
-      .content-section {
-        flex: 1;
+      /* Login container */
+      .login-container {
+        pointer-events: none;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
-        position: relative;
-        z-index: 1;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        padding: 0 20px;
+        background: transparent;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
       }
 
-      .hero-text {
-        margin-top: auto;
-        margin-bottom: 24px;
+      /* Brand section */
+      .brand-section {
+        pointer-events: auto;
+        text-align: center;
+        margin-bottom: 48px;
       }
 
-      .hero-title {
-        font-size: 36px;
-        font-weight: 600;
-        line-height: 1.2;
-        margin-bottom: 16px;
+      .brand-logo {
+        width: 160px;
+        height: auto;
+        margin-bottom: 40px;
+        filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.3));
       }
 
-      .hero-subtitle {
-        font-size: 16px;
-        color: #888;
-        line-height: 1.4;
-      }
-
-      .get-started-button {
-        background: #7C3AED;
-        color: white;
-        border: none;
-        padding: 16px;
-        border-radius: 12px;
-        font-size: 16px;
-        font-weight: 600;
-        width: 100%;
-        cursor: pointer;
-        transition: background-color 0.2s;
-      }
-
-      .get-started-button:hover {
-        background: #6D28D9;
-      }
-
+      /* Button styles */
       .twitter-login {
+        pointer-events: auto;
         display: flex;
         align-items: center;
-        gap: 10px;
-        background: #1DA1F2;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 25px;
+        justify-content: center;
+        gap: 12px;
+        background: rgba(0, 0, 0, 0.6);
         color: white;
-        font-weight: bold;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 16px 24px;
+        font-size: 16px;
+        font-weight: 500;
         cursor: pointer;
-        z-index: 1;
-        transition: transform 0.2s;
+        transition: all 0.2s ease;
+        width: auto;
+        min-width: 220px;
+        position: relative;
+        backdrop-filter: blur(8px);
+      }
+
+      .x-icon {
+        width: 20px;
+        height: 20px;
+        margin-left: 8px;
+      }
+
+      .button-text {
+        font-size: 16px;
+        font-weight: 500;
       }
 
       .twitter-login:hover {
-        transform: scale(1.05);
+        background: rgba(0, 0, 0, 0.8);
+        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       }
 
-      .home-container {
+      /* Wallet container */
+      .wallet-container {
+        pointer-events: auto;
+        padding: 24px;
         height: 100%;
         display: flex;
         flex-direction: column;
+        gap: 24px;
       }
 
       .balance-section {
         text-align: center;
-        padding: 30px 0;
+        padding: 24px;
+        margin-bottom: 16px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
       }
 
       .balance-label {
@@ -317,19 +301,294 @@
         width: 24px;
         height: 24px;
       }
+
+      .error-message {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(220, 38, 38, 0.9);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        z-index: 1000;
+        animation: slideDown 0.3s ease-out;
+      }
+
+      .popup-help {
+        margin-top: 16px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        font-size: 14px;
+      }
+
+      .popup-help ol {
+        margin-left: 20px;
+        margin-top: 8px;
+      }
+
+      .retry-button {
+        margin-top: 16px;
+        background: #7C3AED;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .retry-button:hover {
+        background: #6D28D9;
+        transform: translateY(-1px);
+      }
+
+      @keyframes slideDown {
+        from {
+          transform: translate(-50%, -100%);
+          opacity: 0;
+        }
+        to {
+          transform: translate(-50%, 0);
+          opacity: 1;
+        }
+      }
+
+      /* Add after existing styles */
+      
+      .dashboard-container {
+        padding: 24px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        inset: 0;
+        isolation: isolate;
+        z-index: 2;
+      }
+
+      .glass-panel {
+        position: relative;
+        z-index: 3;
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 32px;
+        margin: 16px;
+        height: calc(100% - 32px);
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+      }
+
+      .glass-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 24px;
+        transition: all 0.3s ease;
+      }
+
+      .glass-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+      }
+
+      .balance-card {
+        text-align: center;
+      }
+
+      .balance-label {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 14px;
+      }
+
+      .balance-amount {
+        font-size: 42px;
+        font-weight: 700;
+        margin: 16px 0 8px;
+        background: linear-gradient(135deg, #7C3AED, #3B82F6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .balance-usd {
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        margin: 24px 16px;
+      }
+
+      .balance-change {
+        font-size: 14px;
+        padding: 4px 12px;
+        border-radius: 12px;
+        background: rgba(34, 197, 94, 0.1);
+        color: #22C55E;
+      }
+
+      .balance-change.negative {
+        background: rgba(239, 68, 68, 0.1);
+        color: #EF4444;
+      }
+
+      .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        min-width: 100px;
+        height: 36px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        justify-content: center;
+        font-size: 14px;
+      }
+
+      .action-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .action-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .action-btn:active {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .tokens-card {
+        margin-top: 12px;
+        text-align: center;
+      }
+
+      .tokens-card h3 {
+        margin-bottom: 16px;
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .token-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 16px;
+        max-width: 280px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .token-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.2s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .token-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .token-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .token-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+      }
+
+      .token-details {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .token-name {
+        font-weight: 500;
+      }
+
+      .token-amount {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .token-value {
+        font-weight: 500;
+      }
+
+      .balance-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .network-select {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        cursor: pointer;
+      }
+
+      .network-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+      }
     </style>
   </head>
   <body>
     <div id="app">
-      <div class="header">
-        <h2>Sozu Wallet</h2>
-        <div class="nav-buttons">
-          <button id="settingsBtn">Settings</button>
-        </div>
+      <div class="spline-container">
+        <iframe 
+          src='https://my.spline.design/animatedshapeblend-44b4174e2919277ccdb7a032cc53f2c1/'
+          frameborder='0'
+          allowtransparency="true"
+          allow="autoplay; pointer-lock"
+        ></iframe>
       </div>
-      <div class="content" id="mainContent">
-        <!-- Dynamic content will be inserted here -->
-      </div>
+      <div id="mainContent"></div>
     </div>
     <script type="module" src="./index.ts"></script>
   </body>

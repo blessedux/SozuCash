@@ -16,14 +16,12 @@
     }
   ],
   "permissions": [
-    "storage",
-    "identity"
+    "storage"
   ],
-  "host_permissions": [
-    "https://*.auth0.com/*",
-    "https://your-backend-url/*"
-  ],
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'"
-  }
+  "web_accessible_resources": [{
+    "resources": [
+      "assets/images/*"
+    ],
+    "matches": ["<all_urls>"]
+  }]
 } 

@@ -1,8 +1,10 @@
 export const auth0Config = {
-  domain: 'your-auth0-domain.auth0.com',
-  clientId: 'your-auth0-client-id',
-  audience: 'your-api-identifier',
-  redirectUri: chrome.runtime.getURL('popup.html'),
+  domain: process.env.AUTH0_DOMAIN || '',
+  clientId: process.env.AUTH0_CLIENT_ID || '',
+  audience: process.env.AUTH0_AUDIENCE || '',
+  redirectUri: chrome.identity.getRedirectURL('oauth-callback.html'),
   scope: 'openid profile email',
-  connection: 'twitter'  // Specify Twitter as the connection
+  cacheLocation: 'memory' as const,
+  useRefreshTokens: true,
+  connection: 'twitter'
 }; 
