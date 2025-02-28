@@ -2,8 +2,10 @@
 <html>
   <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sozu Wallet</title>
     <link href="./styles/main.css" rel="stylesheet">
+    <link href="./styles/buttons.css" rel="stylesheet">
     <style>
       /* Reset and base styles */
       * {
@@ -590,6 +592,13 @@
       </div>
       <div id="mainContent"></div>
     </div>
+    
+    <!-- Preload images -->
+    <div style="display:none">
+      <img src="assets/sozu-logo.png" id="preloaded-logo" />
+      <img src="assets/mnt-logo.png" id="preloaded-mnt" />
+    </div>
+    
     <script type="module" src="./index.ts"></script>
   </body>
 </html> 

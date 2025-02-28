@@ -5,7 +5,7 @@ export function LoginScreen({ onLogin }: { onLogin: () => void }) {
     <div className="login-container h-full flex flex-col items-center justify-center p-6">
       <div className="brand-section mb-12">
         <img 
-          src="/assets/sozu-logo.png" 
+          src="assets/sozu-logo.png" 
           alt="Sozu Cash" 
           className="brand-logo w-40"
         />

@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtensionReloader = require('webpack-extension-reloader');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'development',
@@ -45,6 +46,22 @@ module.exports = {
         contentScript: 'contentScript',
         popup: 'popup'
       }
+    }),
+    new CopyPlugin({
+      patterns: [
+        { 
+          from: './src/manifest.json',
+          to: 'manifest.json'
+        },
+        {
+          from: './src/assets',
+          to: 'assets'
+        },
+        {
+          from: './src/styles',
+          to: 'styles'
+        }
+      ]
     })
   ],
   resolve: {

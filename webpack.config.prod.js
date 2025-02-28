@@ -28,6 +28,10 @@ module.exports = {
           'css-loader',
           'postcss-loader'
         ]
+      },
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
       }
     ]
   },
@@ -46,6 +50,10 @@ module.exports = {
         {
           from: './src/assets',
           to: 'assets'
+        },
+        {
+          from: './src/styles',
+          to: 'styles'
         }
       ]
     })
