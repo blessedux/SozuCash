@@ -1,3 +1,69 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities; 
+@tailwind utilities;
+
+/* General styles for the wallet app */
+
+/* Header Actions */
+.header-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background-color: rgba(220, 38, 38, 0.1);
+  color: rgba(220, 38, 38, 0.9);
+  border: none;
+  border-radius: 9999px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background-color: rgba(220, 38, 38, 0.2);
+}
+
+.logout-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Login state animations */
+.twitter-login.loading {
+  position: relative;
+  background-color: #1d9bf0;
+  color: transparent;
+}
+
+.twitter-login.loading::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-message {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: rgb(220, 38, 38);
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 10px;
+  font-size: 14px;
+  text-align: center;
+} 

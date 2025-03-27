@@ -1,0 +1,32 @@
+<!-- Twitter/X integration tipping template -->
+<div class="sozu-twitter-tipping-overlay">
+  <div class="sozu-twitter-tipping-card">
+    <div class="sozu-twitter-tipping-header">
+      <img src="{{extensionIconUrl}}" alt="Sozu Wallet" class="sozu-twitter-tipping-logo" />
+      <div class="sozu-twitter-tipping-title">Tip @{{authorUsername}}</div>
+      <button class="sozu-twitter-tipping-close">✕</button>
+    </div>
+    
+    <div class="sozu-twitter-tipping-content">
+      <div class="sozu-twitter-tipping-input-group">
+        <div class="sozu-twitter-tipping-amount-input">
+          <div class="sozu-twitter-tipping-token-select">
+            <span class="sozu-twitter-tipping-token-icon">ETH</span>
+            <span class="sozu-twitter-tipping-token-caret">▼</span>
+          </div>
+          <input type="number" class="sozu-twitter-tipping-amount" placeholder="0.01" min="0.001" step="0.001" />
+        </div>
+        <div class="sozu-twitter-tipping-usd-value">≈ ${{usdValue}} USD</div>
+      </div>
+      
+      <div class="sozu-twitter-tipping-message">
+        <label for="tip-message">Add a message (optional)</label>
+        <textarea id="tip-message" class="sozu-twitter-tipping-message-input" placeholder="Great tweet! Sending a tip to support your work."></textarea>
+      </div>
+      
+      <div class="sozu-twitter-tipping-actions">
+        <button class="sozu-twitter-tipping-send-btn">Send Tip</button>
+      </div>
+    </div>
+  </div>
+</div> 

@@ -1,6 +1,8 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   mode: 'production',
@@ -24,7 +26,9 @@ module.exports = {
       {
         test: /\.css$/,
         use: [
-          'style-loader',
+          {
+            loader: MiniCssExtractPlugin.loader
+          },
           'css-loader',
           'postcss-loader'
         ]
@@ -32,31 +36,36 @@ module.exports = {
       {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
         type: 'asset/resource',
+      },
+      {
+        test: /\.html$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'html-loader',
+          options: {
+            minimize: true
+          }
+        }
       }
     ]
   },
   plugins: [
-    new HtmlWebpackPlugin({
-      template: './src/popup/index.html',
-      filename: 'popup.html',
-      chunks: ['popup']
+    new MiniCssExtractPlugin({
+      filename: '[name].css'
     }),
-    new CopyPlugin({
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, 'src/popup.html'),
+      filename: 'popup.html',
+      chunks: ['popup'],
+    }),
+    new CopyWebpackPlugin({
       patterns: [
-        { 
-          from: './src/manifest.json',
-          to: 'manifest.json'
-        },
-        {
-          from: './src/assets',
-          to: 'assets'
-        },
-        {
-          from: './src/styles',
-          to: 'styles'
-        }
-      ]
-    })
+        { from: 'src/manifest.json', to: 'manifest.json' },
+        { from: 'src/assets', to: 'assets' },
+        { from: 'src/styles', to: 'styles' },
+        { from: 'src/oauth-callback.html', to: 'oauth-callback.html' },
+      ],
+    }),
   ],
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],

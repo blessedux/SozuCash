@@ -85,8 +85,9 @@ class WalletApp {
     document.addEventListener('DOMContentLoaded', () => {
       this.mainContent = document.getElementById('mainContent');
       if (this.mainContent) {
-        this.showLoginScreen();
-        this.initLoginHandler();
+        // First check if the user is already authenticated
+        this.checkAuthState();
+        this.setupMessageListeners();
         this.setupGlobalEventListeners();
       }
     });
@@ -208,9 +209,74 @@ class WalletApp {
     if (loginButton) {
       loginButton.addEventListener('click', () => {
         console.log('Login button clicked');
-        this.showDashboard();
+        this.handleLogin();
       });
     }
+  }
+
+  private async handleLogin() {
+    // Show the loading state
+    this.showLoadingState();
+    
+    try {
+      // Send a message to the background script to start the login process
+      const response = await chrome.runtime.sendMessage({ type: 'LOGIN' });
+      
+      if (response.success) {
+        console.log('Login initiated successfully');
+        // The OAuth flow will continue in the background
+        // We'll receive an AUTH_STATE_CHANGED message when it's complete
+      } else {
+        console.error('Login failed:', response.error);
+        this.hideLoadingState();
+        this.showError(response.error || 'Failed to login with X');
+      }
+    } catch (error) {
+      console.error('Error initiating login:', error);
+      this.hideLoadingState();
+      this.showError('Failed to connect with X. Please try again later.');
+    }
+  }
+
+  // Add a method to check the auth state on startup
+  private async checkAuthState() {
+    try {
+      const response = await chrome.runtime.sendMessage({ type: 'GET_AUTH_STATE' });
+      
+      if (response.success && response.state.isAuthenticated) {
+        console.log('User is already authenticated:', response.state.user);
+        // Update the UI with the user's information
+        this.showDashboard();
+      } else {
+        console.log('User is not authenticated, showing login screen');
+        this.showLoginScreen();
+      }
+    } catch (error) {
+      console.error('Error checking auth state:', error);
+      this.showLoginScreen();
+    }
+  }
+
+  private setupMessageListeners() {
+    // Listen for auth state changes
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      console.log('Popup received message:', message);
+      
+      if (message.type === 'AUTH_STATE_CHANGED') {
+        if (message.state.isAuthenticated) {
+          console.log('Auth state changed - user authenticated');
+          this.hideLoadingState();
+          this.showDashboard();
+        } else {
+          console.log('Auth state changed - user not authenticated');
+          this.hideLoadingState();
+          this.showLoginScreen();
+        }
+      }
+      
+      sendResponse({ success: true });
+      return true;
+    });
   }
 
   private showDashboard() {
@@ -221,6 +287,16 @@ class WalletApp {
     
     this.mainContent.innerHTML = `
       <div class="dashboard-container">
+        <div class="header-actions">
+          <button id="logoutBtn" class="logout-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Logout
+          </button>
+        </div>
         <div class="glass-panel">
           <!-- Wallet Card with custom border glow -->
           <div class="glass-card balance-card" style="box-shadow: 0 0 15px ${currentWallet.borderColor}; border: 1px solid ${currentWallet.borderColor};">
@@ -314,6 +390,14 @@ class WalletApp {
         this.switchWallet(index);
       });
     });
+
+    // Add logout button handler
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        this.handleLogout();
+      });
+    }
   }
 
   private showError(message: string) {
@@ -781,6 +865,24 @@ class WalletApp {
           <span>BASE</span>
         `;
       }
+    }
+  }
+
+  private async handleLogout() {
+    try {
+      // Send logout message to background
+      const response = await chrome.runtime.sendMessage({ type: 'LOGOUT' });
+      
+      if (response.success) {
+        console.log('Logout successful');
+        this.showLoginScreen();
+      } else {
+        console.error('Logout failed:', response.error);
+        this.showError(response.error || 'Failed to logout');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+      this.showError('Failed to logout. Please try again.');
     }
   }
 }
