@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'production',
@@ -37,26 +38,18 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './src/popup/index.html',
+      template: path.resolve(__dirname, 'src/popup.html'),
       filename: 'popup.html',
-      chunks: ['popup']
+      chunks: ['popup'],
     }),
-    new CopyPlugin({
+    new CopyWebpackPlugin({
       patterns: [
-        { 
-          from: './src/manifest.json',
-          to: 'manifest.json'
-        },
-        {
-          from: './src/assets',
-          to: 'assets'
-        },
-        {
-          from: './src/styles',
-          to: 'styles'
-        }
-      ]
-    })
+        { from: 'src/manifest.json', to: 'manifest.json' },
+        { from: 'src/assets', to: 'assets' },
+        { from: 'src/styles', to: 'styles' },
+        { from: 'src/oauth-callback.html', to: 'oauth-callback.html' },
+      ],
+    }),
   ],
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],

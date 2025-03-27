@@ -35,34 +35,25 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './src/popup/index.html',
+      template: path.resolve(__dirname, 'src/popup.html'),
       filename: 'popup.html',
-      chunks: ['popup']
+      chunks: ['popup'],
+    }),
+    new CopyPlugin({
+      patterns: [
+        { from: 'src/manifest.json', to: 'manifest.json' },
+        { from: 'src/assets', to: 'assets' },
+        { from: 'src/styles', to: 'styles' },
+        { from: 'src/oauth-callback.html', to: 'oauth-callback.html' },
+      ],
     }),
     new ExtensionReloader({
       reloadPage: true,
       entries: {
         background: 'background',
         contentScript: 'contentScript',
-        popup: 'popup'
-      }
+      },
     }),
-    new CopyPlugin({
-      patterns: [
-        { 
-          from: './src/manifest.json',
-          to: 'manifest.json'
-        },
-        {
-          from: './src/assets',
-          to: 'assets'
-        },
-        {
-          from: './src/styles',
-          to: 'styles'
-        }
-      ]
-    })
   ],
   resolve: {
     extensions: ['.ts', '.js']
