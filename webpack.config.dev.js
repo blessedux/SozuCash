@@ -2,6 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtensionReloader = require('webpack-extension-reloader');
 const CopyPlugin = require('copy-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   mode: 'development',
@@ -26,14 +27,33 @@ module.exports = {
       {
         test: /\.css$/,
         use: [
-          'style-loader',
+          {
+            loader: MiniCssExtractPlugin.loader
+          },
           'css-loader',
           'postcss-loader'
         ]
+      },
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
+      },
+      {
+        test: /\.html$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'html-loader',
+          options: {
+            minimize: false
+          }
+        }
       }
     ]
   },
   plugins: [
+    new MiniCssExtractPlugin({
+      filename: '[name].css'
+    }),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'src/popup.html'),
       filename: 'popup.html',

@@ -17,6 +17,7 @@
         "*://*.twitter.com/*"
       ],
       "js": ["contentScript.js"],
+      "css": ["contentScript.css"],
       "run_at": "document_idle"
     }
   ],

@@ -1,0 +1,385 @@
+/* Sozu Wallet Twitter/X Integration Styles */
+
+/* Main launcher button */
+.sozu-launcher-button {
+  margin: 12px 0;
+  padding: 0 16px;
+}
+
+.sozu-launcher-button button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(124, 58, 237, 0.1);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sozu-launcher-button button:hover {
+  background: rgba(124, 58, 237, 0.2);
+}
+
+.sozu-launcher-button img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.sozu-launcher-button span {
+  font-weight: 500;
+  font-size: 15px;
+  color: rgb(124, 58, 237);
+}
+
+/* Tweet tip button */
+.sozu-tip-author-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(124, 58, 237, 0.1);
+  color: rgb(124, 58, 237);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  margin-left: 8px;
+  border: none;
+}
+
+.sozu-tip-author-btn:hover {
+  background: rgba(124, 58, 237, 0.2);
+}
+
+.sozu-tip-author-btn img {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+/* Twitter tipping overlay */
+.sozu-twitter-tipping-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.sozu-twitter-tipping-card {
+  background: #121212;
+  width: 400px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
+.sozu-twitter-tipping-header {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.sozu-twitter-tipping-logo {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.sozu-twitter-tipping-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.sozu-twitter-tipping-close {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.sozu-twitter-tipping-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sozu-twitter-tipping-content {
+  padding: 20px;
+}
+
+.sozu-twitter-tipping-input-group {
+  margin-bottom: 20px;
+}
+
+.sozu-twitter-tipping-amount-input {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-twitter-tipping-token-select {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.sozu-twitter-tipping-token-icon {
+  font-weight: 600;
+}
+
+.sozu-twitter-tipping-token-caret {
+  font-size: 8px;
+  opacity: 0.7;
+}
+
+.sozu-twitter-tipping-amount {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 18px;
+  padding: 12px;
+  outline: none;
+  width: 100%;
+}
+
+.sozu-twitter-tipping-usd-value {
+  margin-top: 8px;
+  font-size: 14px;
+  opacity: 0.7;
+  text-align: right;
+}
+
+.sozu-twitter-tipping-message {
+  margin-bottom: 20px;
+}
+
+.sozu-twitter-tipping-message label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.sozu-twitter-tipping-message-input {
+  width: 100%;
+  height: 80px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: white;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+}
+
+.sozu-twitter-tipping-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.sozu-twitter-tipping-send-btn {
+  width: 100%;
+  padding: 14px;
+  background: #7C3AED;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.sozu-twitter-tipping-send-btn:hover {
+  background: #6D28D9;
+}
+
+/* Tooltip styles */
+.sozu-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 1000;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Wallet sidebar app styles */
+.sozu-app-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 420px;
+  height: 100vh;
+  background: #121212;
+  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sozu-app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-app-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.sozu-app-title img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.sozu-app-close {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sozu-app-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sozu-app-nav {
+  display: flex;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-nav-item {
+  padding: 16px 12px;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sozu-nav-item.active {
+  color: white;
+}
+
+.sozu-nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: #7C3AED;
+  border-radius: 4px 4px 0 0;
+}
+
+.sozu-app-content {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.sozu-section {
+  display: none;
+}
+
+.sozu-section.active {
+  display: block;
+}
+
+/* Toast notification */
+.sozu-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(16, 185, 129, 0.95);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 10001;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sozu-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.sozu-toast.error {
+  background: rgba(239, 68, 68, 0.95);
+}
+
+/* Loading spinner */
+.sozu-loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: sozu-spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes sozu-spin {
+  to {
+    transform: rotate(360deg);
+  }
+} 
