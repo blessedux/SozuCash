@@ -1,13 +1,14 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   mode: 'production',
   entry: {
     popup: './src/popup/index.ts',
     background: './src/background/index.ts',
-    contentScript: './src/contentScript/index.ts'
+    contentScript: './src/contentScript.ts'
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -24,7 +25,13 @@ module.exports = {
       {
         test: /\.css$/,
         use: [
-          'style-loader',
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              // for contentScript, we need separate CSS file
+              emit: true,
+            },
+          },
           'css-loader',
           'postcss-loader'
         ]
@@ -41,6 +48,9 @@ module.exports = {
       filename: 'popup.html',
       chunks: ['popup']
     }),
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+    }),
     new CopyPlugin({
       patterns: [
         { 
@@ -54,6 +64,10 @@ module.exports = {
         {
           from: './src/styles',
           to: 'styles'
+        },
+        {
+          from: './src/oauth-callback.html',
+          to: 'oauth-callback.html'
         }
       ]
     })

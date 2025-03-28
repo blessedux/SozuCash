@@ -1,0 +1,1029 @@
+/* Sozu Wallet Twitter Integration Styles */
+
+/* Main launcher button */
+.sozu-launcher-button {
+  margin: 12px 0;
+  padding: 0 16px;
+}
+
+.sozu-launcher-button button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(124, 58, 237, 0.1);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sozu-launcher-button button:hover {
+  background: rgba(124, 58, 237, 0.2);
+}
+
+.sozu-launcher-button img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.sozu-launcher-button span {
+  font-weight: 500;
+  font-size: 15px;
+  color: rgb(124, 58, 237);
+}
+
+/* Tweet tip button */
+.sozu-tip-author-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(124, 58, 237, 0.1);
+  color: rgb(124, 58, 237);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  margin-left: 8px;
+  border: none;
+}
+
+.sozu-tip-author-btn:hover {
+  background: rgba(124, 58, 237, 0.2);
+}
+
+.sozu-tip-author-btn img {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+/* Trending widget styles */
+.sozu-trending-widget-container {
+  margin: 12px 0;
+}
+
+.sozu-trending-widget {
+  background: rgba(30, 30, 30, 0.6);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-trending-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-trending-logo {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+.sozu-trending-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: rgb(231, 233, 234);
+}
+
+.sozu-trending-content {
+  padding: 8px 0;
+}
+
+.sozu-trending-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.sozu-trending-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sozu-trending-token {
+  font-weight: 700;
+  font-size: 15px;
+  color: rgb(231, 233, 234);
+}
+
+.sozu-trending-price {
+  font-size: 14px;
+  color: rgb(231, 233, 234);
+}
+
+.sozu-trending-change {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.sozu-trending-change.sozu-positive {
+  color: rgb(16, 185, 129);
+}
+
+.sozu-trending-change.sozu-negative {
+  color: rgb(239, 68, 68);
+}
+
+.sozu-trending-footer {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.sozu-trending-view-all {
+  background: transparent;
+  color: rgb(124, 58, 237);
+  border: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 9999px;
+  transition: background 0.2s;
+}
+
+.sozu-trending-view-all:hover {
+  background: rgba(124, 58, 237, 0.1);
+}
+
+/* Twitter tipping overlay */
+.sozu-twitter-tipping-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.sozu-twitter-tipping-card {
+  background: #121212;
+  width: 400px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
+.sozu-twitter-tipping-header {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.sozu-twitter-tipping-logo {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.sozu-twitter-tipping-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.sozu-twitter-tipping-close {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.sozu-twitter-tipping-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sozu-twitter-tipping-content {
+  padding: 20px;
+}
+
+.sozu-twitter-tipping-input-group {
+  margin-bottom: 20px;
+}
+
+.sozu-twitter-tipping-amount-input {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-twitter-tipping-token-select {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.sozu-twitter-tipping-token-icon {
+  font-weight: 600;
+}
+
+.sozu-twitter-tipping-token-caret {
+  font-size: 8px;
+  opacity: 0.7;
+}
+
+.sozu-twitter-tipping-amount {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 18px;
+  padding: 12px;
+  outline: none;
+  width: 100%;
+}
+
+.sozu-twitter-tipping-usd-value {
+  margin-top: 8px;
+  font-size: 14px;
+  opacity: 0.7;
+  text-align: right;
+}
+
+.sozu-twitter-tipping-message {
+  margin-bottom: 20px;
+}
+
+.sozu-twitter-tipping-message label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.sozu-twitter-tipping-message-input {
+  width: 100%;
+  height: 80px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: white;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+}
+
+.sozu-twitter-tipping-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.sozu-twitter-tipping-send-btn {
+  width: 100%;
+  padding: 14px;
+  background: #7C3AED;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.sozu-twitter-tipping-send-btn:hover {
+  background: #6D28D9;
+}
+
+/* Wallet sidebar app styles */
+.sozu-app-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 420px;
+  height: 100vh;
+  background: #121212;
+  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sozu-app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-app-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.sozu-app-title img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.sozu-app-close {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sozu-app-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sozu-app-nav {
+  display: flex;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-nav-item {
+  padding: 16px 12px;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sozu-nav-item.active {
+  color: white;
+}
+
+.sozu-nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: #7C3AED;
+  border-radius: 4px 4px 0 0;
+}
+
+.sozu-app-content {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.sozu-section {
+  display: none;
+}
+
+.sozu-section.active {
+  display: block;
+}
+
+.sozu-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-balance-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.sozu-network-select {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sozu-network-select:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sozu-balance-amount {
+  font-size: 36px;
+  font-weight: 700;
+  margin: 8px 0;
+  background: linear-gradient(90deg, #7C3AED, #3B82F6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sozu-balance-usd {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+.sozu-action-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.sozu-action-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.sozu-action-btn.send {
+  background: #7C3AED;
+  color: white;
+}
+
+.sozu-action-btn.receive {
+  background: #3B82F6;
+  color: white;
+}
+
+.sozu-action-btn.tip {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.sozu-action-btn:hover {
+  opacity: 0.9;
+}
+
+.sozu-tokens-header {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.sozu-token-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-token-item:last-child {
+  border-bottom: none;
+}
+
+.sozu-token-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sozu-token-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+}
+
+.sozu-token-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.sozu-token-name {
+  font-weight: 500;
+}
+
+.sozu-token-ticker {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sozu-token-value {
+  font-weight: 500;
+  text-align: right;
+}
+
+.sozu-token-price {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sozu-nft-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.sozu-nft-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-nft-image {
+  aspect-ratio: 1;
+  width: 100%;
+  object-fit: cover;
+}
+
+.sozu-nft-details {
+  padding: 12px;
+}
+
+.sozu-nft-name {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.sozu-nft-collection {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Toast notification */
+.sozu-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(16, 185, 129, 0.95);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 10001;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sozu-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.sozu-toast.error {
+  background: rgba(239, 68, 68, 0.95);
+}
+
+/* Loading spinner */
+.sozu-loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: sozu-spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes sozu-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Embedded wallet container - replaces Twitter's sidebar */
+.sozu-wallet-container {
+  width: 100%;
+  height: 100%;
+  background: #000; /* Match Twitter's dark theme */
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 16px;
+  margin-top: 12px;
+}
+
+.sozu-embedded-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-app-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.sozu-app-title img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.sozu-app-nav {
+  display: flex;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-nav-item {
+  padding: 16px 12px;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sozu-nav-item.active {
+  color: white;
+}
+
+.sozu-nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: #7C3AED;
+  border-radius: 4px 4px 0 0;
+}
+
+.sozu-app-content {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.sozu-section {
+  display: none;
+}
+
+.sozu-section.active {
+  display: block;
+}
+
+.sozu-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-balance-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.sozu-network-select {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sozu-network-select:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sozu-balance-amount {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 8px 0;
+  background: linear-gradient(90deg, #7C3AED, #3B82F6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sozu-balance-usd {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+.sozu-action-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.sozu-action-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.sozu-action-btn.send {
+  background: #7C3AED;
+  color: white;
+}
+
+.sozu-action-btn.receive {
+  background: #3B82F6;
+  color: white;
+}
+
+.sozu-action-btn.tip {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.sozu-action-btn:hover {
+  opacity: 0.9;
+}
+
+.sozu-tokens-header {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.sozu-token-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-token-item:last-child {
+  border-bottom: none;
+}
+
+.sozu-token-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sozu-token-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+}
+
+.sozu-token-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.sozu-token-name {
+  font-weight: 500;
+}
+
+.sozu-token-ticker {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sozu-token-value {
+  font-weight: 500;
+  text-align: right;
+}
+
+.sozu-token-price {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sozu-nft-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.sozu-nft-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-nft-image {
+  aspect-ratio: 1;
+  width: 100%;
+  object-fit: cover;
+}
+
+.sozu-nft-details {
+  padding: 12px;
+}
+
+.sozu-nft-name {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.sozu-nft-collection {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Activity items */
+.sozu-activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-activity-item:last-child {
+  border-bottom: none;
+}
+
+.sozu-activity-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.sozu-activity-icon.send {
+  background: rgba(239, 68, 68, 0.2);
+  position: relative;
+}
+
+.sozu-activity-icon.send::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 12px solid rgba(239, 68, 68, 0.8);
+  position: absolute;
+}
+
+.sozu-activity-icon.receive {
+  background: rgba(16, 185, 129, 0.2);
+  position: relative;
+}
+
+.sozu-activity-icon.receive::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 12px solid rgba(16, 185, 129, 0.8);
+  position: absolute;
+}
+
+.sozu-activity-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.sozu-activity-title {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sozu-activity-subtitle, .sozu-activity-date {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sozu-activity-amount {
+  font-weight: 500;
+  text-align: right;
+}
+
+.sozu-activity-price {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Tipping items */
+.sozu-tipping-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sozu-tipping-item:last-child {
+  border-bottom: none;
+}
+
+.sozu-tipping-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sozu-tipping-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.sozu-tipping-username {
+  font-weight: 500;
+}
+
+.sozu-tipping-date {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sozu-tipping-amount {
+  font-weight: 500;
+  text-align: right;
+}
+
+.sozu-tipping-usd {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+} 

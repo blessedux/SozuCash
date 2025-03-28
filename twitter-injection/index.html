@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sozu Wallet</title>
+    <style>
+      :root {
+        --primary-color: #1d9bf0;
+        --bg-color: #f7f9fa;
+        --text-color: #0f1419;
+        --border-color: #cfd9de;
+        --highlight-color: #e8f5fd;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-color: #15202b;
+          --text-color: #e7e9ea;
+          --border-color: #38444d;
+          --highlight-color: #1e364a;
+        }
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+        width: 360px;
+        height: 600px;
+      }
+
+      .wallet-container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header {
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .logo {
+        font-size: 20px;
+        font-weight: bold;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+      }
+
+      .logo svg {
+        width: 24px;
+        height: 24px;
+        margin-right: 8px;
+        fill: var(--primary-color);
+      }
+
+      .account {
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .account-balance {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
+      .account-address {
+        font-family: monospace;
+        background-color: var(--highlight-color);
+        padding: 8px;
+        border-radius: 4px;
+        font-size: 14px;
+        word-break: break-all;
+      }
+
+      .assets {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 16px;
+      }
+
+      .asset-item {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .asset-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--highlight-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+      }
+
+      .asset-details {
+        flex: 1;
+      }
+
+      .asset-name {
+        font-weight: bold;
+      }
+
+      .asset-balance {
+        font-size: 14px;
+        opacity: 0.8;
+      }
+
+      .actions {
+        display: flex;
+        padding: 16px;
+        border-top: 1px solid var(--border-color);
+      }
+
+      button {
+        flex: 1;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 9999px;
+        padding: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        margin: 0 8px;
+      }
+
+      button:hover {
+        opacity: 0.9;
+      }
+
+      button.secondary {
+        background-color: transparent;
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wallet-container">
+      <div class="header">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18.28 20H5.72a1.75 1.75 0 0 1-1.75-1.75V9.5h16.06v8.75c0 .966-.784 1.75-1.75 1.75zm-.5-13h-3.56V4.5a1 1 0 0 0-1-1h-2.44a1 1 0 0 0-1 1V7h-3.56A2.25 2.25 0 0 0 3.97 9.25v9c0 1.24 1.01 2.25 2.25 2.25h12.56c1.24 0 2.25-1.01 2.25-2.25v-9c0-1.24-1.01-2.25-2.25-2.25zm-4.06 0h-3.44V5h3.44z"></path>
+          </svg>
+          Sozu Wallet
+        </div>
+        <div class="network">Mantle Network</div>
+      </div>
+
+      <div class="account">
+        <div class="account-balance">0.0 ETH</div>
+        <div class="account-address">0x0000...0000</div>
+      </div>
+
+      <div class="assets">
+        <div class="section-title">Assets</div>
+        <div class="asset-item">
+          <div class="asset-icon">ETH</div>
+          <div class="asset-details">
+            <div class="asset-name">Ethereum</div>
+            <div class="asset-balance">0.0 ETH</div>
+          </div>
+        </div>
+        <div class="asset-item">
+          <div class="asset-icon">MNT</div>
+          <div class="asset-details">
+            <div class="asset-name">Mantle</div>
+            <div class="asset-balance">0.0 MNT</div>
+          </div>
+        </div>
+        <div class="section-title">NFTs</div>
+        <div class="asset-item">
+          <div class="asset-icon">NFT</div>
+          <div class="asset-details">
+            <div class="asset-name">Twitter Agent #123</div>
+            <div class="asset-balance">1 Token</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="secondary">Send</button>
+        <button>Receive</button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/popup.ts"></script>
+  </body>
+</html>
