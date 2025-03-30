@@ -148,20 +148,28 @@ export default class TwitterIntegration {
       this.walletContainer = document.createElement('div');
       this.walletContainer.className = 'sozu-wallet-container';
       
-      // Render the wallet UI
-      this.renderWalletUI();
+      // Create the launcher button with Mantle logo
+      const launcherButton = document.createElement('div');
+      launcherButton.className = 'sozu-launcher-button';
+      launcherButton.innerHTML = `
+        <button>
+          <img src="${chrome.runtime.getURL('assets/images/mantle-mnt-logo (1).png')}" alt="SozuCash" />
+          <span>SozuCash</span>
+        </button>
+      `;
       
-      // Save the original sidebar content for later if needed
-      const originalContent = rightSidebar.innerHTML;
+      // Add click handler to the button
+      launcherButton.querySelector('button')?.addEventListener('click', () => {
+        this.renderWalletUI();
+      });
       
-      // Clear the sidebar and insert our wallet
-      rightSidebar.innerHTML = '';
-      rightSidebar.appendChild(this.walletContainer);
+      // Add the launcher button to the sidebar
+      rightSidebar.appendChild(launcherButton);
       
       // Mark as replaced
       this.sidebarReplaced = true;
       
-      console.log('Sozu: Sidebar successfully replaced with wallet');
+      console.log('Sozu: Sidebar successfully updated with launcher button');
       
       // Also watch for page changes to re-inject if needed
       this.observePageChanges();
@@ -277,10 +285,18 @@ export default class TwitterIntegration {
     if (!this.walletContainer) return;
 
     this.walletContainer.innerHTML = `
+      <div class="sozu-spline-container">
+        <iframe 
+          src='https://my.spline.design/animatedshapeblend-44b4174e2919277ccdb7a032cc53f2c1/'
+          frameborder='0'
+          allowtransparency="true"
+          allow="autoplay; pointer-lock"
+        ></iframe>
+      </div>
+      
       <div class="sozu-embedded-header">
         <div class="sozu-app-title">
-          <img src="${chrome.runtime.getURL('assets/images/sozu-logo.png')}" alt="Sozu Wallet" />
-          <span>Sozu Wallet</span>
+          <span>Wallet</span>
         </div>
       </div>
       

@@ -10,7 +10,7 @@ module.exports = {
   entry: {
     popup: './src/popup/index.ts',
     background: './src/background/index.ts',
-    contentScript: './src/contentScript.ts'
+    twitterInject: './twitter-injection/src/twitter-inject.ts'
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -53,8 +53,8 @@ module.exports = {
       reloadPage: true,
       entries: {
         background: 'background',
-        contentScript: 'contentScript',
-        popup: 'popup'
+        popup: 'popup',
+        twitterInject: 'twitterInject'
       }
     }),
     new CopyPlugin({

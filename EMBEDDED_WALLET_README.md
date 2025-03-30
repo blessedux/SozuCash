@@ -84,3 +84,5 @@ In a production implementation, you would need to:
 - Add network switching
 - Improve detection of Twitter UI changes
 - Optimize performance for larger timelines
+
+-BIOMETRIC!!!!!!

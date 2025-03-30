@@ -8,7 +8,8 @@ module.exports = {
   entry: {
     popup: './src/popup/index.ts',
     background: './src/background/index.ts',
-    contentScript: './src/contentScript.ts'
+    // contentScript: './src/contentScript.ts', // Remove or comment out old entry
+    twitterInject: './twitter-injection/src/twitter-inject.ts' // Add new entry
   },
   output: {
     path: path.resolve(__dirname, 'dist'),

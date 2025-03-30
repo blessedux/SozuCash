@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Sozu Wallet",
   "version": "1.0.0",
-  "description": "Sozu Wallet Chrome Extension",
+  "description": "Sozu Wallet Chrome Extension with Twitter Integration",
   "action": {
     "default_popup": "popup.html"
   },
@@ -11,9 +11,9 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["contentScript.js"],
-      "css": ["contentScript.css"]
+      "matches": ["https://*.twitter.com/*", "https://*.x.com/*"],
+      "js": ["twitterInject.js"],
+      "run_at": "document_idle"
     }
   ],
   "permissions": [
@@ -21,9 +21,15 @@
   ],
   "web_accessible_resources": [{
     "resources": [
+      "popup.html",
+      "popup.js",
+      "styles/*",
       "assets/*",
-      "assets/sozu-logo.png"
+      "assets/images/*"
     ],
-    "matches": ["<all_urls>"]
-  }]
+    "matches": ["https://*.twitter.com/*", "https://*.x.com/*"]
+  }],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; frame-src https://my.spline.design;"
+  }
 } 
