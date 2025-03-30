@@ -81,17 +81,18 @@
 
     /* NEW: Styles for the injected UI container and iframe */
     #${INJECTED_CONTAINER_ID} {
-      width: 100%; /* Take full width of the parent */
-      /* Let height be determined by iframe or set fixed if needed */
-      /* height: 600px; */
-      /* max-height: 80vh; */ /* Example max height */
-      margin-top: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+      width: 350px; /* Reduced width */
+      height: 600px; /* Fixed height */
+      /* max-height: calc(100vh - 80px); */ /* Optional: Limit height based on viewport */
+      margin-top: 0; /* Remove margin-top */
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 16px;
-      overflow: hidden; /* Clip iframe content */
-      position: sticky; /* Make it sticky */
-      top: 10px; /* Define sticky position offset */
-      z-index: 100; /* Keep high z-index */
+      overflow: hidden;
+      position: fixed;   /* Keep fixed */
+      /* Remove static top/right - will be set dynamically */
+      /* top: 70px; */
+      /* right: 15px; */
+      z-index: 1000;     /* Keep high z-index */
       
       /* --- Transition Styles --- */
       opacity: 0;
@@ -110,15 +111,24 @@
 
     #${INJECTED_IFRAME_ID} {
       display: block; /* Remove potential bottom space */
-      width: 400px;   /* Match popup width */
+      width: 350px;   /* Reduced width */
       height: 600px;  /* Match popup height */
       border: none;   /* Remove iframe border */
     }
 
-    /* Class to hide original sidebar content */
-    .${HIDE_ORIGINAL_CLASS} {
-        display: none !important;
+    /* Class to hide original sidebar content - RENAME/REPURPOSE for fade */
+    /* .${HIDE_ORIGINAL_CLASS} { display: none !important; } */
+    
+    /* NEW: Class for fading out original elements - REMOVING, will use inline styles */
+    /*
+    .sozu-fade-out-original {
+        opacity: 0 !important; 
+        filter: blur(8px) !important;
+        visibility: hidden !important;
+        transition: opacity 0.5s ease-in-out, filter 0.5s ease-in-out, visibility 0s linear 0.5s !important;
+        pointer-events: none !important; 
     }
+    */
     `;
 
     // --- Main Injection Logic ---
@@ -278,31 +288,68 @@
            return;
       }
 
-      // Hide existing content within the target container (direct children)
+      // --- Define Specific Selectors ---
+      const searchBarSelector = '.css-175oi2r.r-1awozwy.r-aqfbo4.r-kemksi.r-18u37iz.r-1h3ijdo.r-6gpygo.r-15ysp7h.r-1xcajam.r-ipm5af.r-136ojw6.r-1jocfgc';
+      // Use the specific element below search ALSO as an alignment target
+      const alignmentTargetSelector = '.css-175oi2r.r-kemksi.r-1kqtdi0.r-1867qdf.r-1phboty.r-rs99b7.r-1ifxtd0.r-1udh08x'; 
+      const otherElementSelector = '.css-175oi2r.r-1kqtdi0.r-1867qdf.r-1phboty.r-1ifxtd0.r-1udh08x.r-1niwhzg.r-1yadl64';
+      // Combine selectors for elements to hide
+      const elementsToHideSelector = `${alignmentTargetSelector}, ${otherElementSelector}`;
+      // --- End Selectors ---
+
+      // --- Find alignment target and search bar ---
+      const alignmentElement = sidebarColumn.querySelector(alignmentTargetSelector) as HTMLElement;
+      const searchBarElement = sidebarColumn.querySelector(searchBarSelector) as HTMLElement;
+      
+      if (!alignmentElement) {
+          console.warn('Sozu: Could not find alignment target element using specific selector. Wallet position might be incorrect.');
+      }
+      if (!searchBarElement) {
+            console.warn('Sozu: Could not find search bar element using specific selector. It might get hidden.');
+      }
+      // --- End Finding Elements --- 
+      
+      // --- Measure positions BEFORE hiding --- 
+      const alignmentRect = alignmentElement?.getBoundingClientRect(); // Use optional chaining
+      const parentRect = targetParentContainer.getBoundingClientRect(); // For calculating right edge
+      
+      // Use alignmentRect top if available, otherwise fallback (e.g., parentRect.top or a default)
+      const calculatedTop = alignmentRect ? alignmentRect.top : parentRect.top; 
+      const calculatedRight = window.innerWidth - parentRect.right;
+      console.log(`Sozu: Alignment Element Top: ${alignmentRect?.top}px, Parent Right Edge: ${parentRect.right}px`);
+      console.log(`Sozu: Calculated Fixed Position - Top: ${calculatedTop}px, Right: ${calculatedRight}px`);
+      // --- End Measurement ---
+
+      // --- Hide specific children (Explicit Selectors, Skip Search Bar) ---
       originalSidebarContent = []; // Clear previous list
-      targetParentContainer.childNodes.forEach(node => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-              const element = node as HTMLElement;
-              originalSidebarContent.push(element); // Store node reference
-              element.classList.add(HIDE_ORIGINAL_CLASS); // Hide it
+      const elementsToHide = sidebarColumn.querySelectorAll(elementsToHideSelector); 
+
+      elementsToHide.forEach((node) => {
+          if (node instanceof HTMLElement) { 
+              // Double check it's not somehow the search bar (unlikely with specific selectors, but safe)
+              if (!node.matches(searchBarSelector)) { 
+                  originalSidebarContent.push(node); // Store node reference
+                  
+                  // --- Apply inline styles for fade-out and transition ---
+                  node.style.transition = 'opacity 0.5s ease-in-out, filter 0.5s ease-in-out';
+                  node.style.opacity = '0';
+                  node.style.pointerEvents = 'none';
+                  
+                  // --- End inline styles ---
+              }
           }
       });
-
-      // NEW: Hide specific elements by class within the sidebar column
-      const elementsToHide = sidebarColumn.querySelectorAll('.css-175oi2r.r-vacyoi.r-ttdzmv');
-      hiddenElementsByClass = []; // Clear previous list
-      elementsToHide.forEach(node => {
-          if (node instanceof HTMLElement) {
-              hiddenElementsByClass.push(node);
-              node.classList.add(HIDE_ORIGINAL_CLASS);
-          }
-      });
-      console.log(`Sozu: Hid ${hiddenElementsByClass.length} elements by specific class.`);
-      // --- End NEW section ---
-
+      console.log(`Sozu: Attempted to hide ${originalSidebarContent.length} specific elements.`);
+      // --- End Hiding Logic ---
+      
       // Create the wallet container div
       injectedContainer = document.createElement('div');
       injectedContainer.id = INJECTED_CONTAINER_ID;
+
+      // --- Apply dynamic position --- 
+      injectedContainer.style.top = `${calculatedTop}px`;
+      injectedContainer.style.right = `${calculatedRight}px`;
+      // --- End dynamic position ---
 
       // Create the iframe
       const iframe = document.createElement('iframe');
@@ -392,25 +439,31 @@
            injectedContainer = null; 
       }
 
-       // Restore original content
-       console.log(`Sozu: Restoring ${originalSidebarContent.length} original elements.`);
+       // Restore original content (elements hidden below search)
+       console.log(`Sozu: Restoring ${originalSidebarContent.length} original elements below search.`);
        originalSidebarContent.forEach(node => {
            // Check if node still exists and has the hiding class before removing
-           if (node && node.classList && node.classList.contains(HIDE_ORIGINAL_CLASS)) {
-               node.classList.remove(HIDE_ORIGINAL_CLASS);
+           // Remove the fade-out class to restore visibility/opacity
+           if (node instanceof HTMLElement) { // Simplified check
+               // Need a tiny delay for display change to register before transition starts
+               requestAnimationFrame(() => { 
+                 // THEN, trigger the fade-in by resetting inline styles
+                 // The transition property should still be set from the fade-out
+                 node.style.opacity = ''; // Reset to default (usually 1)
+                 node.style.pointerEvents = ''; // Reset pointer events
+               });
+               
+               // Optional: Clean up inline transition style after fade-in
+               setTimeout(() => {
+                 if(node) { // Check if node still exists
+                    node.style.transition = ''; // Clear the transition style
+                 }
+               }, 500); // Matches transition duration
            }
        });
        originalSidebarContent = []; // Clear the stored nodes
 
-       // NEW: Restore specific elements hidden by class
-       console.log(`Sozu: Restoring ${hiddenElementsByClass.length} elements hidden by specific class.`);
-       hiddenElementsByClass.forEach(node => {
-           // Check if node still exists and has the hiding class before removing
-           if (node && node.classList && node.classList.contains(HIDE_ORIGINAL_CLASS)) {
-               node.classList.remove(HIDE_ORIGINAL_CLASS);
-           }
-       });
-       hiddenElementsByClass = []; // Clear the stored nodes
+       // ** REMOVED redundant restore logic for hiddenElementsByClass **
 
       isSozuUiInjected = false;
       console.log('Sozu: Wallet UI Removed');
