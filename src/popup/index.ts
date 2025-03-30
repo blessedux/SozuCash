@@ -43,7 +43,7 @@ class WalletApp {
           symbol: 'MNT',
           amount: 123.45,
           value: '$345.67',
-          icon: 'mnt-logo.png'
+          icon: 'mnt-logo.svg'
         }
       ]
     },
@@ -59,7 +59,7 @@ class WalletApp {
           symbol: 'MNT',
           amount: 567.89,
           value: '$159.01',
-          icon: 'mnt-logo.png'
+          icon: 'mnt-logo.svg'
         }
       ]
     },
@@ -75,7 +75,7 @@ class WalletApp {
           symbol: 'MNT',
           amount: 42.00,
           value: '$11.76',
-          icon: 'mnt-logo.png'
+          icon: 'mnt-logo.svg'
         }
       ]
     }
@@ -151,56 +151,35 @@ class WalletApp {
   private showLoginScreen() {
     if (!this.mainContent) return;
     
-    // Try multiple approaches to display the logo
-    // Approach 1: Use chrome.runtime.getURL with more logging
-    const logoUrl = chrome.runtime.getURL('assets/sozu-logo.png');
+    const logoUrl = chrome.runtime.getURL('assets/sozu-logo.svg');
     console.log('Logo URL full path:', logoUrl);
-    
-    // Create a test image to see if it loads
-    const testImg = new Image();
-    testImg.onload = () => console.log('Image loaded successfully');
-    testImg.onerror = (e) => console.error('Image failed to load:', e);
-    testImg.src = logoUrl;
     
     this.mainContent.innerHTML = `
       <div class="login-container">
         <div class="brand-section">
-          <!-- Try both relative and absolute paths -->
-          <img 
-            src="${logoUrl}" 
-            alt="Sozu Cash" 
-            class="brand-logo"
-            style="width: 160px; height: auto; margin-bottom: 20px; filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.3));"
-            onerror="this.onerror=null; this.src='assets/sozu-logo.png'; console.log('Trying fallback path');"
-          />
-          
-          <!-- Fallback text logo in case image fails -->
+          <!-- Use a div with background image for the logo -->
           <div 
-            style="display: none; font-size: 42px; font-weight: bold; background: linear-gradient(90deg, #7C3AED, #3B82F6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"
-            class="fallback-logo"
-          >
-            SOZU
-          </div>
+            class="brand-logo"
+            style="
+              width: 160px; 
+              height: 80px; /* Adjust height based on logo aspect ratio */
+              margin-bottom: 20px; 
+              background-image: url(${logoUrl}); 
+              background-size: contain; 
+              background-repeat: no-repeat; 
+              background-position: center;
+              filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.3));
+            "
+          ></div>
+          
+          <!-- REMOVED Fallback text logo -->
+          
         </div>
         <button class="twitter-login" id="loginButton">
           <span class="button-text">Connect with X</span>
         </button>
       </div>
     `;
-    
-    // Check if image failed to load after a short delay
-    setTimeout(() => {
-      const img = this.mainContent?.querySelector('.brand-logo') as HTMLImageElement;
-      const fallbackLogo = this.mainContent?.querySelector('.fallback-logo') as HTMLElement;
-      
-      if (img && !img.complete) {
-        console.log('Image not loaded after timeout, showing fallback');
-        img.style.display = 'none';
-        if (fallbackLogo) {
-          fallbackLogo.style.display = 'block';
-        }
-      }
-    }, 500);
   }
 
   private initLoginHandler() {
@@ -231,7 +210,7 @@ class WalletApp {
               <div class="balance-header">
                 <span class="balance-label">Total Balance</span>
                 <div id="networkSelect" class="network-select" style="cursor: pointer;">
-                  <img src="${this.assetUrl('mnt-logo.png')}" alt="MNT" class="network-icon"/>
+                  <img src="${this.assetUrl('mnt-logo.svg')}" alt="MNT" class="network-icon"/>
                   <span>MNT</span>
                 </div>
               </div>
@@ -701,7 +680,7 @@ class WalletApp {
     
     // Add network options
     const networks = [
-      { id: 'mantle', name: 'Mantle', icon: 'mnt-logo.png' },
+      { id: 'mantle', name: 'Mantle', icon: 'mnt-logo.svg' },
       { id: 'ethereum', name: 'Ethereum', icon: 'eth-logo.png' },
       { id: 'base', name: 'Base', icon: 'base-logo.png' }
     ];
@@ -763,7 +742,7 @@ class WalletApp {
     if (networkSelect) {
       if (networkId === 'mantle') {
         networkSelect.innerHTML = `
-          <img src="${this.assetUrl('mnt-logo.png')}" alt="MNT" class="network-icon"/>
+          <img src="${this.assetUrl('mnt-logo.svg')}" alt="MNT" class="network-icon"/>
           <span>MNT</span>
         `;
       } else if (networkId === 'ethereum') {
