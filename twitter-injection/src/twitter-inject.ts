@@ -20,6 +20,7 @@
     let injectedContainer: HTMLElement | null = null;
     let originalSidebarContent: HTMLElement[] = []; // To store original elements
     let hiddenElementsByClass: HTMLElement[] = []; // NEW: Store elements hidden by specific class
+    let overlayElements: HTMLElement[] = []; // Store multiple overlay elements
 
 
     // --- Constants ---
@@ -93,6 +94,7 @@
       /* top: 70px; */
       /* right: 15px; */
       z-index: 1000;     /* Keep high z-index */
+      pointer-events: auto !important; /* Ensure container is interactive */
       
       /* --- Transition Styles --- */
       opacity: 0;
@@ -114,6 +116,7 @@
       width: 350px;   /* Reduced width */
       height: 600px;  /* Match popup height */
       border: none;   /* Remove iframe border */
+      pointer-events: auto !important; /* Ensure iframe is interactive */
     }
 
     /* Class to hide original sidebar content - RENAME/REPURPOSE for fade */
@@ -309,6 +312,24 @@
       }
       // --- End Finding Elements --- 
       
+      // --- Find the potential overlay elements --- 
+      const overlaySelector1 = '.css-175oi2r.r-vacyoi.r-ttdzmv'; // Original overlay
+      const overlaySelector2 = '.css-175oi2r.r-1hycxz.r-gtdqiz'; // Newly identified overlay
+      overlayElements = []; // Clear previous
+      const potentialOverlays = sidebarColumn.querySelectorAll(`${overlaySelector1}, ${overlaySelector2}`);
+      
+      potentialOverlays.forEach(node => {
+          if (node instanceof HTMLElement) {
+                console.log(`Sozu: Found potential overlay element (${node.className}), disabling pointer events.`);
+                node.style.pointerEvents = 'none'; // Disable pointer events on overlay
+                overlayElements.push(node); // Store reference
+          }
+      });
+      if (overlayElements.length === 0) {
+           console.warn('Sozu: Could not find any known overlay elements.');
+      }
+      // --- End Overlay Handling ---
+      
       // --- Measure positions BEFORE hiding --- 
       const alignmentRect = alignmentElement?.getBoundingClientRect(); // Use optional chaining
       const parentRect = targetParentContainer.getBoundingClientRect(); // For calculating right edge
@@ -438,6 +459,16 @@
           // If container is somehow already null, just clean up other things
            injectedContainer = null; 
       }
+
+       // --- Re-enable pointer events on overlays ---
+       console.log(`Sozu: Re-enabling pointer events on ${overlayElements.length} overlay elements.`);
+       overlayElements.forEach(overlay => {
+           if (overlay) { // Check if reference is still valid
+                overlay.style.pointerEvents = ''; // Reset to default
+           }
+       });
+       overlayElements = []; // Clear references
+       // --- End Overlay Handling ---
 
        // Restore original content (elements hidden below search)
        console.log(`Sozu: Restoring ${originalSidebarContent.length} original elements below search.`);
