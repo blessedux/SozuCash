@@ -25,11 +25,18 @@
       "popup.js",
       "styles/*",
       "assets/*",
-      "assets/images/*"
+      "assets/images/*",
+      "assets/icons/mantle-mnt-logo.svg",
+      "assets/sozu-logo.svg"
     ],
     "matches": ["https://*.twitter.com/*", "https://*.x.com/*"]
   }],
+  "icons": {
+    "16": "assets/icons/mantle-mnt-logo.svg",
+    "48": "assets/icons/mantle-mnt-logo-med.png",
+    "128": "assets/icons/mantle-mnt-logo-big.png"
+  },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; frame-src https://my.spline.design;"
+    "extension_pages": "script-src 'self'; object-src 'self'; frame-src https://my.spline.design; connect-src https://*.spline.design;"
   }
 } 

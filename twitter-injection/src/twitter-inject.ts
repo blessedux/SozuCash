@@ -41,11 +41,10 @@
       transition: background-color 0.2s;
       text-decoration: none;
       cursor: pointer;
-      margin: 4px 0 4px 0px;
+      margin: 4px 0 4px 6px;
       box-sizing: border-box;
       width: auto;
       position: relative;
-      left: -5px; /* Adjusted */
       color: rgb(231, 233, 234); /* Ensure text color is set */
     }
 
@@ -60,6 +59,10 @@
       width: 26px;
       height: 26px;
       margin-right: 12px;
+    }
+
+    .sozu-wallet-icon img {
+      border-radius: 6px; /* Make the icon image rounded */
     }
 
     .sozu-wallet-icon svg {
@@ -132,6 +135,30 @@
         pointer-events: none !important; 
     }
     */
+
+    /* NEW: Active state for the button icon */
+    .sozu-wallet-button.active .sozu-wallet-icon img {
+        filter: invert(1);
+    }
+    .sozu-wallet-button.active {
+        /* REMOVED background and border from active state */
+        /* background-color: rgba(231, 233, 234, 0.1); */
+        /* border: 1px solid rgba(231, 233, 234, 0.2); */ 
+    }
+    
+    /* NEW: Media Query for smaller screens */
+    @media (max-width: 1280px) { /* Adjust breakpoint as needed */
+        .sozu-wallet-button .sozu-wallet-text {
+            display: none;
+        }
+        .sozu-wallet-button .sozu-wallet-icon {
+            margin-right: 0; /* Remove margin when text is hidden */
+        }
+        .sozu-wallet-button {
+             padding: 0 12px; /* Adjust padding */
+             width: 50px; /* Make it more square */
+        }
+    }
     `;
 
     // --- Main Injection Logic ---
@@ -241,11 +268,13 @@
       button.href = '#'; // Make it behave like a link for accessibility/styling consistency
       button.addEventListener('click', handleWalletClick);
 
+      // --- Use IMG tag for the icon --- 
+      const iconUrl = chrome.runtime.getURL('assets/icons/mantle-mnt-logo.svg');
+      
       button.innerHTML = `
         <div class="sozu-wallet-icon">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="${walletIconPath}"></path>
-          </svg>
+          <img src="${iconUrl}" alt="SozuCash Icon" style="width: 26px; height: 26px;">
+          </img>
         </div>
         <span class="sozu-wallet-text">SozuCash</span>
       `;
@@ -341,28 +370,6 @@
       console.log(`Sozu: Calculated Fixed Position - Top: ${calculatedTop}px, Right: ${calculatedRight}px`);
       // --- End Measurement ---
 
-      // --- Hide specific children (Explicit Selectors, Skip Search Bar) ---
-      originalSidebarContent = []; // Clear previous list
-      const elementsToHide = sidebarColumn.querySelectorAll(elementsToHideSelector); 
-
-      elementsToHide.forEach((node) => {
-          if (node instanceof HTMLElement) { 
-              // Double check it's not somehow the search bar (unlikely with specific selectors, but safe)
-              if (!node.matches(searchBarSelector)) { 
-                  originalSidebarContent.push(node); // Store node reference
-                  
-                  // --- Apply inline styles for fade-out and transition ---
-                  node.style.transition = 'opacity 0.5s ease-in-out, filter 0.5s ease-in-out';
-                  node.style.opacity = '0';
-                  node.style.pointerEvents = 'none';
-                  
-                  // --- End inline styles ---
-              }
-          }
-      });
-      console.log(`Sozu: Attempted to hide ${originalSidebarContent.length} specific elements.`);
-      // --- End Hiding Logic ---
-      
       // Create the wallet container div
       injectedContainer = document.createElement('div');
       injectedContainer.id = INJECTED_CONTAINER_ID;
@@ -396,6 +403,8 @@
               targetParentContainer.appendChild(injectedContainer);
           }
           isSozuUiInjected = true; // Mark as injected (even with error) to allow removal
+           // Add active class to button even on error to allow toggle off
+           document.querySelector('.sozu-wallet-button')?.classList.add('active');
           return; // Stop further execution for this injection attempt
       }
 
@@ -409,7 +418,29 @@
           targetParentContainer.appendChild(injectedContainer);
       }
       
-      // Add 'visible' class shortly after insertion to trigger transition
+      // --- Hide specific children NOW (Just before showing wallet) ---
+      originalSidebarContent = []; // Clear previous list
+      const elementsToHide = sidebarColumn.querySelectorAll(elementsToHideSelector); 
+
+      elementsToHide.forEach((node) => {
+          if (node instanceof HTMLElement) { 
+              // Double check it's not somehow the search bar
+              if (!node.matches(searchBarSelector)) { 
+                  originalSidebarContent.push(node); // Store node reference
+                  
+                  // --- Apply inline styles for fade-out and transition ---
+                  console.log(`Sozu: Applying fade-out to: ${node.tagName}.${node.className.split(' ').join('.')}`); // More specific logging
+                  node.style.transition = 'opacity 0.5s ease-in-out, filter 0.5s ease-in-out';
+                  node.style.opacity = '0';
+                  node.style.pointerEvents = 'none';
+                  // --- End inline styles ---
+              }
+          }
+      });
+      console.log(`Sozu: Applied fade-out to ${originalSidebarContent.length} specific elements.`);
+      // --- End Hiding Logic ---
+      
+      // Add 'visible' class shortly after insertion/hiding to trigger transition
       requestAnimationFrame(() => {
         requestAnimationFrame(() => { // Double RAF for robustness in some cases
             if (injectedContainer) {
@@ -420,6 +451,8 @@
 
       isSozuUiInjected = true;
       console.log('Sozu: Wallet UI Injected');
+      // Add active class to button
+      document.querySelector('.sozu-wallet-button')?.classList.add('active');
     }
 
     function removeWalletUI() {
@@ -498,6 +531,8 @@
 
       isSozuUiInjected = false;
       console.log('Sozu: Wallet UI Removed');
+      // Remove active class from button
+      document.querySelector('.sozu-wallet-button')?.classList.remove('active');
     }
 
 
