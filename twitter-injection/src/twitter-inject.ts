@@ -21,7 +21,11 @@
     let originalSidebarContent: HTMLElement[] = []; // To store original elements
     let hiddenElementsByClass: HTMLElement[] = []; // NEW: Store elements hidden by specific class
     let overlayElements: HTMLElement[] = []; // Store multiple overlay elements
-
+    let resizeTimeoutId: number | null = null; // Restore for debouncing resize
+    
+    // Store initial position to maintain it during scroll
+    let initialWalletPosition: { top: number; left: number } | null = null;
+    let scrollTimeoutId: number | null = null;
 
     // --- Constants ---
     const walletIconPath = 'M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8zm-7-8.5c-1.93 0-3.5 1.57-3.5 3.5s1.57 3.5 3.5 3.5 3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5zm0 5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z';
@@ -92,8 +96,9 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 16px;
       overflow: hidden;
-      position: fixed;   /* Keep fixed */
-      /* Remove static top/right - will be set dynamically */
+      position: fixed; /* Restore fixed positioning */
+      width: 350px; /* Restore fixed width */
+      /* Remove static top/right - position is now relative */
       /* top: 70px; */
       /* right: 15px; */
       z-index: 1000;     /* Keep high z-index */
@@ -143,7 +148,7 @@
     .sozu-wallet-button.active {
         /* REMOVED background and border from active state */
         /* background-color: rgba(231, 233, 234, 0.1); */
-        /* border: 1px solid rgba(231, 233, 234, 0.2); */ 
+        /* border: 1px solid rgba(231, 233, 234, 0.2);  */ 
     }
     
     /* NEW: Media Query for smaller screens */
@@ -308,16 +313,12 @@
           return;
       }
 
-      // Find a suitable container to inject into/replace content within.
-      // Often the first direct child div holds the main content (search, trends, etc.)
-      // This selector might need adjustment based on Twitter's structure changes.
-      const targetParentContainer = sidebarColumn.querySelector(':scope > div > div') as HTMLElement;
-      if (!targetParentContainer) {
-           console.error("Sozu: Could not find target container within sidebar column. Injecting directly into column.");
-           // Fallback: Use sidebarColumn itself, but this might have unintended layout consequences.
-           // It's better to find a more specific container.
-           // For now, let's prevent injection if the specific container isn't found.
-           return;
+      // Find the container that holds the sidebar content (search, trends, etc.)
+      const sidebarContentContainer = sidebarColumn.querySelector(':scope > div > div') as HTMLElement;
+      if (!sidebarContentContainer) {
+           console.error("Sozu: Could not find sidebar content container.");
+           // Fallback or prevent injection?
+           return; 
       }
 
       // --- Define Specific Selectors ---
@@ -359,25 +360,37 @@
       }
       // --- End Overlay Handling ---
       
-      // --- Measure positions BEFORE hiding --- 
-      const alignmentRect = alignmentElement?.getBoundingClientRect(); // Use optional chaining
-      const parentRect = targetParentContainer.getBoundingClientRect(); // For calculating right edge
-      
-      // Use alignmentRect top if available, otherwise fallback (e.g., parentRect.top or a default)
-      const calculatedTop = alignmentRect ? alignmentRect.top : parentRect.top; 
-      const calculatedRight = window.innerWidth - parentRect.right;
-      console.log(`Sozu: Alignment Element Top: ${alignmentRect?.top}px, Parent Right Edge: ${parentRect.right}px`);
-      console.log(`Sozu: Calculated Fixed Position - Top: ${calculatedTop}px, Right: ${calculatedRight}px`);
-      // --- End Measurement ---
+      // --- REMOVED Initial position calculation ---
+      /*
+      let calculatedTop: number;
+      let calculatedRight: number;
+      const verticalMargin = 12; // Margin below search bar if alignment target fails
+
+      if (alignmentElement) {
+          calculatedTop = alignmentElement.getBoundingClientRect().top;
+      } else if (searchBarElement) {
+          calculatedTop = searchBarElement.getBoundingClientRect().bottom + verticalMargin;
+          console.warn('Sozu (inject): Alignment target not found, using search bar bottom for initial top.');
+      } else {
+          calculatedTop = 65; // Absolute fallback
+          console.error('Sozu (inject): Cannot find alignment target OR search bar for initial top positioning!');
+      }
+
+      if (searchBarElement) {
+          calculatedRight = window.innerWidth - searchBarElement.getBoundingClientRect().right;
+      } else {
+          calculatedRight = 15; // Absolute fallback
+          console.error('Sozu (inject): Cannot find search bar for initial right positioning!');
+      }
+      console.log(`Sozu (inject): Initial Calculated Top: ${calculatedTop}px, Right: ${calculatedRight}px`);
+      */
+      // --- End Initial Position Calculation ---
 
       // Create the wallet container div
       injectedContainer = document.createElement('div');
       injectedContainer.id = INJECTED_CONTAINER_ID;
-
-      // --- Apply dynamic position --- 
-      injectedContainer.style.top = `${calculatedTop}px`;
-      injectedContainer.style.right = `${calculatedRight}px`;
-      // --- End dynamic position ---
+      // Add direct style offset for left positioning
+      injectedContainer.style.marginLeft = '-60px';
 
       // Create the iframe
       const iframe = document.createElement('iframe');
@@ -396,29 +409,39 @@
           console.error("Sozu: Error setting iframe source.", e);
           // Display error message instead of iframe
           injectedContainer.innerHTML = '<p style="color: red; padding: 15px;">Error loading SozuCash wallet UI. Check console and ensure `popup/index.html` is in `web_accessible_resources`.</p>';
-          // Still append the container with the error message
-          if (targetParentContainer.firstChild) {
-              targetParentContainer.insertBefore(injectedContainer, targetParentContainer.firstChild);
-          } else {
-              targetParentContainer.appendChild(injectedContainer);
-          }
+          // Still append the container with the error message TO BODY
+          document.body.appendChild(injectedContainer); 
+          console.log('Sozu: Appended error container to document.body');
+          
           isSozuUiInjected = true; // Mark as injected (even with error) to allow removal
-           // Add active class to button even on error to allow toggle off
-           document.querySelector('.sozu-wallet-button')?.classList.add('active');
+          // Add active class to button even on error to allow toggle off
+          document.querySelector('.sozu-wallet-button')?.classList.add('active');
           return; // Stop further execution for this injection attempt
       }
 
       // Append iframe to the container
       injectedContainer.appendChild(iframe);
 
-      // Append the new container to the target area in the sidebar
-      if (targetParentContainer.firstChild) {
-          targetParentContainer.insertBefore(injectedContainer, targetParentContainer.firstChild);
+      // --- REMOVED Apply Initial Position BEFORE appending --- 
+      /*
+      injectedContainer.style.top = `${calculatedTop}px`;
+      injectedContainer.style.right = `${calculatedRight}px`;
+      */
+      // --- End Initial Position Application ---
+
+      // --- Find search bar to insert after --- 
+      const searchBarForInsertion = sidebarContentContainer.querySelector(searchBarSelector) as HTMLElement;
+      if (!searchBarForInsertion) {
+            console.error('Sozu: Cannot find search bar to insert wallet after.');
+            // Fallback: Append to end of container?
+            sidebarContentContainer.appendChild(injectedContainer);
       } else {
-          targetParentContainer.appendChild(injectedContainer);
+            // Insert the wallet container AFTER the search bar
+            searchBarForInsertion.parentNode?.insertBefore(injectedContainer, searchBarForInsertion.nextSibling);
       }
+      console.log('Sozu: Appended injected container into sidebar flow.');
       
-      // --- Hide specific children NOW (Just before showing wallet) ---
+      // --- Re-enable Hiding specific children NOW --- 
       originalSidebarContent = []; // Clear previous list
       const elementsToHide = sidebarColumn.querySelectorAll(elementsToHideSelector); 
 
@@ -443,8 +466,13 @@
       // Add 'visible' class shortly after insertion/hiding to trigger transition
       requestAnimationFrame(() => {
         requestAnimationFrame(() => { // Double RAF for robustness in some cases
+            updateWalletPosition(true); // Calculate and set initial position with 'isInitial' flag
             if (injectedContainer) {
+                console.log('Sozu: RAF - Before adding .visible class');
                 injectedContainer.classList.add('visible');
+                // Log computed styles AFTER adding visible class
+                const styles = window.getComputedStyle(injectedContainer);
+                console.log(`Sozu: RAF - After adding .visible. Computed - Top: ${styles.top}, Left: ${styles.left}, Opacity: ${styles.opacity}, Visibility: ${styles.visibility}`);
             }
         });
       });
@@ -453,6 +481,10 @@
       console.log('Sozu: Wallet UI Injected');
       // Add active class to button
       document.querySelector('.sozu-wallet-button')?.classList.add('active');
+      
+      // Add resize and scroll listeners
+      window.addEventListener('resize', handleResize);
+      window.addEventListener('scroll', handleScroll, { passive: true });
     }
 
     function removeWalletUI() {
@@ -504,6 +536,7 @@
        // --- End Overlay Handling ---
 
        // Restore original content (elements hidden below search)
+       // --- Re-enable restoring original content --- 
        console.log(`Sozu: Restoring ${originalSidebarContent.length} original elements below search.`);
        originalSidebarContent.forEach(node => {
            // Check if node still exists and has the hiding class before removing
@@ -533,8 +566,191 @@
       console.log('Sozu: Wallet UI Removed');
       // Remove active class from button
       document.querySelector('.sozu-wallet-button')?.classList.remove('active');
+      
+      // Reset stored position
+      initialWalletPosition = null;
+      
+      // Remove event listeners
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll);
+      if (resizeTimeoutId) {
+          clearTimeout(resizeTimeoutId);
+          resizeTimeoutId = null;
+      }
+      if (scrollTimeoutId) {
+          clearTimeout(scrollTimeoutId);
+          scrollTimeoutId = null;
+      }
     }
 
+    // --- Updated Function to calculate and update wallet position --- 
+    function updateWalletPosition(isInitial = false) {
+        if (!isSozuUiInjected || !injectedContainer) return;
+        
+        // If we already have a position and this isn't initial calculation or resize,
+        // just maintain the existing position
+        if (initialWalletPosition && !isInitial) {
+            injectedContainer.style.top = `${initialWalletPosition.top}px`;
+            injectedContainer.style.left = `${initialWalletPosition.left}px`;
+            injectedContainer.style.right = ''; // Ensure right is cleared
+            injectedContainer.style.display = 'block'; // Always ensure visibility
+            return;
+        }
+        
+        const sidebarColumn = document.querySelector('div[data-testid="sidebarColumn"]');
+        if (!sidebarColumn) {
+            console.warn('Sozu (updatePosition): Could not find sidebar column.');
+            return;
+        }
+        
+        // Find the main content column as reference only (not used for primary alignment)
+        const mainContentColumn = document.querySelector('div[data-testid="primaryColumn"]') as HTMLElement;
+        
+        // Use search bar selector as the reference element for exact alignment
+        const searchBarSelector = '.css-175oi2r.r-1awozwy.r-aqfbo4.r-kemksi.r-18u37iz.r-1h3ijdo.r-6gpygo.r-15ysp7h.r-1xcajam.r-ipm5af.r-136ojw6.r-1jocfgc';
+        // We're also looking for search bar's parent container for better reference
+        const searchBarParentSelector = '.r-1hycxz.r-aqfbo4.r-1l8l4mf.css-175oi2r'; 
+        
+        const searchBarElement = sidebarColumn.querySelector(searchBarSelector) as HTMLElement;
+        const searchBarParent = sidebarColumn.querySelector(searchBarParentSelector) as HTMLElement;
+        
+        // Small horizontal offset for micro adjustments if needed
+        const horizontalOffset = -100; // Increased negative offset to move further left
+        
+        // Default fallback values
+        let fallbackTop = 80;
+        let fallbackLeft = 0; // Will be set based on available search elements
+        
+        // ALIGNMENT STRATEGY:
+        // 1. First try to use search bar's exact left position
+        // 2. If not available, try parent's exact left
+        // 3. If neither is available, use fallback from window width
+        
+        if (searchBarElement) {
+            const searchBarRect = searchBarElement.getBoundingClientRect();
+            fallbackLeft = searchBarRect.left + horizontalOffset;
+            console.log(`Sozu (updatePosition): Using search bar left: ${fallbackLeft}px`);
+        } 
+        else if (searchBarParent) {
+            const parentRect = searchBarParent.getBoundingClientRect();
+            fallbackLeft = parentRect.left + horizontalOffset;
+            console.log(`Sozu (updatePosition): Using search bar parent left: ${fallbackLeft}px`);
+        }
+        else {
+            // Last resort fallback
+            fallbackLeft = window.innerWidth - 400;
+            console.log(`Sozu (updatePosition): Using window-based fallback: ${fallbackLeft}px`);
+        }
+
+        if (!searchBarElement) {
+            console.warn('Sozu (updatePosition): Could not find reference search bar. Using fallback position.');
+            
+            injectedContainer.style.top = `${fallbackTop}px`;
+            injectedContainer.style.left = `${fallbackLeft}px`;
+            
+            // Still store position as initial if this is the first calculation
+            if (isInitial) {
+                initialWalletPosition = { top: fallbackTop, left: fallbackLeft };
+                console.log(`Sozu (updatePosition): Stored fallback initial position - Top: ${fallbackTop}px, Left: ${fallbackLeft}px`);
+            }
+            return;
+        }
+        
+        const searchBarRect = searchBarElement.getBoundingClientRect();
+        
+        // If search bar exists but has no dimensions, use fallback
+        if (searchBarRect.width === 0 || searchBarRect.height === 0) {
+            console.warn('Sozu (updatePosition): Reference search bar found but has no dimensions. Using fallback position.');
+            
+            injectedContainer.style.top = `${fallbackTop}px`;
+            injectedContainer.style.left = `${fallbackLeft}px`;
+            
+            // Store position as initial if this is the first calculation
+            if (isInitial) {
+                initialWalletPosition = { top: fallbackTop, left: fallbackLeft };
+                console.log(`Sozu (updatePosition): Stored fallback initial position - Top: ${fallbackTop}px, Left: ${fallbackLeft}px`);
+            }
+            return;
+        }
+        
+        // Always ensure wallet is visible
+        injectedContainer.style.display = 'block';
+        
+        // Calculate top based on reference bottom + margin
+        const verticalMargin = 20; // Space below search bar
+        const calculatedTop = searchBarRect.bottom + verticalMargin;
+        
+        // DIRECT HORIZONTAL ALIGNMENT:
+        // Use the exact left edge of the search bar for horizontal alignment
+        const calculatedLeft = searchBarRect.left + horizontalOffset;
+        
+        // Log calculated values for debugging
+        console.log(`Sozu (updatePosition): Search Bar Left Edge: ${searchBarRect.left}px`);
+        console.log(`Sozu (updatePosition): Final calculation - Top: ${calculatedTop}px, Left: ${calculatedLeft}px`);
+
+        // Apply styles if values are sane
+        if (calculatedTop > 0 && calculatedLeft >= -20) { // Allow slightly negative left
+            injectedContainer.style.top = `${calculatedTop}px`;
+            injectedContainer.style.left = `${calculatedLeft}px`;
+            injectedContainer.style.right = ''; // Ensure right is cleared
+            
+            // Store the position if this is the initial calculation
+            if (isInitial) {
+                initialWalletPosition = { top: calculatedTop, left: calculatedLeft };
+                console.log(`Sozu (updatePosition): Stored initial position - Top: ${calculatedTop}px, Left: ${calculatedLeft}px`);
+            }
+        } else {
+            console.warn(`Sozu (updatePosition): Calculated position invalid (Top: ${calculatedTop}, Left: ${calculatedLeft}). Using fallback.`);
+            // Use fallback values
+            injectedContainer.style.top = `${fallbackTop}px`;
+            injectedContainer.style.left = `${fallbackLeft}px`;
+            
+            // Store position as initial if this is the first calculation
+            if (isInitial) {
+                initialWalletPosition = { top: fallbackTop, left: fallbackLeft };
+                console.log(`Sozu (updatePosition): Stored fallback initial position - Top: ${fallbackTop}px, Left: ${fallbackLeft}px`);
+            }
+        }
+    }
+    
+    // --- Updated Debounced resize handler ---
+    function handleResize() {
+        if (resizeTimeoutId) {
+            clearTimeout(resizeTimeoutId);
+        }
+        resizeTimeoutId = window.setTimeout(() => {
+            console.log('Sozu: Window resized, recalculating wallet position.');
+            // On resize, we DO want to recalculate position from reference elements
+            initialWalletPosition = null; // Reset stored position to force recalculation
+            updateWalletPosition(true); // true = treat as initial position calculation
+            resizeTimeoutId = null; // Clear ID after execution
+        }, 150); // Debounce timeout in ms
+    }
+    
+    // --- New scroll handler to ensure visibility during scroll ---
+    function handleScroll() {
+        if (!isSozuUiInjected || !injectedContainer) return;
+        
+        // Ensure wallet is visible during scroll
+        if (injectedContainer.style.display === 'none') {
+            injectedContainer.style.display = 'block';
+        }
+        
+        // Debounce scroll handling
+        if (scrollTimeoutId) {
+            clearTimeout(scrollTimeoutId);
+        }
+        
+        // After scroll stops, make sure position is maintained
+        scrollTimeoutId = window.setTimeout(() => {
+            if (initialWalletPosition) {
+                // Reapply stored position to ensure wallet stays fixed
+                injectedContainer!.style.top = `${initialWalletPosition.top}px`;
+                injectedContainer!.style.left = `${initialWalletPosition.left}px`;
+            }
+            scrollTimeoutId = null;
+        }, 100);
+    }
 
     // --- Start Process ---
     main();
