@@ -1,5 +1,166 @@
 /// <reference types="chrome"/>/// <reference types="chrome"/>
 
+/**
+ * Background script for SozuCash Wallet extension
+ * Handles Twitter OAuth authentication and communication between components
+ */
+
+// Constants
+const TWITTER_CLIENT_ID = 'YOUR_TWITTER_CLIENT_ID'; // Replace with your actual Twitter client ID 
+const REDIRECT_URL = chrome.runtime.getURL('src/oauth-callback.html');
+const TWITTER_OAUTH_URL = 'https://twitter.com/i/oauth2/authorize';
+const TWITTER_SCOPES = ['tweet.read', 'users.read', 'offline.access'];
+
+// State
+let authTabId: number | null = null;
+
+/**
+ * Initiates the Twitter OAuth flow
+ * @param senderId - ID of the sender (tab or extension)
+ */
+function initiateTwitterOAuth(senderId?: number): void {
+  // Generate random state value for security
+  const state = Math.random().toString(36).substring(2, 15);
+  
+  // Generate OAuth URL with PKCE
+  const url = new URL(TWITTER_OAUTH_URL);
+  url.searchParams.append('response_type', 'code');
+  url.searchParams.append('client_id', TWITTER_CLIENT_ID);
+  url.searchParams.append('redirect_uri', REDIRECT_URL);
+  url.searchParams.append('scope', TWITTER_SCOPES.join(' '));
+  url.searchParams.append('state', state);
+  url.searchParams.append('code_challenge_method', 'S256');
+  url.searchParams.append('code_challenge', 'CODE_CHALLENGE_VALUE'); // TODO: Implement actual PKCE
+  
+  // Store state in local storage for verification on callback
+  chrome.storage.local.set({ oauthState: state });
+  
+  // Open OAuth window
+  chrome.tabs.create({ url: url.toString() }, (tab) => {
+    if (tab.id) {
+      authTabId = tab.id;
+      
+      // If sender is a tab, remember it to return the result
+      if (senderId) {
+        chrome.storage.local.set({ callerTabId: senderId });
+      }
+    }
+  });
+}
+
+/**
+ * Handles the OAuth callback from Twitter
+ * @param url - The callback URL containing the authorization code
+ */
+function handleOAuthCallback(url: string): void {
+  // Parse the URL to get authorization code and state
+  const urlParams = new URLSearchParams(new URL(url).search);
+  const code = urlParams.get('code');
+  const state = urlParams.get('state');
+  
+  // Verify state parameter to prevent CSRF attacks
+  chrome.storage.local.get(['oauthState'], (result) => {
+    if (result.oauthState !== state) {
+      console.error('OAuth state does not match. Possible CSRF attack.');
+      return;
+    }
+    
+    if (code) {
+      // Process the authorization code
+      // In a real implementation, you would exchange this code for tokens
+      console.log('Received OAuth code:', code);
+      
+      // Store auth code for later use
+      chrome.storage.local.set({ 
+        twitterAuthCode: code,
+        isAuthenticated: true,
+        authTimestamp: Date.now()
+      });
+      
+      // Notify any waiting tabs
+      chrome.storage.local.get(['callerTabId'], (result) => {
+        if (result.callerTabId) {
+          chrome.tabs.sendMessage(result.callerTabId, {
+            type: 'OAUTH_COMPLETE',
+            success: true
+          });
+          
+          // Clear the stored caller ID
+          chrome.storage.local.remove(['callerTabId']);
+        }
+      });
+      
+      // Close the auth tab if it's still open
+      if (authTabId) {
+        chrome.tabs.remove(authTabId);
+        authTabId = null;
+      }
+    }
+  });
+}
+
+/**
+ * Handle messages from content scripts and popup
+ */
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Handle OAuth initiation
+  if (message.type === 'TWITTER_OAUTH_START') {
+    // Get sender tab ID if available
+    const senderId = sender.tab?.id;
+    initiateTwitterOAuth(senderId);
+    sendResponse({ status: 'initiating_oauth' });
+    return true; // Keep channel open for async response
+  }
+  
+  // Handle OAuth callback
+  if (message.type === 'OAUTH_CALLBACK' && message.url) {
+    handleOAuthCallback(message.url);
+    sendResponse({ status: 'processing_callback' });
+    return true;
+  }
+  
+  // Handle authentication status check
+  if (message.type === 'CHECK_AUTH_STATUS') {
+    chrome.storage.local.get(['isAuthenticated', 'authTimestamp'], (result) => {
+      // Check if auth is valid (not expired)
+      const isAuthenticated = result.isAuthenticated;
+      const authTimestamp = result.authTimestamp || 0;
+      const authAge = Date.now() - authTimestamp;
+      
+      // Consider auth expired after 24 hours (86400000 ms)
+      const isExpired = authAge > 86400000;
+      
+      sendResponse({
+        isAuthenticated: isAuthenticated && !isExpired
+      });
+    });
+    return true; // Keep channel open for async response
+  }
+});
+
+// Listen for tab updates to capture OAuth callback
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (tabId === authTabId && changeInfo.url && changeInfo.url.startsWith(REDIRECT_URL)) {
+    handleOAuthCallback(changeInfo.url);
+  }
+});
+
+// Handle extension installation or update
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === 'install') {
+    // First installation
+    console.log('SozuCash Wallet installed');
+    
+    // Open welcome page or tutorial
+    chrome.tabs.create({
+      url: chrome.runtime.getURL('src/popup/index.html?welcome=true')
+    });
+  } else if (details.reason === 'update') {
+    // Extension updated
+    console.log('SozuCash Wallet updated to version', chrome.runtime.getManifest().version);
+  }
+});
+
 interface TwitterWallet {
   address: string;
   privateKey: string;
@@ -13,29 +174,6 @@ interface TwitterWallet {
 interface WalletStore {
   [twitterUsername: string]: TwitterWallet[];
 }
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === 'OAUTH_REQUEST') {
-    handleTwitterAuth(request.details)
-      .then(result => sendResponse({success: true, data: result}))
-      .catch(error => sendResponse({success: false, error: error.message}));
-    return true; // Keep channel open for async response
-  }
-  
-  if (request.type === 'GET_WALLETS') {
-    getWallets(request.username)
-      .then(wallets => sendResponse({success: true, wallets}))
-      .catch(error => sendResponse({success: false, error: error.message}));
-    return true;
-  }
-  
-  if (request.type === 'IMPORT_WALLET') {
-    importWallet(request.username, request.address)
-      .then(wallet => sendResponse({success: true, wallet}))
-      .catch(error => sendResponse({success: false, error: error.message}));
-    return true;
-  }
-});
 
 async function handleTwitterAuth(details: { twitterUsername: string }): Promise<any> {
   try {
