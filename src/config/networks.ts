@@ -1,4 +1,4 @@
-export const MANTLE_NETWORK = {
+/// <reference types="chrome"/>export const MANTLE_NETWORK = {
   chainId: 5001,
   name: 'Mantle Testnet',
   rpcUrls: ['https://rpc.testnet.mantle.xyz'],

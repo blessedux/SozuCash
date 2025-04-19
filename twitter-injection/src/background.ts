@@ -1,4 +1,4 @@
-// Background script for Sozu Wallet Chrome extension
+/// <reference types="chrome"/>// Background script for Sozu Wallet Chrome extension
 
 // Listen for messages from content scripts
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

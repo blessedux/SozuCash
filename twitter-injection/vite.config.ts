@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+/// <reference types="chrome"/>import { defineConfig } from 'vite'
 import monkey from 'vite-plugin-monkey'
 import packageJson from './package.json'
 import { resolve } from 'path'

@@ -1,4 +1,4 @@
-export const chromeConfig = {
+/// <reference types="chrome"/>export const chromeConfig = {
   manifest_version: 3,
   name: "Sozu Wallet",
   version: "1.0.0",

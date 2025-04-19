@@ -1,4 +1,4 @@
-import { encrypt, decrypt } from '@metamask/browser-passworder';
+/// <reference types="chrome"/>import { encrypt, decrypt } from '@metamask/browser-passworder';
 import { Buffer } from 'buffer';
 
 export class PasswordService {

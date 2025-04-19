@@ -1,4 +1,4 @@
-// Type definitions for Chrome extension API
+/// <reference types="chrome"/>// Type definitions for Chrome extension API
 
 interface ChromeRuntime {
   sendMessage: (message: any) => void;

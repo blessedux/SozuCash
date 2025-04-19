@@ -1,4 +1,4 @@
-import { JsonRpcProvider, Wallet, formatEther, parseEther, formatUnits } from 'ethers';
+/// <reference types="chrome"/>import { JsonRpcProvider, Wallet, formatEther, parseEther, formatUnits } from 'ethers';
 import { MANTLE_NETWORK } from '../config/networks';
 
 export class MantleService {

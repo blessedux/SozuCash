@@ -4,16 +4,16 @@
   "version": "1.0.0",
   "description": "SozuCash Wallet Chrome Extension with Twitter Integration",
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "src/popup/index.html"
   },
   "background": {
-    "service_worker": "background.js",
+    "service_worker": "assets/background.js",
     "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["https://*.twitter.com/*", "https://*.x.com/*"],
-      "js": ["twitterInject.js"],
+      "js": ["assets/content.js"],
       "run_at": "document_idle"
     }
   ],
@@ -23,14 +23,12 @@
   ],
   "web_accessible_resources": [{
     "resources": [
-      "popup.html",
-      "popup.js",
-      "styles/*",
-      "assets/*",
+      "src/popup/index.html",
+      "assets/*.js",
+      "assets/*.css",
       "assets/images/*",
-      "assets/icons/mantle-mnt-logo.svg",
-      "assets/sozu-logo.svg",
-      "oauth-callback.html"
+      "assets/icons/*",
+      "src/oauth-callback.html"
     ],
     "matches": ["https://*.twitter.com/*", "https://*.x.com/*", "https://oauth.twitter.com/*"]
   }],
@@ -43,8 +41,8 @@
     "extension_pages": "script-src 'self'; object-src 'self'; frame-src https://my.spline.design; connect-src https://*.spline.design https://*.twitter.com https://api.twitter.com;"
   },
   "externally_connectable": {
-  "matches": ["https://twitter.com/*", "https://x.com/*"]
-},
+    "matches": ["https://twitter.com/*", "https://x.com/*"]
+  },
   "oauth2": {
     "client_id": "YOUR_TWITTER_CLIENT_ID",
     "scopes": ["tweet.read", "users.read"]

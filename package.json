@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "webpack serve --config webpack.config.dev.js",
     "build": "webpack --config webpack.config.prod.js",
-    "watch": "webpack --watch --config webpack.config.dev.js"
+    "watch": "webpack --watch --config webpack.config.dev.js",
+    "fix-chrome-types": "find ./src ./twitter-injection -name '*.ts' -exec sed -i '' -e '1s;^;/// <reference types=\"chrome\"/>;' {} \\;"
   },
   "dependencies": {
     "@metamask/browser-passworder": "^6.0.0",

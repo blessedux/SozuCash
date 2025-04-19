@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Authentication Complete</title>
+  <script>
+    window.onload = function() {
+      chrome.runtime.sendMessage({
+        type: 'AUTH_CALLBACK',
+        url: window.location.href
+      });
+      window.close();
+    };
+  </script>
+</head>
+<body>
+  <p>Authentication complete. You can close this window.</p>
+</body>
+</html> 

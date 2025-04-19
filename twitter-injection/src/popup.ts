@@ -1,4 +1,4 @@
-// Sozu Wallet Popup UI Script
+/// <reference types="chrome"/>// Sozu Wallet Popup UI Script
 
 // Mock wallet data for demonstration
 const walletData = {
