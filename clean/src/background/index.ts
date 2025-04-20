@@ -5,6 +5,9 @@
  * Handles Twitter OAuth authentication and communication between components
  */
 
+import { blockchainService, walletManager, secureStorage } from '../services/wallet';
+import type { Wallet } from '../services/wallet';
+
 // Constants
 const TWITTER_CLIENT_ID = 'YOUR_TWITTER_CLIENT_ID'; // Replace with your actual Twitter client ID 
 const REDIRECT_URL = chrome.runtime.getURL('src/oauth-callback.html');
@@ -77,12 +80,19 @@ function handleOAuthCallback(url: string): void {
         authTimestamp: Date.now()
       });
       
+      // Get username from Twitter API (mock for now)
+      const twitterUsername = "twitter_user"; // This would come from the API
+      
+      // Store username
+      chrome.storage.local.set({ twitterUsername });
+      
       // Notify any waiting tabs
       chrome.storage.local.get(['callerTabId'], (result) => {
         if (result.callerTabId) {
           chrome.tabs.sendMessage(result.callerTabId, {
             type: 'OAUTH_COMPLETE',
-            success: true
+            success: true,
+            username: twitterUsername
           });
           
           // Clear the stored caller ID
@@ -136,6 +146,184 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true; // Keep channel open for async response
   }
+  
+  // Get wallets for a user
+  if (message.type === 'GET_WALLETS') {
+    const { username, password } = message;
+    
+    // Validate input
+    if (!username) {
+      sendResponse({ success: false, error: 'Username is required' });
+      return true;
+    }
+    
+    // If password provided, try to get wallets from secure storage
+    if (password) {
+      secureStorage.getWallets(username, password)
+        .then(wallets => {
+          // Convert to public wallet objects (without private keys)
+          const publicWallets: Wallet[] = wallets.map(w => ({
+            address: w.address,
+            name: w.name,
+            balance: w.balance,
+            twitterUsername: w.twitterUsername,
+            networkId: w.networkId,
+            isImported: w.isImported,
+            created: w.created
+          }));
+          
+          sendResponse({ success: true, wallets: publicWallets });
+        })
+        .catch(error => {
+          sendResponse({ 
+            success: false, 
+            error: error instanceof Error ? error.message : 'Failed to get wallets' 
+          });
+        });
+    } else {
+      // Without password, return empty wallets
+      sendResponse({ success: true, wallets: [] });
+    }
+    
+    return true; // Keep channel open for async response
+  }
+  
+  // Import a wallet
+  if (message.type === 'IMPORT_WALLET') {
+    const { username, address, password } = message;
+    
+    // Validate input
+    if (!username || !address || !password) {
+      sendResponse({ 
+        success: false, 
+        error: 'Username, address and password are required' 
+      });
+      return true;
+    }
+    
+    try {
+      // Imported wallets don't have private keys
+      secureStorage.saveWallet(username, {
+        address,
+        name: `${username}'s Imported Wallet`,
+        privateKey: '', // No private key for imported wallets
+        twitterUsername: username,
+        balance: '0',
+        created: Date.now(),
+        networkId: 'mantle',
+        isImported: true
+      }, password)
+        .then(() => {
+          sendResponse({
+            success: true,
+            wallet: {
+              address,
+              name: `${username}'s Imported Wallet`,
+              twitterUsername: username,
+              balance: '0',
+              created: Date.now(),
+              networkId: 'mantle',
+              isImported: true
+            }
+          });
+        })
+        .catch(error => {
+          sendResponse({ 
+            success: false, 
+            error: error instanceof Error ? error.message : 'Failed to import wallet' 
+          });
+        });
+    } catch (error) {
+      sendResponse({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Failed to import wallet' 
+      });
+    }
+    
+    return true; // Keep channel open for async response
+  }
+  
+  // Create a new wallet
+  if (message.type === 'CREATE_WALLET') {
+    const { username, password, name } = message;
+    
+    // Validate input
+    if (!username || !password) {
+      sendResponse({ 
+        success: false, 
+        error: 'Username and password are required' 
+      });
+      return true;
+    }
+    
+    try {
+      // Create a new wallet
+      const { wallet, privateKey } = blockchainService.createWallet(username);
+      
+      // Set custom name if provided
+      if (name) {
+        wallet.name = name;
+      }
+      
+      // Save to secure storage
+      secureStorage.saveWallet(username, {
+        ...wallet,
+        privateKey
+      }, password)
+        .then(() => {
+          // Return public wallet info (without private key)
+          sendResponse({
+            success: true,
+            wallet: {
+              address: wallet.address,
+              name: wallet.name,
+              twitterUsername: wallet.twitterUsername,
+              balance: wallet.balance,
+              created: wallet.created,
+              networkId: wallet.networkId,
+              isImported: wallet.isImported
+            }
+          });
+        })
+        .catch(error => {
+          sendResponse({ 
+            success: false, 
+            error: error instanceof Error ? error.message : 'Failed to save wallet' 
+          });
+        });
+    } catch (error) {
+      sendResponse({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Failed to create wallet' 
+      });
+    }
+    
+    return true; // Keep channel open for async response
+  }
+  
+  // Get balance for an address
+  if (message.type === 'GET_BALANCE') {
+    const { address, networkId } = message;
+    
+    // Validate address
+    if (!address) {
+      sendResponse({ success: false, error: 'Address is required' });
+      return true;
+    }
+    
+    blockchainService.getBalance(address, networkId || 'mantle')
+      .then(balance => {
+        sendResponse({ success: true, balance });
+      })
+      .catch(error => {
+        sendResponse({ 
+          success: false, 
+          error: error instanceof Error ? error.message : 'Failed to get balance' 
+        });
+      });
+    
+    return true; // Keep channel open for async response
+  }
 });
 
 // Listen for tab updates to capture OAuth callback
@@ -159,232 +347,4 @@ chrome.runtime.onInstalled.addListener((details) => {
     // Extension updated
     console.log('SozuCash Wallet updated to version', chrome.runtime.getManifest().version);
   }
-});
-
-interface TwitterWallet {
-  address: string;
-  privateKey: string;
-  created: number;
-  name: string;
-  twitterUsername: string;
-  isImported?: boolean;
-}
-
-// Store wallets by Twitter username -> array of wallets
-interface WalletStore {
-  [twitterUsername: string]: TwitterWallet[];
-}
-
-async function handleTwitterAuth(details: { twitterUsername: string }): Promise<any> {
-  try {
-    // Twitter OAuth 2.0 flow
-    const redirectUri = chrome.identity.getRedirectURL();
-    const clientId = 'YOUR_TWITTER_CLIENT_ID'; // Get from Twitter Developer Portal
-    
-    const authUrl = new URL('https://twitter.com/i/oauth2/authorize');
-    authUrl.searchParams.append('response_type', 'code');
-    authUrl.searchParams.append('client_id', clientId);
-    authUrl.searchParams.append('redirect_uri', redirectUri);
-    authUrl.searchParams.append('scope', 'tweet.read users.read');
-    authUrl.searchParams.append('state', crypto.randomUUID());
-    authUrl.searchParams.append('code_challenge', await generateCodeChallenge());
-    authUrl.searchParams.append('code_challenge_method', 'S256');
-    
-    // Launch authentication flow - fix for responseUrl possibly undefined
-    const responseUrl = await chrome.identity.launchWebAuthFlow({
-      url: authUrl.toString(),
-      interactive: true
-    });
-    
-    // Add null check before creating URL
-    if (!responseUrl) {
-      throw new Error("Authentication failed - no response URL received");
-    }
-    
-    // Now TypeScript knows responseUrl is defined
-    const url = new URL(responseUrl);
-    const code = url.searchParams.get('code');
-    
-    if (!code) {
-      throw new Error('Authentication failed - no code received');
-    }
-    
-    // Exchange code for tokens
-    const tokenResponse = await fetch('https://api.twitter.com/2/oauth2/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: new URLSearchParams({
-        'grant_type': 'authorization_code',
-        'code': code,
-        'redirect_uri': redirectUri,
-        'client_id': clientId,
-        'code_verifier': await getStoredCodeVerifier()
-      })
-    });
-    
-    const tokens = await tokenResponse.json();
-    
-    // Get user details from Twitter API
-    const userResponse = await fetch('https://api.twitter.com/2/users/me', {
-      headers: {
-        'Authorization': `Bearer ${tokens.access_token}`
-      }
-    });
-    
-    const userData = await userResponse.json();
-    const twitterUsername = userData.data.username;
-    
-    // Create or get wallet for user
-    const wallet = await createOrGetWallet(twitterUsername);
-    
-    // Add null check before sending wallet data
-    if (wallet) {
-      // Send success to UI
-      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        if (tabs[0]?.id) {
-          chrome.tabs.sendMessage(tabs[0].id, {
-            type: 'OAUTH_COMPLETE',
-            wallet: {
-              address: wallet.address,
-              username: twitterUsername,
-              name: wallet.name
-            }
-          });
-        }
-      });
-      
-      return {
-        username: twitterUsername,
-        wallet: {
-          address: wallet.address,
-          name: wallet.name
-        }
-      };
-    } else {
-      // Return just the username if no wallet
-      return {
-        username: twitterUsername,
-        wallet: null
-      };
-    }
-    
-  } catch (error) {
-    console.error('Twitter Auth Error:', error);
-    throw error;
-  }
-}
-
-// Generate a code verifier and challenge for PKCE
-async function generateCodeChallenge(): Promise<string> {
-  const codeVerifier = generateRandomString(128);
-  
-  // Store code verifier for later token exchange
-  chrome.storage.local.set({ code_verifier: codeVerifier });
-  
-  // Hash the code verifier to create the code challenge
-  const encoder = new TextEncoder();
-  const data = encoder.encode(codeVerifier);
-  const digest = await crypto.subtle.digest('SHA-256', data);
-  
-  // Fix: Use Array.from instead of spread operator
-  return btoa(Array.from(new Uint8Array(digest))
-    .map(b => String.fromCharCode(b))
-    .join(''))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
-}
-
-async function getStoredCodeVerifier(): Promise<string> {
-  const result = await chrome.storage.local.get('code_verifier');
-  return result.code_verifier;
-}
-
-function generateRandomString(length: number): string {
-  const array = new Uint8Array(length);
-  crypto.getRandomValues(array);
-  return Array.from(array)
-    .map(b => String.fromCharCode(b % 26 + 97))
-    .join('');
-}
-
-async function createOrGetWallet(twitterUsername: string, importedAddress?: string): Promise<TwitterWallet | null> {
-  // Check if user already has wallets
-  const wallets = await getWallets(twitterUsername);
-  
-  if (wallets.length > 0) {
-    // Return the first wallet if they already have one
-    return wallets[0];
-  }
-  
-  if (importedAddress) {
-    // Create wallet entry with imported address
-    const importedWallet: TwitterWallet = {
-      address: importedAddress,
-      privateKey: '', // No private key for imported wallets
-      created: Date.now(),
-      name: `${twitterUsername}'s Imported Wallet`,
-      twitterUsername,
-      isImported: true
-    };
-    
-    // Store the imported wallet
-    await storeWallet(twitterUsername, importedWallet);
-    return importedWallet;
-  }
-  
-  // No wallet yet and no import address - return null to trigger import screen
-  return null;
-}
-
-async function getWallets(twitterUsername: string): Promise<TwitterWallet[]> {
-  try {
-    const result = await chrome.storage.local.get('wallets');
-    const walletStore: WalletStore = result.wallets || {};
-    return walletStore[twitterUsername] || [];
-  } catch (error) {
-    console.error('Error retrieving wallets:', error);
-    return [];
-  }
-}
-
-async function storeWallet(twitterUsername: string, wallet: TwitterWallet): Promise<void> {
-  try {
-    // Get current wallets
-    const result = await chrome.storage.local.get('wallets');
-    const walletStore: WalletStore = result.wallets || {};
-    
-    // Add new wallet to user's wallet array
-    walletStore[twitterUsername] = walletStore[twitterUsername] || [];
-    walletStore[twitterUsername].push(wallet);
-    
-    // Save updated wallets
-    await chrome.storage.local.set({ 'wallets': walletStore });
-  } catch (error) {
-    console.error('Error storing wallet:', error);
-    throw error;
-  }
-}
-
-async function importWallet(twitterUsername: string, address: string): Promise<TwitterWallet> {
-  // Validate the address
-  if (!address.match(/^0x[a-fA-F0-9]{40}$/)) {
-    throw new Error('Invalid Ethereum address format');
-  }
-  
-  // Create wallet object for the imported address
-  const wallet: TwitterWallet = {
-    address: address,
-    privateKey: '', // No private key for imported wallets
-    created: Date.now(),
-    name: `${twitterUsername}'s Imported Wallet`,
-    twitterUsername,
-    isImported: true
-  };
-  
-  // Store the wallet
-  await storeWallet(twitterUsername, wallet);
-  return wallet;
-} 
+}); 
