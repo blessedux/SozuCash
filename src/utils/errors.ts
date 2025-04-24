@@ -1,15 +1,21 @@
-/// <reference types="chrome"/>export enum AuthErrorCode {
-  UNAUTHORIZED = 'unauthorized',
-  USER_CANCELLED = 'user_cancelled',
-  POPUP_BLOCKED = 'popup_blocked',
-  NETWORK_ERROR = 'network_error',
-  CONSENT_REQUIRED = 'consent_required'
-}
+/// <reference types="chrome"/>
+
+import { AuthErrorCode } from '../types/auth';
+
+export const AuthErrors = {
+  UNAUTHORIZED: 'unauthorized' as AuthErrorCode,
+  USER_CANCELLED: 'user_cancelled' as AuthErrorCode,
+  POPUP_BLOCKED: 'popup_blocked' as AuthErrorCode,
+  NETWORK_ERROR: 'network_error' as AuthErrorCode,
+  CONSENT_REQUIRED: 'consent_required' as AuthErrorCode
+};
 
 export class AuthError extends Error {
-  constructor(message: string, public code: AuthErrorCode) {
+  code: AuthErrorCode;
+  
+  constructor(code: AuthErrorCode, message: string) {
     super(message);
-    this.name = 'AuthError';
+    this.code = code;
   }
 }
 

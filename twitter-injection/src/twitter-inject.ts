@@ -1,732 +1,477 @@
-/// <reference types="chrome"/>/// <reference types="chrome"/>
+/// <reference types="chrome"/>
 
-// ==UserScript==
-// @name         SozuCash Twitter Integration (Extension)
-// @namespace    SozuCash
-// @version      1.1.0
-// @description  Integrates SozuCash Wallet into Twitter, injecting UI into the right sidebar via iframe.
-// @author       SozuCash Team
-// @match        https://twitter.com/*
-// @match        https://x.com/*
-// @run-at       document-idle
-// @icon         https://abs.twimg.com/favicons/twitter.2.ico
-// ==/UserScript==
+/**
+ * Twitter UI Injection Script
+ * This script injects the SozuCash wallet UI into the Twitter/X.com interface
+ */
 
-(function() {
-    'use strict';
+console.log('SozuCash Twitter injection loaded');
 
-    // --- State Variables ---
-    let injectionAttempts = 0;
-    const MAX_INJECTION_ATTEMPTS = 10;
-    let isSozuUiInjected = false;
-    let injectedContainer: HTMLElement | null = null;
-    let originalSidebarContent: HTMLElement[] = []; // To store original elements
-    let hiddenElementsByClass: HTMLElement[] = []; // NEW: Store elements hidden by specific class
-    let overlayElements: HTMLElement[] = []; // Store multiple overlay elements
-    let resizeTimeoutId: number | null = null; // Restore for debouncing resize
+// Transaction interface
+interface Transaction {
+  type: string;
+  amount: string | number;
+  date: string | number;
+}
+
+// Mock wallet data for demo purposes
+const mockWalletData = {
+  success: true,
+  balance: '4,560.28',
+  address: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
+  transactions: [
+    {
+      type: 'Received',
+      amount: '120.00',
+      date: Date.now() - 86400000, // 1 day ago
+    },
+    {
+      type: 'Sent',
+      amount: '75.50',
+      date: Date.now() - 172800000, // 2 days ago
+    },
+    {
+      type: 'Received',
+      amount: '340.00',
+      date: Date.now() - 345600000, // 4 days ago
+    }
+  ]
+};
+
+// Helper to wait for an element to appear in the DOM
+const waitForElement = (selector: string, timeout = 10000): Promise<Element | null> => {
+  return new Promise((resolve) => {
+    if (document.querySelector(selector)) {
+      return resolve(document.querySelector(selector));
+    }
+
+    const observer = new MutationObserver(() => {
+      if (document.querySelector(selector)) {
+        observer.disconnect();
+        resolve(document.querySelector(selector));
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    // Set a timeout to avoid hanging indefinitely
+    setTimeout(() => {
+      observer.disconnect();
+      resolve(null);
+    }, timeout);
+  });
+};
+
+// Inject the SozuCash wallet button in the Twitter sidebar
+const injectSidebarButton = async () => {
+  // Wait for the Twitter sidebar navigation to load
+  const sidebarNav = await waitForElement('nav[aria-label="Primary"]');
+  
+  if (!sidebarNav) {
+    console.error('Could not find Twitter sidebar navigation');
+    return;
+  }
+  
+  // Create our button element
+  const sozuButton = document.createElement('a');
+  sozuButton.className = 'sozucash-sidebar-button';
+  sozuButton.setAttribute('role', 'link');
+  sozuButton.setAttribute('data-testid', 'sozucash-button');
+  sozuButton.style.display = 'flex';
+  sozuButton.style.alignItems = 'center';
+  sozuButton.style.padding = '12px';
+  sozuButton.style.borderRadius = '9999px';
+  sozuButton.style.margin = '4px 0';
+  sozuButton.style.cursor = 'pointer';
+  
+  sozuButton.innerHTML = `
+    <div style="display: flex; justify-content: center; align-items: center; min-width: 26px; min-height: 26px; margin-right: 12px;">
+      <img src="${chrome.runtime.getURL('assets/icons/mantle-mnt-logo.svg')}" alt="SozuCash" width="26" height="26" />
+    </div>
+    <span style="font-weight: bold; font-size: 20px;">SozuCash</span>
+  `;
+  
+  // Add hover effect
+  sozuButton.addEventListener('mouseover', () => {
+    sozuButton.style.backgroundColor = 'rgba(29, 161, 242, 0.1)';
+  });
+  
+  sozuButton.addEventListener('mouseout', () => {
+    sozuButton.style.backgroundColor = 'transparent';
+  });
+  
+  // Add click event to show wallet UI
+  sozuButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWalletUI();
+  });
+  
+  // Find a good place to insert our button (before the last item which is usually Profile)
+  const navItems = sidebarNav.querySelectorAll('a[role="link"]');
+  if (navItems.length > 0) {
+    const lastItem = navItems[navItems.length - 1];
+    lastItem.parentNode?.insertBefore(sozuButton, lastItem);
+  } else {
+    // Fallback - append to the nav
+    sidebarNav.appendChild(sozuButton);
+  }
+};
+
+// Create and toggle the wallet UI panel
+const toggleWalletUI = async () => {
+  // Remove existing wallet UI if it exists
+  const existingUI = document.querySelector('.sozucash-wallet-ui');
+  if (existingUI) {
+    existingUI.remove();
+    return;
+  }
+  
+  // Find the right sidebar to replace
+  const rightSidebar = await waitForElement('[data-testid="sidebarColumn"]');
+  if (!rightSidebar) {
+    console.error('Could not find Twitter right sidebar');
+    return;
+  }
+  
+  // Create wallet UI container
+  const walletUI = document.createElement('div');
+  walletUI.className = 'sozucash-wallet-ui';
+  walletUI.style.cssText = `
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 12px;
+    max-height: 80vh;
+    overflow: auto;
+    position: relative;
+    color: #333;
+    animation: fadeIn 0.3s ease-in-out;
+  `;
+  
+  // Add animation styles
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
     
-    // Store initial position to maintain it during scroll
-    let initialWalletPosition: { top: number; left: number } | null = null;
-    let scrollTimeoutId: number | null = null;
-
-    // --- Constants ---
-    const walletIconPath = 'M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8zm-7-8.5c-1.93 0-3.5 1.57-3.5 3.5s1.57 3.5 3.5 3.5 3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5zm0 5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z';
-    const INJECTED_CONTAINER_ID = 'sozucash-injected-container';
-    const INJECTED_IFRAME_ID = 'sozucash-injected-iframe';
-    const HIDE_ORIGINAL_CLASS = 'sozu-hide-original';
-
-    // --- CSS Styles ---
-    const componentStyles = `
-    /* Button Styles (Keep as before) */
-    .sozu-wallet-button {
-      display: inline-flex;
-      align-items: center;
-      height: 50px;
-      padding: 0 16px;
-      border-radius: 9999px;
-      transition: background-color 0.2s;
-      text-decoration: none;
-      cursor: pointer;
-      margin: 4px 0 4px 6px;
-      box-sizing: border-box;
-      width: auto;
-      position: relative;
-      color: rgb(231, 233, 234); /* Ensure text color is set */
-    }
-
-    .sozu-wallet-button:hover {
-      background-color: rgba(231, 233, 234, 0.1);
-    }
-
-    .sozu-wallet-icon {
+    .sozucash-wallet-ui .token-item {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      width: 26px;
-      height: 26px;
-      margin-right: 12px;
-    }
-
-    .sozu-wallet-icon img {
-      border-radius: 6px; /* Make the icon image rounded */
-    }
-
-    .sozu-wallet-icon svg {
-      width: 26px;
-      height: 26px;
-      fill: rgb(231, 233, 234);
-      stroke: rgb(231, 233, 234);
-      stroke-width: 0.2;
-    }
-
-    .sozu-wallet-text {
-      font-family: "Segoe UI", Helvetica, Arial, sans-serif;
-      color: rgb(231, 233, 234);
-      font-size: 20px;
-      font-weight: 400;
-      letter-spacing: normal;
-      margin-right: 0;
-      white-space: nowrap;
-    }
-
-    /* NEW: Styles for the injected UI container and iframe */
-    #${INJECTED_CONTAINER_ID} {
-      width: 350px; /* Reduced width */
-      height: 600px; /* Fixed height */
-      /* max-height: calc(100vh - 80px); */ /* Optional: Limit height based on viewport */
-      margin-top: 0; /* Remove margin-top */
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      overflow: hidden;
-      position: fixed; /* Restore fixed positioning */
-      width: 350px; /* Restore fixed width */
-      /* Remove static top/right - position is now relative */
-      /* top: 70px; */
-      /* right: 15px; */
-      z-index: 1000;     /* Keep high z-index */
-      pointer-events: auto !important; /* Ensure container is interactive */
-      
-      /* --- Transition Styles --- */
-      opacity: 0;
-      filter: blur(8px);
-      visibility: hidden;
-      transition: opacity 0.5s ease-in-out, filter 0.5s ease-in-out, visibility 0s linear 0.5s;
+      padding: 12px;
+      border-radius: 12px;
+      background: #f9f9f9;
+      margin-bottom: 8px;
+      transition: all 0.2s ease;
     }
     
-    /* Add visible class for fade-in effect */
-    #${INJECTED_CONTAINER_ID}.visible {
-        opacity: 1;
-        filter: blur(0);
-        visibility: visible;
-        transition: opacity 0.5s ease-in-out, filter 0.5s ease-in-out, visibility 0s linear 0s;
-    }
-
-    #${INJECTED_IFRAME_ID} {
-      display: block; /* Remove potential bottom space */
-      width: 350px;   /* Reduced width */
-      height: 600px;  /* Match popup height */
-      border: none;   /* Remove iframe border */
-      pointer-events: auto !important; /* Ensure iframe is interactive */
-    }
-
-    /* Class to hide original sidebar content - RENAME/REPURPOSE for fade */
-    /* .${HIDE_ORIGINAL_CLASS} { display: none !important; } */
-    
-    /* NEW: Class for fading out original elements - REMOVING, will use inline styles */
-    /*
-    .sozu-fade-out-original {
-        opacity: 0 !important; 
-        filter: blur(8px) !important;
-        visibility: hidden !important;
-        transition: opacity 0.5s ease-in-out, filter 0.5s ease-in-out, visibility 0s linear 0.5s !important;
-        pointer-events: none !important; 
-    }
-    */
-
-    /* NEW: Active state for the button icon */
-    .sozu-wallet-button.active .sozu-wallet-icon img {
-        filter: invert(1);
-    }
-    .sozu-wallet-button.active {
-        /* REMOVED background and border from active state */
-        /* background-color: rgba(231, 233, 234, 0.1); */
-        /* border: 1px solid rgba(231, 233, 234, 0.2);  */ 
+    .sozucash-wallet-ui .token-item:hover {
+      background: #f0f0f0;
+      transform: translateY(-2px);
     }
     
-    /* NEW: Media Query for smaller screens */
-    @media (max-width: 1280px) { /* Adjust breakpoint as needed */
-        .sozu-wallet-button .sozu-wallet-text {
-            display: none;
-        }
-        .sozu-wallet-button .sozu-wallet-icon {
-            margin-right: 0; /* Remove margin when text is hidden */
-        }
-        .sozu-wallet-button {
-             padding: 0 12px; /* Adjust padding */
-             width: 50px; /* Make it more square */
-        }
+    .sozucash-tab-container {
+      display: flex;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 16px;
     }
-    `;
-
-    // --- Main Injection Logic ---
-    function main() {
-      console.log('Sozu: Starting injection process');
-      if (document.body) {
-        console.log('Sozu: Document body ready, injecting styles');
-        injectStyles();
-        waitForSidebar();
-      } else {
-        console.log('Sozu: Waiting for DOMContentLoaded');
-        document.addEventListener('DOMContentLoaded', () => {
-          console.log('Sozu: DOMContentLoaded fired, injecting styles');
-          injectStyles();
-          waitForSidebar();
-        });
-      }
-
-      const observer = new MutationObserver(() => {
-        if (!document.querySelector('.sozu-wallet-button')) {
-          console.log('Sozu: DOM changed, checking for button injection');
-          checkAndInjectButton();
-        }
-         // If UI was injected but target sidebar/container disappeared, attempt re-injection check
-        if (isSozuUiInjected && !document.getElementById(INJECTED_CONTAINER_ID)) {
-            console.log("Sozu: Injected UI container not found, attempting to re-inject.");
-            // Reset state and try again - might need more sophisticated handling
-            isSozuUiInjected = false;
-            injectWalletUI();
-        }
-      });
-
-      observer.observe(document.documentElement, {
-        childList: true,
-        subtree: true,
-      });
+    
+    .sozucash-tab {
+      padding: 12px 16px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
     }
-
-    function injectStyles() {
-      const styleElement = document.createElement('style');
-      styleElement.textContent = componentStyles;
-      document.head.appendChild(styleElement);
-      console.log('Sozu: Styles injected');
+    
+    .sozucash-tab.active {
+      border-bottom-color: #8A2BE2;
+      color: #8A2BE2;
     }
-
-    function waitForSidebar() {
-      checkAndInjectButton();
-      const interval = setInterval(() => {
-        if (checkAndInjectButton() || injectionAttempts >= MAX_INJECTION_ATTEMPTS) {
-          clearInterval(interval);
-          if (injectionAttempts >= MAX_INJECTION_ATTEMPTS) {
-            console.log('Sozu: Max button injection attempts reached');
-          }
-        }
-        injectionAttempts++;
-        // console.log(`Sozu: Button injection attempt ${injectionAttempts}`); // Reduce noise
-      }, 1000);
+    
+    .sozucash-tab-content {
+      display: none;
     }
-
-    function checkAndInjectButton(): boolean {
-      // console.log('Sozu: Checking for button injection'); // Reduce noise
-      if (document.querySelector('.sozu-wallet-button')) {
-        // console.log('Sozu: Button already exists');
-        return true;
-      }
-
-      const sidebarNav = document.querySelector('nav[aria-label="Primary"]');
-      if (!sidebarNav) {
-        // console.log('Sozu: Sidebar navigation not found');
-        return false;
-      }
-
-      const referenceButton = findReferenceButton(sidebarNav);
-      if (!referenceButton) {
-        // console.log('Sozu: Reference button not found');
-        return false;
-      }
-
-      const walletButton = createWalletButton();
-      if (referenceButton.parentNode) {
-        referenceButton.parentNode.insertBefore(walletButton, referenceButton.nextSibling);
-        const otherButtonStyles = window.getComputedStyle(referenceButton);
-        walletButton.style.minWidth = otherButtonStyles.minWidth || "auto";
-        walletButton.style.left = "-10px"; // Re-apply position adjustment
-        console.log('Sozu: Button successfully injected');
-        return true;
-      }
-
-      // console.log('Sozu: Failed to inject button'); // Reduce noise
-      return false;
+    
+    .sozucash-tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
     }
-
-    function findReferenceButton(navElement: Element): Element | null {
-      let refButton = navElement.querySelector('a[aria-label="Grok"], a[aria-label="AI"]');
-      if (!refButton) refButton = navElement.querySelector('a[aria-label="Premium"]');
-      if (!refButton) {
-        const links = navElement.querySelectorAll('a');
-        refButton = links.length > 1 ? links[links.length - 2] : links[0]; // Avoid "More" or handle single link case
-      }
-      return refButton;
-    }
-
-    function createWalletButton(): HTMLElement {
-      const button = document.createElement('a');
-      button.className = 'sozu-wallet-button';
-      button.setAttribute('aria-label', 'SozuCash');
-      button.href = '#'; // Make it behave like a link for accessibility/styling consistency
-      button.addEventListener('click', handleWalletClick);
-
-      // --- Use IMG tag for the icon --- 
-      const iconUrl = chrome.runtime.getURL('assets/icons/mantle-mnt-logo.svg');
-      
-      button.innerHTML = `
-        <div class="sozu-wallet-icon">
-          <img src="${iconUrl}" alt="SozuCash Icon" style="width: 26px; height: 26px;">
-          </img>
+  `;
+  document.head.appendChild(styleEl);
+  
+  // Request wallet data from background script (using mock data for now)
+  // In production, use: chrome.runtime.sendMessage({ type: 'GET_WALLET_DATA' }, (response) => {
+  const renderWalletUI = (response = mockWalletData) => {
+    if (response && response.success) {
+      // Create wallet UI with the data
+      walletUI.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h2 style="font-size: 20px; font-weight: bold; margin: 0;">SozuCash Wallet</h2>
+          <button id="sozucash-close" style="background: none; border: none; cursor: pointer; font-size: 18px;">✕</button>
         </div>
-        <span class="sozu-wallet-text">SozuCash</span>
+        
+        <div class="sozucash-tab-container">
+          <div class="sozucash-tab active" data-tab="wallet">Wallet</div>
+          <div class="sozucash-tab" data-tab="activity">Activity</div>
+          <div class="sozucash-tab" data-tab="nfts">NFTs</div>
+        </div>
+        
+        <div class="sozucash-tab-content active" data-tab-content="wallet">
+          <div style="text-align: center; margin: 24px 0;">
+            <div style="font-size: 40px; font-weight: bold; margin-bottom: 8px; background: linear-gradient(135deg, #8A2BE2, #4B0082); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+              ${response.balance} MNT
+            </div>
+            <div style="font-size: 14px; color: #666; word-break: break-all; margin-bottom: 8px;">
+              ${response.address}
+            </div>
+            <button id="copy-address" style="background: none; border: none; color: #8A2BE2; cursor: pointer; font-size: 14px;">
+              Copy Address
+            </button>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; margin: 24px 0;">
+            <button id="sozucash-send" style="background-color: #8A2BE2; color: white; border: none; border-radius: 9999px; padding: 10px 0; font-weight: bold; cursor: pointer; flex: 1; margin-right: 8px; transition: all 0.2s ease;">Send</button>
+            <button id="sozucash-receive" style="background-color: white; color: #8A2BE2; border: 1px solid #8A2BE2; border-radius: 9999px; padding: 10px 0; font-weight: bold; cursor: pointer; flex: 1; margin-left: 8px; transition: all 0.2s ease;">Receive</button>
+          </div>
+          
+          <div style="margin-top: 24px;">
+            <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 12px;">Your Tokens</h3>
+            <div class="token-list">
+              <div class="token-item">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <img src="${chrome.runtime.getURL('assets/icons/mantle-mnt-logo.svg')}" width="32" height="32" />
+                  <div>
+                    <div style="font-weight: 500;">Mantle</div>
+                    <div style="font-size: 12px; color: #666;">MNT</div>
+                  </div>
+                </div>
+                <div style="font-weight: 500;">${response.balance}</div>
+              </div>
+              <div class="token-item">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 32px; height: 32px; background: #627EEA; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">ETH</div>
+                  <div>
+                    <div style="font-weight: 500;">Ethereum</div>
+                    <div style="font-size: 12px; color: #666;">ETH</div>
+                  </div>
+                </div>
+                <div style="font-weight: 500;">0.25</div>
+              </div>
+              <div class="token-item">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 32px; height: 32px; background: #8247E5; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">MATIC</div>
+                  <div>
+                    <div style="font-weight: 500;">Polygon</div>
+                    <div style="font-size: 12px; color: #666;">MATIC</div>
+                  </div>
+                </div>
+                <div style="font-weight: 500;">345.75</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="sozucash-tab-content" data-tab-content="activity">
+          <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 12px;">Recent Transactions</h3>
+          <div>
+            ${
+              response.transactions && response.transactions.length > 0 
+                ? response.transactions.map((tx: Transaction) => `
+                    <div style="padding: 16px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
+                      <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <div style="width: 28px; height: 28px; border-radius: 50%; background: ${tx.type === 'Received' ? '#e6f7ee' : '#ffebee'}; display: flex; align-items: center; justify-content: center;">
+                            <span style="color: ${tx.type === 'Received' ? '#0a8a4a' : '#d32f2f'}; font-size: 14px;">
+                              ${tx.type === 'Received' ? '↓' : '↑'}
+                            </span>
+                          </div>
+                          <div>
+                            <div style="font-weight: 500;">${tx.type}</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                              ${new Date(tx.date).toLocaleDateString()} at ${new Date(tx.date).toLocaleTimeString()}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <div style="font-weight: 500; text-align: right;">${tx.amount} MNT</div>
+                        <div style="font-size: 12px; color: #666; margin-top: 4px; text-align: right;">
+                          ~$${(parseFloat(tx.amount as string) * 0.85).toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                  `).join('')
+                : '<div style="text-align: center; color: #666; padding: 32px 0;">No transactions yet</div>'
+            }
+          </div>
+          <div style="margin-top: 24px; text-align: center;">
+            <button style="background: none; border: 1px solid #8A2BE2; color: #8A2BE2; border-radius: 9999px; padding: 10px 24px; font-weight: 500; cursor: pointer;">View all transactions</button>
+          </div>
+        </div>
+        
+        <div class="sozucash-tab-content" data-tab-content="nfts">
+          <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 12px;">Your NFTs</h3>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 16px;">
+            <div style="border-radius: 12px; overflow: hidden; border: 1px solid #eee;">
+              <img src="https://via.placeholder.com/150" width="100%" style="display: block;" />
+              <div style="padding: 12px;">
+                <div style="font-weight: 500;">Mantle Monsters #436</div>
+                <div style="font-size: 12px; color: #666; margin-top: 4px;">Monster Collection</div>
+              </div>
+            </div>
+            <div style="border-radius: 12px; overflow: hidden; border: 1px solid #eee;">
+              <img src="https://via.placeholder.com/150" width="100%" style="display: block;" />
+              <div style="padding: 12px;">
+                <div style="font-weight: 500;">SozuCash OG Pass</div>
+                <div style="font-size: 12px; color: #666; margin-top: 4px;">Membership</div>
+              </div>
+            </div>
+          </div>
+          <div style="text-align: center; margin-top: 24px;">
+            <button style="background: none; border: 1px solid #8A2BE2; color: #8A2BE2; border-radius: 9999px; padding: 10px 24px; font-weight: 500; cursor: pointer;">Mint an NFT</button>
+          </div>
+        </div>
       `;
-      return button;
-    }
-
-    // --- Wallet UI Injection/Removal ---
-
-    function handleWalletClick(event: Event) {
-      event.preventDefault();
-      event.stopPropagation();
-      console.log('SozuCash button clicked');
-
-      if (isSozuUiInjected) {
-          removeWalletUI();
-      } else {
-          injectWalletUI();
-      }
-    }
-
-    function injectWalletUI() {
-      console.log('Sozu: Attempting to inject Wallet UI');
-      if (isSozuUiInjected) {
-          console.log('Sozu: UI already injected.');
-          return;
-      }
-
-      const sidebarColumn = document.querySelector('div[data-testid="sidebarColumn"]');
-      if (!sidebarColumn) {
-          console.error("Sozu: Could not find target sidebar column.");
-          return;
-      }
-
-      // Find the container that holds the sidebar content (search, trends, etc.)
-      const sidebarContentContainer = sidebarColumn.querySelector(':scope > div > div') as HTMLElement;
-      if (!sidebarContentContainer) {
-           console.error("Sozu: Could not find sidebar content container.");
-           // Fallback or prevent injection?
-           return; 
-      }
-
-      // --- Find alignment target and search bar ---
-      const alignmentElement = sidebarColumn.querySelector('.css-175oi2r.r-kemksi.r-1kqtdi0.r-1867qdf.r-1phboty.r-rs99b7.r-1ifxtd0.r-1udh08x') as HTMLElement;
-      
-      if (!alignmentElement) {
-          console.warn('Sozu: Could not find alignment target element using specific selector. Wallet position might be incorrect.');
-      }
-      
-      // --- Find the potential overlay elements --- 
-      const overlaySelector1 = '.css-175oi2r.r-vacyoi.r-ttdzmv'; // Original overlay
-      const overlaySelector2 = '.css-175oi2r.r-1hycxz.r-gtdqiz'; // Newly identified overlay
-      overlayElements = []; // Clear previous
-      const potentialOverlays = sidebarColumn.querySelectorAll(`${overlaySelector1}, ${overlaySelector2}`);
-      
-      potentialOverlays.forEach(node => {
-          if (node instanceof HTMLElement) {
-                console.log(`Sozu: Found potential overlay element (${node.className}), disabling pointer events.`);
-                node.style.pointerEvents = 'none'; // Disable pointer events on overlay
-                overlayElements.push(node); // Store reference
-          }
-      });
-      if (overlayElements.length === 0) {
-           console.warn('Sozu: Could not find any known overlay elements.');
-      }
-      // --- End Overlay Handling ---
-      
-      // Create the wallet container div
-      injectedContainer = document.createElement('div');
-      injectedContainer.id = INJECTED_CONTAINER_ID;
-      // Add direct style offset for left positioning
-      injectedContainer.style.marginLeft = '-60px';
-
-      // Create the iframe
-      const iframe = document.createElement('iframe');
-      iframe.id = INJECTED_IFRAME_ID;
-
-      try {
-          // Get Twitter username from the page
-          const twitterUsername = getTwitterUsername();
-          
-          // Add username to iframe URL
-          const iframeUrl = new URL(`chrome-extension://${chrome.runtime.id}/popup.html`);
-          iframeUrl.searchParams.set('twitterUsername', twitterUsername || '');
-          
-          iframe.src = iframeUrl.toString();
-          console.log(`Sozu: Setting iframe source to: ${iframe.src}`);
-      } catch (e) {
-          console.error("Sozu: Error setting iframe source.", e);
-          // Display error message instead of iframe
-          injectedContainer.innerHTML = '<p style="color: red; padding: 15px;">Error loading SozuCash wallet UI. Check console and ensure `popup/index.html` is in `web_accessible_resources`.</p>';
-          // Still append the container with the error message TO BODY
-          document.body.appendChild(injectedContainer); 
-          console.log('Sozu: Appended error container to document.body');
-          
-          isSozuUiInjected = true; // Mark as injected (even with error) to allow removal
-          // Add active class to button even on error to allow toggle off
-          document.querySelector('.sozu-wallet-button')?.classList.add('active');
-          return; // Stop further execution for this injection attempt
-      }
-
-      // Append iframe to the container
-      injectedContainer.appendChild(iframe);
-
-      // --- Find search bar to insert after --- 
-      const searchBarForInsertion = sidebarContentContainer.querySelector('.css-175oi2r.r-1awozwy.r-aqfbo4.r-kemksi.r-18u37iz.r-1h3ijdo.r-6gpygo.r-15ysp7h.r-1xcajam.r-ipm5af.r-136ojw6.r-1jocfgc') as HTMLElement;
-      if (!searchBarForInsertion) {
-            console.error('Sozu: Cannot find search bar to insert wallet after.');
-            // Fallback: Append to end of container?
-            sidebarContentContainer.appendChild(injectedContainer);
-      } else {
-            // Insert the wallet container AFTER the search bar
-            searchBarForInsertion.parentNode?.insertBefore(injectedContainer, searchBarForInsertion.nextSibling);
-      }
-      console.log('Sozu: Appended injected container into sidebar flow.');
-      
-      // --- Re-enable Hiding specific children NOW --- 
-      originalSidebarContent = []; // Clear previous list
-      
-      // Define multiple selectors for elements to hide
-      const elementsToHideSelectors = [
-        // Original selectors
-        '.css-175oi2r.r-kemksi.r-1kqtdi0.r-1867qdf.r-1phboty.r-rs99b7.r-1ifxtd0.r-1udh08x',
-        '.css-175oi2r.r-1kqtdi0.r-1867qdf.r-1phboty.r-1ifxtd0.r-1udh08x.r-1niwhzg.r-1yadl64',
-        // More generic selectors
-        '[data-testid="primaryColumn"] > div > [data-testid="sidebarColumn"] > div > div:not([role="search"])', 
-        // Target specific components by data-testid if they exist
-        '[data-testid="Trends"]',
-        '[data-testid="Who_To_Follow"]',
-        '[data-testid="Timeline_Recommendation"]'
-      ];
-      
-      // Function to check if an element should be hidden
-      const shouldHideElement = (element: HTMLElement): boolean => {
-        // Don't hide the search bar or our injected container
-        if (element.id === INJECTED_CONTAINER_ID) return false;
-        
-        // Don't hide search-related elements
-        if (element.querySelector('[role="search"]')) return false;
-        if (element.getAttribute('role') === 'search') return false;
-        
-        // Check if this is a sidebar component below the search bar
-        const rect = element.getBoundingClientRect();
-        const searchBarForUse = document.querySelector('[role="search"]') || 
-          sidebarColumn.querySelector('.css-175oi2r.r-1awozwy.r-aqfbo4.r-kemksi.r-18u37iz.r-1h3ijdo') ||
-          searchBarForInsertion;
-        
-        if (searchBarForUse) {
-          const searchRect = searchBarForUse.getBoundingClientRect();
-          // If element is below the search bar, hide it
-          if (rect.top > searchRect.bottom) return true;
-        }
-        
-        // By default, hide components that match our selectors
-        return true;
-      };
-      
-      // Try to collect elements to hide using our selectors
-      elementsToHideSelectors.forEach(selector => {
-        const elements = sidebarColumn.querySelectorAll(selector);
-        elements.forEach(node => {
-          if (node instanceof HTMLElement && shouldHideElement(node)) {
-            originalSidebarContent.push(node);
-            
-            // Apply inline styles for fade-out and transition
-            console.log(`Sozu: Applying fade-out to: ${node.tagName}.${node.className.split(' ').join('.')}`);
-            node.style.transition = 'opacity 0.5s ease-in-out, filter 0.5s ease-in-out';
-            node.style.opacity = '0';
-            node.style.pointerEvents = 'none';
-          }
-        });
-      });
-      
-      console.log(`Sozu: Applied fade-out to ${originalSidebarContent.length} specific elements.`);
-      // --- End Hiding Logic ---
-      
-      // Add 'visible' class shortly after insertion/hiding to trigger transition
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => { // Double RAF for robustness in some cases
-            updateWalletPosition(true); // Calculate and set initial position with 'isInitial' flag
-            if (injectedContainer) {
-                console.log('Sozu: RAF - Before adding .visible class');
-                injectedContainer.classList.add('visible');
-                // Log computed styles AFTER adding visible class
-                const styles = window.getComputedStyle(injectedContainer);
-                console.log(`Sozu: RAF - After adding .visible. Computed - Top: ${styles.top}, Left: ${styles.left}, Opacity: ${styles.opacity}, Visibility: ${styles.visibility}`);
-            }
-        });
-      });
-
-      isSozuUiInjected = true;
-      console.log('Sozu: Wallet UI Injected');
-      // Add active class to button
-      document.querySelector('.sozu-wallet-button')?.classList.add('active');
-      
-      // Add resize and scroll listeners
-      window.addEventListener('resize', handleResize);
-      window.addEventListener('scroll', handleScroll, { passive: true });
-    }
-
-    function removeWalletUI() {
-      console.log('Sozu: Attempting to remove Wallet UI');
-      if (!isSozuUiInjected || !injectedContainer) {
-          console.log('Sozu: UI not injected or container lost.');
-          return;
-      }
-
-      // Function to actually remove the element from DOM
-      const removeElement = () => {
-          if (injectedContainer && injectedContainer.parentNode) {
-              injectedContainer.parentNode.removeChild(injectedContainer);
-              console.log('Sozu: Injected container removed from DOM after transition.');
-          } else if (injectedContainer) {
-               console.log('Sozu: Injected container parent node not found during removal.');
-          }
-          injectedContainer = null; // Clear reference
-      };
-
-      // Remove the visible class to trigger fade-out
-      if (injectedContainer) {
-            injectedContainer.classList.remove('visible');
-            
-            // Wait for transition to end before removing from DOM
-            injectedContainer.addEventListener('transitionend', removeElement, { once: true });
-
-            // Fallback timer in case transitionend doesn't fire (e.g., element removed prematurely)
-            setTimeout(() => {
-                if (document.getElementById(INJECTED_CONTAINER_ID)) {
-                    console.warn('Sozu: transitionend did not fire, removing element via timeout.');
-                    removeElement();
-                }
-            }, 600); // Slightly longer than transition duration
-            
-      } else {
-          // If container is somehow already null, just clean up other things
-           injectedContainer = null; 
-      }
-
-       // --- Re-enable pointer events on overlays ---
-       console.log(`Sozu: Re-enabling pointer events on ${overlayElements.length} overlay elements.`);
-       overlayElements.forEach(overlay => {
-           if (overlay) { // Check if reference is still valid
-                overlay.style.pointerEvents = ''; // Reset to default
-           }
-       });
-       overlayElements = []; // Clear references
-       // --- End Overlay Handling ---
-
-       // Restore original content (elements hidden below search)
-       // --- Re-enable restoring original content --- 
-       console.log(`Sozu: Restoring ${originalSidebarContent.length} original elements below search.`);
-       originalSidebarContent.forEach(node => {
-           // Check if node still exists and has the hiding class before removing
-           // Remove the fade-out class to restore visibility/opacity
-           if (node instanceof HTMLElement) { // Simplified check
-               // Need a tiny delay for display change to register before transition starts
-               requestAnimationFrame(() => { 
-                 // THEN, trigger the fade-in by resetting inline styles
-                 // The transition property should still be set from the fade-out
-                 node.style.opacity = ''; // Reset to default (usually 1)
-                 node.style.pointerEvents = ''; // Reset pointer events
-               });
-               
-               // Optional: Clean up inline transition style after fade-in
-               setTimeout(() => {
-                 if(node) { // Check if node still exists
-                    node.style.transition = ''; // Clear the transition style
-                 }
-               }, 500); // Matches transition duration
-           }
-       });
-       originalSidebarContent = []; // Clear the stored nodes
-
-       // ** REMOVED redundant restore logic for hiddenElementsByClass **
-
-      isSozuUiInjected = false;
-      console.log('Sozu: Wallet UI Removed');
-      // Remove active class from button
-      document.querySelector('.sozu-wallet-button')?.classList.remove('active');
-      
-      // Reset stored position
-      initialWalletPosition = null;
-      
-      // Remove event listeners
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('scroll', handleScroll);
-      if (resizeTimeoutId) {
-          clearTimeout(resizeTimeoutId);
-          resizeTimeoutId = null;
-      }
-      if (scrollTimeoutId) {
-          clearTimeout(scrollTimeoutId);
-          scrollTimeoutId = null;
-      }
-    }
-
-    // --- Updated Function to calculate and update wallet position --- 
-    function updateWalletPosition(isInitial = false) {
-        if (!isSozuUiInjected || !injectedContainer) return;
-        
-        const walletWidth = 350;
-        const horizontalOffset = 20; // Added 20px right offset
-
-        const sidebarColumn = document.querySelector('div[data-testid="sidebarColumn"]');
-        if (!sidebarColumn) return;
-
-        // Find search bar using multiple selectors
-        const searchBarSelectors = [
-            '.css-175oi2r.r-1awozwy.r-aqfbo4.r-kemksi.r-18u37iz.r-1h3ijdo.r-6gpygo.r-15ysp7h.r-1xcajam.r-ipm5af.r-136ojw6.r-1jocfgc',
-            '[role="search"]',
-            'input[placeholder="Search"]'
-        ];
-        
-        let searchBarElement: HTMLElement | null = null;
-        for (const selector of searchBarSelectors) {
-            const element = sidebarColumn.querySelector(selector) as HTMLElement;
-            if (element) {
-                searchBarElement = element;
-                break;
-            }
-        }
-
-        if (searchBarElement) {
-            const searchBarRect = searchBarElement.getBoundingClientRect();
-            const verticalMargin = 20;
-            
-            // Apply horizontal offset to center calculation
-            const calculatedLeft = searchBarRect.left + (searchBarRect.width / 2) - (walletWidth / 2) + horizontalOffset;
-            const calculatedTop = searchBarRect.bottom + verticalMargin;
-
-            // Ensure wallet stays within viewport
-            const minLeft = 20;
-            const adjustedLeft = Math.max(minLeft, calculatedLeft);
-
-            injectedContainer.style.left = `${adjustedLeft}px`;
-            injectedContainer.style.top = `${calculatedTop}px`;
-            
-            if (isInitial) {
-                initialWalletPosition = { top: calculatedTop, left: adjustedLeft };
-            }
-        } else {
-            // Fallback positioning
-            const sidebarRect = sidebarColumn.getBoundingClientRect();
-            const fallbackLeft = sidebarRect.left + (sidebarRect.width - walletWidth) / 2 + horizontalOffset;
-            const fallbackTop = sidebarRect.top + 100;
-            
-            injectedContainer.style.left = `${fallbackLeft}px`;
-            injectedContainer.style.top = `${fallbackTop}px`;
-            
-            if (isInitial) {
-                initialWalletPosition = { top: fallbackTop, left: fallbackLeft };
-            }
-        }
-        
-        injectedContainer.style.display = 'block';
+    } else {
+      // Show login UI if not connected
+      walletUI.innerHTML = `
+        <div style="text-align: center; padding: 32px 0;">
+          <img src="${chrome.runtime.getURL('assets/icons/mantle-mnt-logo.svg')}" alt="SozuCash" width="64" height="64" style="margin-bottom: 16px;" />
+          <h2 style="font-size: 22px; font-weight: bold; margin-bottom: 16px;">Connect your wallet</h2>
+          <p style="color: #666; margin-bottom: 24px; line-height: 1.5;">Sign in with your Twitter account to access your SozuCash wallet and manage your crypto assets.</p>
+          <button id="sozucash-connect" style="background-color: #8A2BE2; color: white; border: none; border-radius: 9999px; padding: 12px 32px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; margin: 0 auto;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 5.8c-.7.3-1.5.5-2.4.6.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1-.7-.8-1.8-1.3-3-1.3-2.3 0-4.1 1.8-4.1 4 0 .3 0 .6.1.9-3.4-.2-6.5-1.8-8.5-4.2-.4.6-.6 1.3-.6 2.1 0 1.4.7 2.6 1.8 3.3-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4-.3.1-.7.1-1.1.1-.3 0-.5 0-.8-.1.5 1.6 2 2.8 3.8 2.8-1.4 1.1-3.2 1.8-5.1 1.8-.3 0-.7 0-1-.1 1.8 1.2 4 1.8 6.3 1.8 7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z" fill="currentColor"/>
+            </svg>
+            Connect with X
+          </button>
+        </div>
+      `;
     }
     
-    // --- Updated Debounced resize handler ---
-    function handleResize() {
-        if (resizeTimeoutId) {
-            clearTimeout(resizeTimeoutId);
-        }
-        resizeTimeoutId = window.setTimeout(() => {
-            console.log('Sozu: Window resized, recalculating wallet position.');
-            // On resize, we DO want to recalculate position from reference elements
-            initialWalletPosition = null; // Reset stored position to force recalculation
-            updateWalletPosition(true); // true = treat as initial position calculation
-            resizeTimeoutId = null; // Clear ID after execution
-        }, 150); // Debounce timeout in ms
+    // Replace the "What's happening" section with our wallet UI
+    const whatshappening = rightSidebar.querySelector('[aria-label="Timeline: Trending now"]');
+    if (whatshappening) {
+      whatshappening.parentNode?.replaceChild(walletUI, whatshappening);
+    } else {
+      // Fallback - just append to the sidebar
+      rightSidebar.prepend(walletUI);
     }
     
-    // --- New scroll handler to ensure visibility during scroll ---
-    function handleScroll() {
-        if (!isSozuUiInjected || !injectedContainer) return;
+    // Add event listeners
+    document.getElementById('sozucash-close')?.addEventListener('click', () => {
+      walletUI.remove();
+    });
+    
+    document.getElementById('sozucash-connect')?.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ type: 'CONNECT_TWITTER' });
+    });
+    
+    document.getElementById('sozucash-send')?.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ type: 'OPEN_SEND_DIALOG' });
+    });
+    
+    document.getElementById('sozucash-receive')?.addEventListener('click', () => {
+      chrome.runtime.sendMessage({ type: 'OPEN_RECEIVE_DIALOG' });
+    });
+    
+    document.getElementById('copy-address')?.addEventListener('click', () => {
+      navigator.clipboard.writeText(response.address);
+      showToast('Address copied to clipboard!');
+    });
+    
+    // Add tab switching functionality
+    const tabs = document.querySelectorAll('.sozucash-tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Get the tab name
+        const tabName = (tab as HTMLElement).dataset.tab;
         
-        // Ensure wallet is visible during scroll
-        if (injectedContainer.style.display === 'none') {
-            injectedContainer.style.display = 'block';
-        }
+        // Remove active class from all tabs
+        tabs.forEach(t => t.classList.remove('active'));
         
-        // Debounce scroll handling
-        if (scrollTimeoutId) {
-            clearTimeout(scrollTimeoutId);
-        }
+        // Add active class to clicked tab
+        tab.classList.add('active');
         
-        // After scroll stops, make sure position is maintained
-        scrollTimeoutId = window.setTimeout(() => {
-            if (initialWalletPosition) {
-                // Reapply stored position to ensure wallet stays fixed
-                injectedContainer!.style.top = `${initialWalletPosition.top}px`;
-                injectedContainer!.style.left = `${initialWalletPosition.left}px`;
-            }
-            scrollTimeoutId = null;
-        }, 100);
+        // Hide all tab content
+        const tabContents = document.querySelectorAll('.sozucash-tab-content');
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        // Show selected tab content
+        const activeContent = document.querySelector(`.sozucash-tab-content[data-tab-content="${tabName}"]`);
+        if (activeContent) activeContent.classList.add('active');
+      });
+    });
+  };
+  
+  renderWalletUI();
+};
+
+// Function to show toast message
+const showToast = (message: string) => {
+  // Create toast element
+  const toast = document.createElement('div');
+  toast.textContent = message;
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 10000;
+    animation: fadeInOut 3s ease-in-out forwards;
+  `;
+  
+  // Add animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%, 20px); }
+      15% { opacity: 1; transform: translate(-50%, 0); }
+      85% { opacity: 1; transform: translate(-50%, 0); }
+      100% { opacity: 0; transform: translate(-50%, -20px); }
     }
+  `;
+  document.head.appendChild(style);
+  
+  // Add to body
+  document.body.appendChild(toast);
+  
+  // Remove after animation
+  setTimeout(() => {
+    document.body.removeChild(toast);
+  }, 3000);
+};
 
-    function getTwitterUsername(): string | null {
-        // Get username from Twitter's navigation menu
-        const usernameElement = document.querySelector('div[data-testid="SideNav_AccountSwitcher_Button"] [role="presentation"]') as HTMLElement;
-        if (usernameElement) {
-            const username = usernameElement.innerText.trim().replace('@', '');
-            console.log(`Sozu: Detected Twitter username: @${username}`);
-            return username;
-        }
-        return null;
-    }
+// Listen for messages from the extension
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'CHECK_TWITTER_INJECTION') {
+    sendResponse({ success: true, status: 'Twitter injection is active' });
+  }
+  return true;
+});
 
-    // Add message listener for OAuth flow
-    window.addEventListener('message', handleOAuthMessage);
+// Initialize by injecting the button when the page loads
+const init = () => {
+  // Only run on Twitter/X domains
+  if (window.location.hostname.includes('twitter.com') || window.location.hostname.includes('x.com')) {
+    console.log('Initializing SozuCash Twitter injection');
+    injectSidebarButton();
+  }
+};
 
-    function handleOAuthMessage(event: MessageEvent) {
-        if (event.data.type === 'INITIATE_OAUTH') {
-            console.log('Sozu: Received OAuth initiation request');
-            
-            // Forward message to extension background
-            chrome.runtime.sendMessage({
-                type: 'OAUTH_REQUEST',
-                details: {
-                    twitterUsername: getTwitterUsername(),
-                    redirectUrl: window.location.href
-                }
-            });
-        }
-        
-        if (event.data.type === 'OAUTH_COMPLETE') {
-            console.log('Sozu: OAuth flow completed', event.data);
-            // Forward authentication result to iframe
-            if (injectedContainer) {
-                (injectedContainer as HTMLIFrameElement).contentWindow?.postMessage(event.data, '*');
-            }
-        }
-        
-        // Add handler for import complete
-        if (event.data.type === 'IMPORT_COMPLETE') {
-            console.log('Sozu: Wallet import completed', event.data);
-            // Forward to iframe
-            if (injectedContainer) {
-                (injectedContainer as HTMLIFrameElement).contentWindow?.postMessage(event.data, '*');
-            }
-        }
-    }
+// Start the injection process
+init();
 
-    // --- Start Process ---
-    main();
-
-})();
-
-// Ensure this file is treated as a module if not already done by bundler/tsconfig
-export {};
+export {}; 

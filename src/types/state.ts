@@ -1,4 +1,6 @@
-/// <reference types="chrome"/>interface WalletState {
+/// <reference types="chrome"/>
+
+interface WalletState {
   isAuthenticated: boolean;
   user?: {
     id: string;

@@ -1,4 +1,4 @@
-/// <reference types="chrome"/>/// <reference types="chrome"/>
+/// <reference types="chrome"/>
 
 console.log('Popup script loaded')
 

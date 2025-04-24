@@ -1,4 +1,6 @@
-/// <reference types="chrome"/>export interface WalletState {
+/// <reference types="chrome"/>
+
+export interface WalletState {
   address: string;
   balance: string;
   network: 'mantle';

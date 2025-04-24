@@ -1,15 +1,13 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   mode: 'production',
   entry: {
     popup: './src/popup/index.ts',
     background: './src/background/index.ts',
-    // contentScript: './src/contentScript.ts', // Remove or comment out old entry
-    twitterInject: './twitter-injection/src/twitter-inject.ts' // Add new entry
+    twitterInject: './twitter-injection/src/twitter-inject.ts'
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -21,18 +19,12 @@ module.exports = {
       {
         test: /\.tsx?$/,
         use: 'ts-loader',
-        exclude: /node_modules/
+        exclude: [/node_modules/]
       },
       {
         test: /\.css$/,
         use: [
-          {
-            loader: MiniCssExtractPlugin.loader,
-            options: {
-              // for contentScript, we need separate CSS file
-              emit: true,
-            },
-          },
+          'style-loader',
           'css-loader',
           'postcss-loader'
         ]
@@ -49,13 +41,10 @@ module.exports = {
       filename: 'popup.html',
       chunks: ['popup']
     }),
-    new MiniCssExtractPlugin({
-      filename: '[name].css',
-    }),
     new CopyPlugin({
       patterns: [
         { 
-          from: './src/manifest.json',
+          from: './dist/manifest.json',
           to: 'manifest.json'
         },
         {
@@ -74,9 +63,6 @@ module.exports = {
     })
   ],
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
-    alias: {
-      '@': path.resolve(__dirname, 'src')
-    }
+    extensions: ['.tsx', '.ts', '.js']
   }
 }; 

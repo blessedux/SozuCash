@@ -1,61 +1,45 @@
-/// <reference types="chrome"/>import { SessionManager } from '../utils/SessionManager';
-import { AuthService } from '../services/AuthService';
+/// <reference types="chrome"/>
 
-// Initialize session manager and auth service
-const sessionManager = SessionManager.getInstance();
+import { AuthService } from '../services/AuthService';
+import '../utils/polyfills';
+
+// Initialize services
 const authService = AuthService.getInstance();
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.type === 'LOGOUT') {
-    sessionManager.clearSession();
-    authService.logout().then(() => {
-      sendResponse({ success: true });
-    });
-    return true;
-  }
+// Set up message listeners
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Handle messages from UI or content scripts
+  console.log('Background received message:', message);
   
-  if (message.type === 'AUTH_CALLBACK') {
-    // Handle the OAuth callback from the redirect page
-    if (message.url) {
-      authService.handleRedirect(message.url)
-        .then(() => {
-          sendResponse({ success: true });
-        })
-        .catch(error => {
-          console.error('Auth callback error:', error);
-          sendResponse({ success: false, error: error.message });
-        });
-    }
-    return true;
-  }
-  
-  if (message.type === 'INITIATE_AUTH') {
-    // Initiate the Twitter OAuth flow
+  if (message.type === 'AUTH_LOGIN') {
     authService.initiateTwitterAuth()
-      .then(() => {
-        sendResponse({ success: true });
-      })
+      .then(() => sendResponse({ success: true }))
       .catch(error => {
-        console.error('Auth initiation error:', error);
+        console.error('Auth error:', error);
         sendResponse({ success: false, error: error.message });
       });
-    return true;
+    return true; // Indicates async response
+  }
+  
+  if (message.type === 'AUTH_LOGOUT') {
+    authService.logout()
+      .then(() => sendResponse({ success: true }))
+      .catch(error => {
+        console.error('Logout error:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+    return true; // Indicates async response
   }
   
   if (message.type === 'GET_AUTH_STATE') {
-    // Get current authentication state
     authService.getCurrentAuthState()
-      .then(authState => {
-        sendResponse({ success: true, data: authState });
-      })
+      .then(state => sendResponse({ success: true, state }))
       .catch(error => {
-        console.error('Get auth state error:', error);
+        console.error('Error fetching auth state:', error);
         sendResponse({ success: false, error: error.message });
       });
-    return true;
+    return true; // Indicates async response
   }
-  
-  return true;
 });
 
 console.log('Background script loaded'); 

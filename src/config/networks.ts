@@ -1,11 +1,16 @@
-/// <reference types="chrome"/>export const MANTLE_NETWORK = {
-  chainId: 5001,
-  name: 'Mantle Testnet',
-  rpcUrls: ['https://rpc.testnet.mantle.xyz'],
-  blockExplorerUrls: ['https://explorer.testnet.mantle.xyz'],
-  nativeCurrency: {
-    name: 'BIT',
-    symbol: 'BIT',
-    decimals: 18
+/// <reference types="chrome"/>
+
+// Simplified networks config
+export const NetworksConfig = {
+  mantle: {
+    rpcUrls: ['https://rpc.mantle.xyz'],
+    blockExplorerUrls: ['https://explorer.mantle.xyz'],
+    nativeCurrency: {
+      name: 'MNT',
+      symbol: 'MNT',
+      decimals: 18
+    }
   }
-}; 
+};
+
+export default NetworksConfig; 

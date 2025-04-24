@@ -1,12 +1,9 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtensionReloader = require('webpack-extension-reloader');
 const CopyPlugin = require('copy-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   mode: 'development',
-  devtool: 'inline-source-map',
   entry: {
     popup: './src/popup/index.ts',
     background: './src/background/index.ts',
@@ -20,23 +17,21 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.tsx?$/,
         use: 'ts-loader',
-        exclude: /node_modules/
+        exclude: [/node_modules/]
       },
       {
         test: /\.css$/,
         use: [
-          {
-            loader: MiniCssExtractPlugin.loader,
-            options: {
-              // for contentScript, we need separate CSS file
-              emit: true,
-            },
-          },
+          'style-loader',
           'css-loader',
           'postcss-loader'
         ]
+      },
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
       }
     ]
   },
@@ -46,21 +41,10 @@ module.exports = {
       filename: 'popup.html',
       chunks: ['popup']
     }),
-    new MiniCssExtractPlugin({
-      filename: '[name].css',
-    }),
-    new ExtensionReloader({
-      reloadPage: true,
-      entries: {
-        background: 'background',
-        popup: 'popup',
-        twitterInject: 'twitterInject'
-      }
-    }),
     new CopyPlugin({
       patterns: [
         { 
-          from: './src/manifest.json',
+          from: './dist/manifest.json',
           to: 'manifest.json'
         },
         {
@@ -79,13 +63,14 @@ module.exports = {
     })
   ],
   resolve: {
-    extensions: ['.ts', '.js']
+    extensions: ['.tsx', '.ts', '.js']
   },
+  devtool: 'inline-source-map',
   devServer: {
     static: {
       directory: path.join(__dirname, 'dist'),
     },
-    hot: true,
-    port: 3000
+    compress: true,
+    port: 9000,
   }
 }; 

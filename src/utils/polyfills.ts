@@ -1,3 +1,4 @@
-/// <reference types="chrome"/>import { Buffer } from 'buffer';
+/// <reference types="chrome"/>
 
-window.Buffer = Buffer; 
+// Simplified polyfills file - no reference to Node.js Buffer
+export {}; 

@@ -1,14 +1,18 @@
-/// <reference types="chrome"/>export const chromeConfig = {
-  manifest_version: 3,
-  name: "Sozu Wallet",
-  version: "1.0.0",
-  description: "Sozu Wallet Chrome Extension",
+/// <reference types="chrome"/>
+
+// Simplified Chrome extension config
+export const ChromeConfig = {
+  name: 'SozuCash Wallet',
+  version: '1.0.0',
+  description: 'SozuCash Wallet Chrome Extension',
   action: {
-    default_popup: "index.html"
+    default_popup: 'popup.html'
   },
-  permissions: ["storage"],
-  web_accessible_resources: [{
-    resources: ["assets/*"],
-    matches: ["<all_urls>"]
-  }]
-}; 
+  permissions: ['storage', 'identity'],
+  web_accessible_resources: [
+    'popup.html', 
+    'oauth-callback.html'
+  ]
+};
+
+export default ChromeConfig; 
