@@ -19,6 +19,6 @@
     "types": ["chrome", "node"],
     "jsx": "react-jsx"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "twitter-injection"]
+  "include": ["src/**/*", "twitter-injection/**/*"],
+  "exclude": ["node_modules"]
 }

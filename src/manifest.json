@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "SozuCash Wallet",
+  "version": "1.0.0",
+  "description": "SozuCash Wallet Chrome Extension with Twitter Integration",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.twitter.com/*", "https://*.x.com/*"],
+      "js": ["twitterInject.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [
+    "identity",
+    "storage"
+  ],
+  "web_accessible_resources": [{
+    "resources": [
+      "popup.html",
+      "popup.js",
+      "styles/*",
+      "assets/*",
+      "oauth-callback.html"
+    ],
+    "matches": ["https://*.twitter.com/*", "https://*.x.com/*", "https://oauth.twitter.com/*"]
+  }],
+  "icons": {
+    "16": "assets/icons/mantle-mnt-logo.svg",
+    "48": "assets/icons/mantle-mnt-logo-med.png",
+    "128": "assets/icons/mantle-mnt-logo-big.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "host_permissions": [
+    "https://twitter.com/*",
+    "https://api.twitter.com/*"
+  ]
+} 
