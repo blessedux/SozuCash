@@ -73,11 +73,13 @@ export default function ReceiveScreen() {
 
   // Check for amount parameter in URL
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const amountParam = urlParams.get('amount');
-    if (amountParam) {
-      setAmount(amountParam);
-      setShowQR(true); // Automatically show the ready to receive screen
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const amountParam = urlParams.get('amount');
+      if (amountParam) {
+        setAmount(amountParam);
+        setShowQR(true); // Automatically show the ready to receive screen
+      }
     }
   }, []);
 
@@ -86,9 +88,12 @@ export default function ReceiveScreen() {
   
   // Generate unique payment URL
   const generatePaymentUrl = (amount: string) => {
-    const baseUrl = window.location.origin;
-    const paymentId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    return `${baseUrl}/pay/${paymentId}?amount=${amount}&wallet=${walletAddress}`;
+    if (typeof window !== 'undefined') {
+      const baseUrl = window.location.origin;
+      const paymentId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      return `${baseUrl}/pay/${paymentId}?amount=${amount}&wallet=${walletAddress}`;
+    }
+    return '';
   };
   
   const paymentUrl = generatePaymentUrl(amount);

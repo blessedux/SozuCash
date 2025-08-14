@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
@@ -8,8 +8,6 @@ export const metadata: Metadata = {
   title: 'Sozu Cash — Tap to Pay',
   description: 'NFC-first payments with one-tap flows on Mantle Network',
   manifest: '/manifest.json',
-  themeColor: '#8b5cf6',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -18,6 +16,14 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#8b5cf6',
 }
 
 export default function RootLayout({
