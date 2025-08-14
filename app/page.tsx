@@ -79,7 +79,7 @@ export default function LandingPage() {
 
             {/* CTA Button */}
             <button
-              onClick={() => router.push('/app')}
+              onClick={() => router.push('/locked-screen')}
               className="bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-8 rounded-2xl text-lg shadow-2xl hover:shadow-white/10 hover:scale-105 active:scale-95 transition-all duration-300"
             >
               🚀 Open App
@@ -317,7 +317,7 @@ export default function LandingPage() {
             </p>
 
             <button
-              onClick={() => router.push('/app')}
+              onClick={() => router.push('/locked-screen')}
               className="bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-8 rounded-2xl text-lg shadow-2xl hover:shadow-white/10 hover:scale-105 active:scale-95 transition-all duration-300"
             >
               🚀 Launch SozuCash App
