@@ -1,5 +1,11 @@
 {
+  "/_not-found": "app/_not-found.js",
+  "/app/page": "app/app/page.js",
+  "/i/[id]/page": "app/i/[id]/page.js",
   "/receive/page": "app/receive/page.js",
+  "/app-navigation/page": "app/app-navigation/page.js",
+  "/locked-screen/page": "app/locked-screen/page.js",
   "/page": "app/page.js",
-  "/app/page": "app/app/page.js"
+  "/test-blend/page": "app/test-blend/page.js",
+  "/test/page": "app/test/page.js"
 }
