@@ -1,151 +1,299 @@
-# SozuCash Wallet Browser Extension
+# Sozu Cash — NFC Invoice PWA
 
-SozuCash Wallet is a Chrome extension that integrates with Twitter/X to provide a seamless Web3 wallet experience. The extension allows users to authenticate with their Twitter accounts and automatically generates EVM-compatible wallets for them.
+A permissionless PWA with NFC-first payments and QR fallback, zero typing, passkeys (Face ID/biometrics) for unlock, and one-tap actions on Mantle Network.
 
-## Features
+## 🎯 Vision
 
-- **Twitter/X OAuth Authentication**: Securely sign in using your Twitter account
-- **EVM-Compatible Wallet Generation**: Each Twitter account can have multiple wallets
-- **Mantle Network Support**: Send and receive MNT tokens on Mantle Network
-- **Twitter Integration**: Injected wallet UI within Twitter's interface
-- **Secure Key Management**: Private keys are stored locally and securely
+**Goal**: Instant payments with a single tap. No typing, no passwords, no friction.
 
-## Installation
+- **NFC-first**: Tap to pay, phone to phone, QR fallback everywhere
+- **Passkeys**: Biometric unlock (Face ID/Touch ID)
+- **One-tap flows**: If you tapped, that was your intent
+- **Mantle Network**: Fast, cheap USDC transfers
+- **PWA**: Install on home screen, works offline
 
-### Local Development Installation
+## ✨ Features
 
-1. Clone this repository:
+### 🔐 Authentication
 
-   ```
-   git clone https://github.com/yourusername/sozucash-wallet.git
-   cd sozucash-wallet
-   ```
+- **Passkeys (WebAuthn)**: Face ID/Touch ID unlock
+- **Privy SDK**: Embedded wallet creation
+- **No email/password**: Pure biometric authentication
 
-2. Install dependencies:
+### 💳 Payments
 
-   ```
+- **NFC Tags**: Android Web NFC read/write
+- **QR Codes**: Universal fallback for all devices
+- **One-tap auto-pay**: Unlocked = instant payment
+- **USDC on Mantle**: Fast, cheap stablecoin transfers
+
+### 📱 User Experience
+
+- **Quick Window**: 60-second auto-pay sessions
+- **Spend caps**: Configurable limits for safety
+- **Optimistic UI**: "Paid ✓" immediately, then status
+- **Offline support**: Service worker for reliability
+
+## 🏗️ Architecture
+
+### Frontend (Next.js 14)
+
+```
+/app
+  /i/[id]/page.tsx      # Deep-link: fetch invoice -> auto-pay
+  /receive/page.tsx     # Keypad -> sign invoice -> NFC write
+  /send/page.tsx        # Scan QR -> auto-pay
+  /_components/         # WaveOverlay, Keypad, BigQR, Toast
+  /_hooks/              # useQuickWindow, usePrivyWallet, useNFC
+/lib
+  invoices/             # Build, sign (EIP-712), verify, pin
+  payments/             # viem client, send, watcher
+  effects/              # Wave animations + haptics
+  rpc/                  # Multi-provider health/selection
+  nfc/                  # Android writer/reader helpers
+```
+
+### Backend (Vercel Edge Functions)
+
+```
+/vercel
+  /edge/i/route.ts      # GET /i/:id shortlink -> JSON
+```
+
+### Data Flow
+
+1. **Vendor creates invoice** → signs with EIP-712 → pins to IPFS
+2. **Short link generated** → `/i/ABC123` → Edge Function resolves
+3. **Payer taps NFC/QR** → deep link opens → auto-pay if unlocked
+4. **Transaction broadcast** → Mantle Network → confirmation
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- Vercel account
+- Privy account
+- Mantle RPC access
+
+### Installation
+
+1. **Clone and install**:
+
+   ```bash
+   git clone https://github.com/blessedux/sozu-wallet.git
+   cd sozucash-pwa
    npm install
    ```
 
-3. Set up your Twitter API credentials:
+2. **Environment setup**:
 
-   - Create a Twitter Developer account at [developer.twitter.com](https://developer.twitter.com)
-   - Create a new project and app
-   - Set up OAuth 2.0 authentication
-   - Add `chrome-extension://[YOUR-EXTENSION-ID]/oauth-callback.html` as an allowed callback URL
-   - Copy your Client ID and Client Secret
-
-4. Create a `.env` file in the root directory with your Twitter API credentials:
-
-   ```
-   TWITTER_CLIENT_ID=your_client_id_here
-   TWITTER_CLIENT_SECRET=your_client_secret_here
+   ```bash
+   cp .env.example .env.local
    ```
 
-5. Build the extension:
+   Configure your `.env.local`:
 
+   ```env
+   NEXT_PUBLIC_MANTLE_CHAIN_ID=5000
+   NEXT_PUBLIC_MANTLE_RPC_URLS=https://rpc.mantle.xyz,https://mantle.publicnode.com
+   NEXT_PUBLIC_USDC_ADDRESS=0x...
+   PRIVY_APP_ID=...
+   PRIVY_APP_SECRET=...
+   KV_REST_API_URL=...
+   KV_REST_API_TOKEN=...
    ```
-   npm run build
+
+3. **Development**:
+
+   ```bash
+   npm run dev
    ```
 
-6. Load the extension in Chrome:
+4. **Deploy to Vercel**:
+   ```bash
+   npx vercel --prod
+   ```
 
-   - Open Chrome and navigate to `chrome://extensions`
-   - Enable "Developer mode" in the top right
-   - Click "Load unpacked" and select the `dist` folder from your project directory
-   - Note the generated extension ID for setting up your Twitter OAuth callback URL
+## 📱 Usage Flows
 
-7. Update your Twitter OAuth callback URL with your actual extension ID and rebuild if necessary
+### App Open (First Run)
 
-### Installing from Chrome Web Store (Coming Soon)
+1. Splash screen → Passkey prompt (Face ID/biometrics)
+2. Privy creates embedded wallet on Mantle
+3. Home screen shows balance → user unlocked
 
-1. Navigate to the Chrome Web Store
-2. Search for "SozuCash Wallet"
-3. Click "Add to Chrome"
+### Vendor — Create Invoice
 
-## Usage
+1. Navigate to `/receive` → keypad enter amount + memo
+2. Build + sign invoice → pin to IPFS → get short link
+3. **Android**: Write NDEF immediately → "Tag updated ✓"
+4. **iOS**: Show QR + note "Provision tag with Android"
 
-### Initial Setup
+### Payer — Send Payment
 
-1. Click on the SozuCash extension icon in your browser toolbar
-2. Click "Connect with X" to authenticate with your Twitter account
-3. Authorize the application when prompted by Twitter
-4. A new EVM wallet will be automatically generated for your Twitter account
-5. Your wallet is now ready to use!
+1. Tap vendor NFC tag (or scan QR) → deep link `/i/:id`
+2. If unlocked + Quick Window active → auto-sign & broadcast
+3. UI: "Paid ✓" (optimistic) + status chip
+4. If insufficient funds → full-screen failure toast + "Deposit"
 
-### Using the Wallet
+### QR Fallback (Universal)
 
-- **View Balance**: Your balance is displayed on the main dashboard
-- **Send Tokens**: Click the "Send" button to transfer tokens to another address
-- **Receive Tokens**: Click the "Deposit" button to view your wallet address for receiving tokens
-- **Switch Networks**: Use the network selector to switch between different EVM networks (when available)
-- **Logout**: Clear your Twitter authentication (Note: this doesn't delete your wallet)
+- Vendor shows QR of invoice link
+- Payer taps "Send" → "Scan" → camera opens
+- Auto-pay upon decode (if unlocked)
 
-### Twitter Integration
+## 🔧 Technical Stack
 
-The extension also injects a wallet UI into Twitter's interface:
+### Client
 
-1. Navigate to [twitter.com](https://twitter.com) or [x.com](https://x.com)
-2. Click on the SozuCash button in the left sidebar
-3. The wallet UI will appear in the right sidebar, replacing the "What's happening" section
-4. You can interact with your wallet directly within Twitter!
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **State**: Zustand
+- **Wallet**: Privy SDK (embedded + passkeys)
+- **EVM**: viem (Mantle config)
+- **QR**: zxing-js/browser (scan), qrcode (generate)
+- **NFC**: Web NFC APIs (NDEFReader/Writer)
+- **Animations**: WebGL + SVG fallback
 
-## Twitter API Requirements
+### Backend
 
-SozuCash Wallet uses Twitter's OAuth 2.0 for authentication. You will need:
+- **Platform**: Vercel Edge Functions
+- **Runtime**: Node 20 (Edge Runtime)
+- **Storage**: Vercel KV (caching)
+- **IPFS**: web3.storage/Pinata client
 
-1. A Twitter Developer Account
-2. A Twitter App with OAuth 2.0 enabled
-3. Client ID and Client Secret for your app
+### Blockchain
 
-For development purposes, you can use a free developer account which provides basic API access. For production, you may need an elevated access level depending on usage.
+- **Network**: Mantle Network (L2)
+- **Token**: USDC
+- **Contracts**: ERC-20 direct transfer
 
-**Note**: If you're just testing the extension locally, you can get a free Twitter Developer account which should be sufficient for OAuth authentication flows.
+## 🛡️ Safety Features
 
-### Twitter OAuth Scopes Used
+### Quick Window
 
-The extension requests the following scopes:
+- **Default**: 60-second auto-pay window
+- **Spend cap**: $50 total, $25 per transaction
+- **Auto-extend**: +30s on successful payment near expiry
 
-- `tweet.read`: To read tweets (for future features)
-- `users.read`: To access user profile information
-- `offline.access`: To maintain persistent authentication
+### Security
 
-## Security
+- **Anti-replay**: Nonce + expiration tracking
+- **Signature verification**: EIP-712 over all invoice fields
+- **Vendor allow-listing**: Optional vendor verification
+- **Local nonce cache**: Prevent double-spending
 
-SozuCash Wallet prioritizes security:
+## 📊 Invoice Schema
 
-- Private keys are stored locally in your browser's secure storage
-- Authentication tokens are stored securely and managed through Chrome's extension APIs
-- The extension uses PKCE (Proof Key for Code Exchange) for enhanced OAuth security
-- No sensitive data is transmitted to external servers
+```json
+{
+  "v": 1,
+  "net": "mantle",
+  "token": "USDC",
+  "dec": 6,
+  "to": "0xVENDOR",
+  "amt": "1250000",
+  "memo": "Americano x2",
+  "nonce": "0x04f3...af",
+  "exp": 1733184000,
+  "sig": "0x..." // EIP-712 over all fields
+}
+```
 
-## Development
+## 🎨 Design System
 
-### Project Structure
+### Reused from Chrome Extension
 
-- `src/`: Source code
-  - `background/`: Background scripts for extension functionality
-  - `popup/`: UI for the extension popup
-  - `services/`: Service classes for authentication, blockchain interactions, etc.
-  - `utils/`: Utility functions and helpers
-  - `types/`: TypeScript type definitions
-  - `twitter-injection/`: Code for Twitter UI integration
+- **Locked screen**: Biometric prompt design
+- **Balance display**: Clean, minimal styling
+- **Button components**: Consistent interactions
+- **Dark mode**: Full theme support
+- **Toast system**: Success/error notifications
 
-### Build Commands
+### New Components
 
-- `npm run dev`: Start development server
-- `npm run build`: Build production version
-- `npm run test`: Run tests
+- **WaveOverlay**: Success animation on payment
+- **Keypad**: Amount input with haptic feedback
+- **BigQR**: Full-screen QR code display
+- **Camera**: QR scanner with real-time detection
 
-## Contributing
+## 🚨 Known Limitations
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### Platform Constraints
 
-## License
+- **iOS NFC**: Cannot write tags from web (use Android to provision)
+- **Phone↔phone NFC**: Not available on web (future-proof payloads)
+- **Biometrics**: Cold starts may require Face ID once
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+### Browser Support
 
-## Acknowledgments
+- **Web NFC**: Chrome/Edge on Android only
+- **Passkeys**: Modern browsers with biometric hardware
+- **PWA**: All modern browsers
 
-- Built with [Ethereum](https://ethereum.org) and [Mantle Network](https://mantle.xyz)
-- Powered by [Twitter OAuth 2.0](https://developer.twitter.com/en/docs/authentication/oauth-2-0)
+## 🧪 Testing
+
+### Manual Testing
+
+```bash
+# Android Chrome
+npm run test:android-nfc
+
+# iOS Safari
+npm run test:ios-deeplink
+
+# QR Scanner
+npm run test:qr-scan
+
+# Payment Flows
+npm run test:payment
+```
+
+### Automated Testing
+
+```bash
+npm run test:unit
+npm run test:integration
+npm run test:e2e
+```
+
+## 📈 Performance Targets
+
+- **App load**: < 2 seconds
+- **NFC read/write**: < 500ms
+- **Payment confirmation**: < 3 seconds
+- **Uptime**: 99.9% on Vercel
+- **One-tap success**: > 95%
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Built on [Mantle Network](https://mantle.xyz)
+- Powered by [Privy](https://privy.io) for passkeys
+- Deployed on [Vercel](https://vercel.com)
+- Icons from [Mantle](https://mantle.xyz) and Sozu branding
+
+---
+
+## 📞 Support
+
+- **Documentation**: [docs.sozu.cash](https://docs.sozu.cash)
+- **Discord**: [discord.gg/sozucash](https://discord.gg/sozucash)
+- **Twitter**: [@sozucash](https://twitter.com/sozucash)
+
+---
+
+_Sozu Cash — Tap to pay, instantly._

@@ -1,0 +1,53 @@
+{
+  "name": "Sozu Cash",
+  "short_name": "Sozu",
+  "description": "NFC-first payments with one-tap flows on Mantle Network",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#8b5cf6",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["finance", "utilities"],
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Send Payment",
+      "short_name": "Send",
+      "description": "Send a payment via NFC or QR",
+      "url": "/send",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Receive Payment",
+      "short_name": "Receive",
+      "description": "Create an invoice to receive payment",
+      "url": "/receive",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

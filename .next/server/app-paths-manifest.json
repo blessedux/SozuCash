@@ -1,0 +1,5 @@
+{
+  "/app-navigation/page": "app/app-navigation/page.js",
+  "/locked-screen/page": "app/locked-screen/page.js",
+  "/receive/page": "app/receive/page.js"
+}

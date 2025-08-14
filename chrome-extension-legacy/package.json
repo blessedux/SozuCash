@@ -1,0 +1,30 @@
+{
+  "name": "sozu-wallet",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "webpack serve --config webpack.config.dev.js",
+    "build": "webpack --config webpack.config.prod.js",
+    "watch": "webpack --watch --config webpack.config.dev.js",
+    "fix-chrome-types": "find ./src -name '*.ts' -exec sed -i '' -e '1s;^;/// <reference types=\"chrome\"/>;' {} \\;"
+  },
+  "dependencies": {
+    "chrome-types": "^0.1.231"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.315",
+    "@types/node": "^20.17.30",
+    "copy-webpack-plugin": "^13.0.0",
+    "css-loader": "^6.8.1",
+    "html-webpack-plugin": "^5.5.3",
+    "postcss": "^8.4.24",
+    "postcss-loader": "^7.3.3",
+    "postcss-preset-env": "^9.0.0",
+    "style-loader": "^3.3.3",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.3",
+    "webpack": "^5.99.6",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.2"
+  }
+}
