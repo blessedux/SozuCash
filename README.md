@@ -1,40 +1,40 @@
-# Sozu Cash — NFC Invoice PWA
+# Sozu Cash — Permissionless P2P payments
 
-A permissionless PWA with NFC-first payments and QR fallback, zero typing, passkeys (Face ID/biometrics) for unlock, and one-tap actions on Mantle Network.
+A permissionless PWA with NFC-first payments and QR fallback, for accessible and frictionless Peer to Peer, private payments.
 
-## 🎯 Vision
+## Vision
 
-**Goal**: Instant payments with a single tap. No typing, no passwords, no friction.
+**Goal**: Instant payments with a single tap. No KYC, no passwords, no friction.
 
-- **NFC-first**: Tap to pay, phone to phone, QR fallback everywhere
+- **NFC-first**: Tap to pay, QR fallback everywhere
 - **Passkeys**: Biometric unlock (Face ID/Touch ID)
 - **One-tap flows**: If you tapped, that was your intent
 - **Mantle Network**: Fast, cheap USDC transfers
 - **PWA**: Install on home screen, works offline
 
-## ✨ Features
+## Features
 
-### 🔐 Authentication
+### Authentication
 
 - **Passkeys (WebAuthn)**: Face ID/Touch ID unlock
 - **Privy SDK**: Embedded wallet creation
-- **No email/password**: Pure biometric authentication
+- **No email/password**: Your keys stay in your device
 
-### 💳 Payments
+### Payments
 
 - **NFC Tags**: Android Web NFC read/write
 - **QR Codes**: Universal fallback for all devices
-- **One-tap auto-pay**: Unlocked = instant payment
-- **USDC on Mantle**: Fast, cheap stablecoin transfers
+- **One-tap auto-pay**: Unlocked = instant payment, no extra confirmation steps, no 2FA.
+- **USDC on Mantle**: Fast, cheap stablecoin transfers. No fees charged to the end user.
 
-### 📱 User Experience
+### User Experience
 
 - **Quick Window**: 60-second auto-pay sessions
 - **Spend caps**: Configurable limits for safety
 - **Optimistic UI**: "Paid ✓" immediately, then status
 - **Offline support**: Service worker for reliability
 
-## 🏗️ Architecture
+## Architecture
 
 ### Frontend (Next.js 14)
 
@@ -67,55 +67,7 @@ A permissionless PWA with NFC-first payments and QR fallback, zero typing, passk
 3. **Payer taps NFC/QR** → deep link opens → auto-pay if unlocked
 4. **Transaction broadcast** → Mantle Network → confirmation
 
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js 18+
-- Vercel account
-- Privy account
-- Mantle RPC access
-
-### Installation
-
-1. **Clone and install**:
-
-   ```bash
-   git clone https://github.com/blessedux/sozu-wallet.git
-   cd sozucash-pwa
-   npm install
-   ```
-
-2. **Environment setup**:
-
-   ```bash
-   cp .env.example .env.local
-   ```
-
-   Configure your `.env.local`:
-
-   ```env
-   NEXT_PUBLIC_MANTLE_CHAIN_ID=5000
-   NEXT_PUBLIC_MANTLE_RPC_URLS=https://rpc.mantle.xyz,https://mantle.publicnode.com
-   NEXT_PUBLIC_USDC_ADDRESS=0x...
-   PRIVY_APP_ID=...
-   PRIVY_APP_SECRET=...
-   KV_REST_API_URL=...
-   KV_REST_API_TOKEN=...
-   ```
-
-3. **Development**:
-
-   ```bash
-   npm run dev
-   ```
-
-4. **Deploy to Vercel**:
-   ```bash
-   npx vercel --prod
-   ```
-
-## 📱 Usage Flows
+## Usage Flows
 
 ### App Open (First Run)
 
@@ -140,10 +92,10 @@ A permissionless PWA with NFC-first payments and QR fallback, zero typing, passk
 ### QR Fallback (Universal)
 
 - Vendor shows QR of invoice link
-- Payer taps "Send" → "Scan" → camera opens
+- Payer taps "Pay" → "Scan" → camera opens
 - Auto-pay upon decode (if unlocked)
 
-## 🔧 Technical Stack
+## Technical Stack
 
 ### Client
 
@@ -170,7 +122,7 @@ A permissionless PWA with NFC-first payments and QR fallback, zero typing, passk
 - **Token**: USDC
 - **Contracts**: ERC-20 direct transfer
 
-## 🛡️ Safety Features
+## Safety Features
 
 ### Quick Window
 
@@ -185,7 +137,7 @@ A permissionless PWA with NFC-first payments and QR fallback, zero typing, passk
 - **Vendor allow-listing**: Optional vendor verification
 - **Local nonce cache**: Prevent double-spending
 
-## 📊 Invoice Schema
+## Invoice Schema
 
 ```json
 {
@@ -219,7 +171,7 @@ A permissionless PWA with NFC-first payments and QR fallback, zero typing, passk
 - **BigQR**: Full-screen QR code display
 - **Camera**: QR scanner with real-time detection
 
-## 🚨 Known Limitations
+## Known Limitations
 
 ### Platform Constraints
 
@@ -233,7 +185,7 @@ A permissionless PWA with NFC-first payments and QR fallback, zero typing, passk
 - **Passkeys**: Modern browsers with biometric hardware
 - **PWA**: All modern browsers
 
-## 🧪 Testing
+## Testing
 
 ### Manual Testing
 
@@ -259,7 +211,7 @@ npm run test:integration
 npm run test:e2e
 ```
 
-## 📈 Performance Targets
+## Performance Targets
 
 - **App load**: < 2 seconds
 - **NFC read/write**: < 500ms
@@ -267,31 +219,22 @@ npm run test:e2e
 - **Uptime**: 99.9% on Vercel
 - **One-tap success**: > 95%
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
-5. Open Pull Request
-
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Built on [Mantle Network](https://mantle.xyz)
 - Powered by [Privy](https://privy.io) for passkeys
 - Deployed on [Vercel](https://vercel.com)
-- Icons from [Mantle](https://mantle.xyz) and Sozu branding
+- Original Idea from SozuHaus Denver Feb 25' [SozuHaus](https://x.com/sozuhaus)
 
 ---
 
 ## 📞 Support
 
 - **Documentation**: [docs.sozu.cash](https://docs.sozu.cash)
-- **Discord**: [discord.gg/sozucash](https://discord.gg/sozucash)
 - **Twitter**: [@sozucash](https://twitter.com/sozucash)
 
 ---
