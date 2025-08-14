@@ -200,8 +200,8 @@ export default function AppNavigation() {
               /* Wallet Profile Screen */
               <div className="h-full flex flex-col overflow-hidden">
                 {/* Profile Picture */}
-                <div className="flex justify-center mb-4 flex-shrink-0">
-                  <div className="w-20 h-20 bg-white/10 backdrop-blur-lg border border-white/20 rounded-full flex items-center justify-center overflow-hidden">
+                <div className="flex justify-center mb-3 flex-shrink-0">
+                  <div className="w-16 h-16 bg-white/10 backdrop-blur-lg border border-white/20 rounded-full flex items-center justify-center overflow-hidden">
                     <img 
                       src={userProfile.image} 
                       alt={userProfile.name}
@@ -212,13 +212,13 @@ export default function AppNavigation() {
 
                 {/* Scrollable Content */}
                 <div className="flex-1 overflow-y-auto pr-1 min-h-0">
-                  <div className="space-y-3 pb-4">
+                  <div className="space-y-2 pb-2">
                     {/* Wallet Address */}
                     <div className="text-center">
-                      <p className="text-white/50 text-xs mb-2">Wallet Address</p>
+                      <p className="text-white/50 text-xs mb-1">Wallet Address</p>
                       <button 
                         onClick={handleCopyAddress}
-                        className="w-full bg-white/5 px-3 py-2 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-center space-x-2"
+                        className="w-full bg-white/5 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-center space-x-2"
                       >
                         <code className="text-white/70 text-xs break-all">
                           {truncateAddress(walletData.address)}
@@ -231,7 +231,7 @@ export default function AppNavigation() {
 
                     {/* QR Code */}
                     <div className="flex justify-center">
-                      <div className="w-28 h-28 bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl flex items-center justify-center">
+                      <div className="w-20 h-20 bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl flex items-center justify-center">
                         <img 
                           src={walletData.qrCode} 
                           alt="Wallet QR Code"
@@ -241,24 +241,24 @@ export default function AppNavigation() {
                     </div>
 
                     {/* Wallet Actions */}
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       <button 
                         onClick={() => console.log('Add new wallet')}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-2 px-3 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs"
+                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs"
                       >
                         Add New Wallet
                       </button>
                       
                       <button 
                         onClick={() => console.log('Import wallet')}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-2 px-3 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs"
+                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs"
                       >
                         Import Wallet
                       </button>
                       
                       <button 
                         onClick={() => console.log('Create wallet')}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-2 px-3 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs"
+                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs"
                       >
                         Create Wallet
                       </button>
@@ -323,13 +323,13 @@ export default function AppNavigation() {
               /* Settings Screen */
               <div className="h-full flex flex-col overflow-hidden">
                 {/* Title */}
-                <h1 className="text-xl font-bold text-white mb-2 flex-shrink-0">
+                <h1 className="text-lg font-bold text-white mb-1 flex-shrink-0">
                   {pages[currentPage].title}
                 </h1>
 
                 {/* Scrollable Settings Content */}
                 <div className="flex-1 overflow-y-auto pr-1 min-h-0">
-                  <div className="space-y-2 pb-4">
+                  <div className="space-y-1.5 pb-2">
                     {/* X Connection Section */}
                     <div className="space-y-1">
                       <h3 className="text-white/50 text-xs font-medium uppercase tracking-wide">Account</h3>
@@ -337,23 +337,23 @@ export default function AppNavigation() {
                       {!isConnectedToX ? (
                         <button 
                           onClick={handleConnectX}
-                          className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left flex items-center space-x-2"
+                          className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left flex items-center space-x-2"
                         >
-                          <span className="text-sm">𝕏</span>
+                          <span className="text-xs">𝕏</span>
                           <span className="text-xs">Connect with X</span>
                         </button>
                       ) : (
-                        <div className="w-full bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg p-2 flex items-center space-x-2">
+                        <div className="w-full bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg p-1.5 flex items-center space-x-2">
                           <img 
                             src={userProfile.image} 
                             alt={userProfile.name}
-                            className="w-6 h-6 rounded-full object-cover"
+                            className="w-5 h-5 rounded-full object-cover"
                           />
                           <div className="flex-1 text-left">
                             <p className="text-white font-semibold text-xs">{userProfile.name}</p>
                             <p className="text-white/60 text-xs">{userProfile.username}</p>
                           </div>
-                          <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                          <div className="w-1 h-1 bg-green-400 rounded-full"></div>
                         </div>
                       )}
                     </div>
@@ -363,14 +363,14 @@ export default function AppNavigation() {
                       <h3 className="text-white/50 text-xs font-medium uppercase tracking-wide">Preferences</h3>
                       <button 
                         onClick={() => console.log('Display currency')}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs"
+                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs"
                       >
                         💱 Display Currency
                       </button>
                       
                       <button 
                         onClick={() => console.log('Language settings')}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs"
+                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs"
                       >
                         🌐 Language
                       </button>
@@ -381,14 +381,14 @@ export default function AppNavigation() {
                       <h3 className="text-white/50 text-xs font-medium uppercase tracking-wide">Support</h3>
                       <button 
                         onClick={() => console.log('More information')}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs"
+                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs"
                       >
                         ℹ️ More Information
                       </button>
                       
                       <button 
                         onClick={() => console.log('Customer support')}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs"
+                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs"
                       >
                         🆘 Customer Support
                       </button>
@@ -399,15 +399,15 @@ export default function AppNavigation() {
                       <h3 className="text-white/50 text-xs font-medium uppercase tracking-wide">Rewards</h3>
                       <button 
                         onClick={() => console.log('Rewards program')}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs"
+                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs"
                       >
                         🎁 Rewards Program
                       </button>
                       
                       {/* Rewards Info */}
-                      <div className="p-2 bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg">
+                      <div className="p-1.5 bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg">
                         <p className="text-white/70 text-xs">
-                          <span className="font-semibold text-white">Earn rewards!</span> Get cash back for each user you onboard. New accounts receive rewards for their first payment or transfer.
+                          <span className="font-semibold text-white">Earn rewards!</span> Get cash back for each user you onboard.
                         </p>
                       </div>
                     </div>

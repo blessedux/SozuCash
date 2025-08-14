@@ -235,6 +235,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - **Documentation**: [docs.sozu.cash](https://docs.sozu.cash)
+
 - **Twitter**: [@sozucash](https://twitter.com/sozucash)
 
 ---
