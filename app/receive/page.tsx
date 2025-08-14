@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, PanInfo } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { QrCode } from 'lucide-react';
+import { QrCode, Wifi } from 'lucide-react';
 
 export default function ReceiveScreen() {
   const [amount, setAmount] = useState('');
@@ -31,6 +31,41 @@ export default function ReceiveScreen() {
       status: 'pending',
       date: '2024-01-20',
       hash: null
+    },
+    {
+      id: 4,
+      amount: 75,
+      status: 'completed',
+      date: '2024-01-18',
+      hash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890'
+    },
+    {
+      id: 5,
+      amount: 200,
+      status: 'pending',
+      date: '2024-01-22',
+      hash: null
+    },
+    {
+      id: 6,
+      amount: 150,
+      status: 'completed',
+      date: '2024-01-16',
+      hash: '0x7890abcdef1234567890abcdef1234567890abcdef1234567890abcdef123456'
+    },
+    {
+      id: 7,
+      amount: 300,
+      status: 'expired',
+      date: '2024-01-08',
+      hash: null
+    },
+    {
+      id: 8,
+      amount: 125,
+      status: 'pending',
+      date: '2024-01-25',
+      hash: null
     }
   ]);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -46,9 +81,17 @@ export default function ReceiveScreen() {
     }
   }, []);
 
-  // Mock wallet address and transaction hash
+  // Mock wallet address and payment URL
   const walletAddress = "0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6";
-  const transactionHash = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
+  
+  // Generate unique payment URL
+  const generatePaymentUrl = (amount: string) => {
+    const baseUrl = window.location.origin;
+    const paymentId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    return `${baseUrl}/pay/${paymentId}?amount=${amount}&wallet=${walletAddress}`;
+  };
+  
+  const paymentUrl = generatePaymentUrl(amount);
 
   // Auto-focus the input when component mounts
   useEffect(() => {
@@ -137,17 +180,11 @@ export default function ReceiveScreen() {
 
 
 
-      {/* Camera Icon */}
-      <button 
-        onClick={() => console.log('Open camera')}
-        className="absolute top-8 right-4 z-20 text-white/70 hover:text-white transition-colors"
-      >
-        📷
-      </button>
+
 
       {/* Main Content */}
       <motion.div
-        className="relative z-10 w-full h-full flex items-center justify-center px-4"
+        className="relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-4 py-8"
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.1}
@@ -158,7 +195,7 @@ export default function ReceiveScreen() {
         {/* Dark Glassmorphism Overlay */}
         <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
         
-        <div className="relative z-20 text-center max-w-sm mx-auto w-full">
+        <div className="relative z-20 text-center max-w-sm mx-auto w-full pt-20">
           {/* Glassmorphism Card */}
           <div className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl w-full h-96 flex items-center justify-center">
             
@@ -227,7 +264,7 @@ export default function ReceiveScreen() {
                     
                     {/* NFC Icon */}
                     <div className="relative z-10 w-16 h-16 bg-white/10 backdrop-blur-lg border border-white/20 rounded-full flex items-center justify-center">
-                      <span className="text-2xl">📱</span>
+                      <Wifi size={32} className="rotate-45" />
                     </div>
                   </div>
                 </div>
@@ -255,38 +292,7 @@ export default function ReceiveScreen() {
                   </div>
                 </div>
 
-                {/* Invoice List */}
-                <div className="flex-1 overflow-y-auto">
-                  <h3 className="text-white/50 text-xs font-medium mb-2">Recent Invoices</h3>
-                  <div className="space-y-1">
-                    {invoices.slice(0, 2).map((invoice) => (
-                      <div key={invoice.id} className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
-                        <div className="flex items-center space-x-2">
-                          <div className={`w-1.5 h-1.5 rounded-full ${
-                            invoice.status === 'completed' ? 'bg-green-400' :
-                            invoice.status === 'expired' ? 'bg-red-400' :
-                            'bg-yellow-400'
-                          }`}></div>
-                          <div>
-                            <p className="text-white text-xs font-medium">${invoice.amount}</p>
-                            <p className="text-white/50 text-xs">{invoice.date}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className={`text-xs font-medium ${
-                            invoice.status === 'completed' ? 'text-green-400' :
-                            invoice.status === 'expired' ? 'text-red-400' :
-                            'text-yellow-400'
-                          }`}>
-                            {invoice.status === 'completed' ? 'Paid' :
-                             invoice.status === 'expired' ? 'Expired' :
-                             'Pending'}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+
               </motion.div>
             ) : (
               /* QR Code Screen */
@@ -314,18 +320,18 @@ export default function ReceiveScreen() {
                   </div>
                 </motion.div>
 
-                {/* Transaction Hash */}
+                {/* Payment URL */}
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.3 }}
                   className="p-4 bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl"
                 >
-                  <p className="text-white/50 text-sm mb-2">Transaction Hash</p>
+                  <p className="text-white/50 text-sm mb-2">Payment Link</p>
                   <div className="flex items-center justify-between">
-                    <code className="text-white/70 text-xs break-all">{transactionHash}</code>
+                    <code className="text-white/70 text-xs break-all">{paymentUrl}</code>
                     <button 
-                      onClick={() => copyToClipboard(transactionHash)}
+                      onClick={() => copyToClipboard(paymentUrl)}
                       className="ml-2 text-white/50 hover:text-white transition-colors"
                     >
                       📋
@@ -335,6 +341,54 @@ export default function ReceiveScreen() {
               </motion.div>
             )}
           </div>
+
+          {/* Invoice History - Below the main card, scrollable */}
+          {showQR && !showQRCode && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              className="mt-8 w-full max-w-sm mx-auto"
+            >
+              <h3 className="text-white/70 text-sm font-medium mb-3 text-center">Recent Invoices</h3>
+              <div className="relative max-h-48 overflow-hidden">
+                <div className="max-h-48 overflow-y-auto space-y-2 pr-2 scrollbar-hide">
+                  {/* Top fade overlay */}
+                  <div className="sticky top-0 left-0 right-0 h-6 bg-gradient-to-b from-black via-black/50 to-transparent pointer-events-none z-20"></div>
+                  
+                  {invoices.map((invoice) => (
+                    <div key={invoice.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-2 h-2 rounded-full ${
+                          invoice.status === 'completed' ? 'bg-green-400' :
+                          invoice.status === 'expired' ? 'bg-red-400' :
+                          'bg-yellow-400'
+                        }`}></div>
+                        <div>
+                          <p className="text-white text-sm font-medium">${invoice.amount}</p>
+                          <p className="text-white/50 text-xs">{invoice.date}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-sm font-medium ${
+                          invoice.status === 'completed' ? 'text-green-400' :
+                          invoice.status === 'expired' ? 'text-red-400' :
+                          'text-yellow-400'
+                        }`}>
+                          {invoice.status === 'completed' ? 'Paid' :
+                           invoice.status === 'expired' ? 'Expired' :
+                           'Pending'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Bottom fade overlay */}
+                  <div className="sticky bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none z-20"></div>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
       </motion.div>
 

@@ -229,24 +229,13 @@ export default function AppNavigation() {
                       </button>
                     </div>
 
-                    {/* QR Code */}
-                    <div className="flex justify-center">
-                      <div className="w-20 h-20 bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl flex items-center justify-center">
-                        <img 
-                          src={walletData.qrCode} 
-                          alt="Wallet QR Code"
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    </div>
-
                     {/* Wallet Actions */}
                     <div className="space-y-1.5">
                       <button 
-                        onClick={() => console.log('Add new wallet')}
+                        onClick={() => console.log('Create new wallet')}
                         className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs"
                       >
-                        Add New Wallet
+                        Create New Wallet
                       </button>
                       
                       <button 
@@ -254,13 +243,6 @@ export default function AppNavigation() {
                         className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs"
                       >
                         Import Wallet
-                      </button>
-                      
-                      <button 
-                        onClick={() => console.log('Create wallet')}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs"
-                      >
-                        Create Wallet
                       </button>
                     </div>
                   </div>
