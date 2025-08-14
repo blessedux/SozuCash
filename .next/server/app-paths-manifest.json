@@ -1,6 +1,0 @@
-{
-  "/not-found": "app/not-found.js",
-  "/locked-screen/page": "app/locked-screen/page.js",
-  "/app-navigation/page": "app/app-navigation/page.js",
-  "/receive/page": "app/receive/page.js"
-}
