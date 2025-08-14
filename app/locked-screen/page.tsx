@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import SplineBackground from '@/components/SplineBackground';
 
 export default function LockedScreen() {
   const [isUnlocking, setIsUnlocking] = useState(false);
@@ -21,16 +22,7 @@ export default function LockedScreen() {
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
       {/* Spline Background Animation */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <iframe 
-          src='https://my.spline.design/animatedshapeblend-vPAPkDf3zXbvMSVXAIjlDWIm/' 
-          frameBorder='0' 
-          width='100%' 
-          height='100%'
-          className="w-full h-full scale-120"
-          style={{ transform: 'scale(1.2)' }}
-        />
-      </div>
+      <SplineBackground scale={1.2} />
 
       {/* Content Overlay */}
       <div className="relative z-10 w-full h-full flex items-center justify-center px-4">

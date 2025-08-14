@@ -82,7 +82,7 @@ export default function ReceiveScreen() {
     }
   };
 
-  const handleEnter = () => {
+  const handleDeposit = () => {
     if (amount && parseFloat(amount) > 0) {
       setShowQR(true);
       // Add new invoice to the list
@@ -170,6 +170,11 @@ export default function ReceiveScreen() {
                 transition={{ duration: 0.3 }}
                 className="space-y-6 w-full"
               >
+                {/* USD Title */}
+                <div className="text-center mb-2">
+                  <h2 className="text-white/70 text-lg font-medium">USD</h2>
+                </div>
+
                 {/* Amount Input Field */}
                 <div className="relative">
                   <input
@@ -188,13 +193,13 @@ export default function ReceiveScreen() {
                   )}
                 </div>
 
-                {/* Receive Button */}
+                {/* Deposit Button */}
                 <button 
-                  onClick={handleEnter}
+                  onClick={handleDeposit}
                   disabled={!amount || parseFloat(amount) <= 0}
                   className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Receive
+                  Deposit
                 </button>
               </motion.div>
             ) : showQR && !showQRCode ? (

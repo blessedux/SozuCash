@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, PanInfo } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Wifi, Camera } from 'lucide-react';
+import SplineBackground from '@/components/SplineBackground';
 
 export default function AppNavigation() {
   const [currentPage, setCurrentPage] = useState(1); // Start on pay page (index 1)
@@ -139,16 +140,7 @@ export default function AppNavigation() {
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
       {/* Spline Background Animation */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <iframe 
-          src='https://my.spline.design/animatedshapeblend-vPAPkDf3zXbvMSVXAIjlDWIm/' 
-          frameBorder='0' 
-          width='100%' 
-          height='100%'
-          className="w-full h-full scale-120"
-          style={{ transform: 'scale(1.2)' }}
-        />
-      </div>
+      <SplineBackground scale={1.2} />
 
       {/* Sozu Cash Logo */}
       <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
