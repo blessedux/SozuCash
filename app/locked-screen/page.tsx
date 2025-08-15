@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import SplineBackground from '@/components/SplineBackground';
 
 export default function LockedScreen() {
   const [isUnlocking, setIsUnlocking] = useState(false);
@@ -20,15 +19,12 @@ export default function LockedScreen() {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
-      {/* Spline Background Animation */}
-      <SplineBackground scale={1.2} />
-
+    <div className="relative w-full h-screen overflow-hidden no-scroll">
       {/* Content Overlay */}
-      <div className="relative z-10 w-full h-full flex items-center justify-center px-4 pointer-events-none">
-        <div className="text-center max-w-sm mx-auto">
+      <div className="relative z-10 w-full h-full flex items-center justify-center px-4 pointer-events-none" style={{ backgroundColor: 'transparent' }}>
+        <div className="text-center w-80 mx-auto" style={{ backgroundColor: 'transparent' }}>
           {/* Glassmorphism Card */}
-          <div className="bg-black/60 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl pointer-events-none">
+          <div className="border border-white/10 rounded-3xl p-8 shadow-2xl pointer-events-none h-96 flex flex-col w-full">
           {/* Logo */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -39,31 +35,9 @@ export default function LockedScreen() {
             <img 
               src="/sozu-logo.png" 
               alt="Sozu Cash" 
-              className="h-16 mx-auto mb-6"
+              className="h-24 mx-auto mb-6"
             />
           </motion.div>
-
-
-
-          {/* Title */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-2xl font-bold text-white mb-3"
-          >
-            Wallet Locked
-          </motion.h1>
-
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="text-lg text-white/70 mb-8"
-          >
-            Use Face ID or Touch ID to unlock
-          </motion.p>
 
           {/* Unlock Button */}
           <motion.div
@@ -74,41 +48,36 @@ export default function LockedScreen() {
             <button
               onClick={handleUnlock}
               disabled={isUnlocking}
-              className={`w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl transition-all duration-200 pointer-events-auto ${
+              className={`w-full border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl transition-all duration-200 pointer-events-auto backdrop-blur-[10px] min-h-[56px] flex items-center justify-center ${
                 isUnlocking 
                   ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:bg-white/20 active:scale-95'
+                  : 'hover:bg-white/5 active:scale-95'
               }`}
             >
-              {isUnlocking ? (
-                <div className="flex items-center justify-center space-x-2">
+              <div className="flex items-center justify-center space-x-2 min-w-[200px]">
+                {isUnlocking && (
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
                   />
-                  <span>Unlocking...</span>
-                </div>
-              ) : (
-                'Unlock with Face ID'
-              )}
+                )}
+                <span>{isUnlocking ? 'Unlocking...' : 'Unlock with Passkeys'}</span>
+              </div>
             </button>
           </motion.div>
 
-          {/* Alternative Options */}
+          {/* Support Button */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 1.0 }}
-            className="mt-6 space-y-3"
+            className="mt-auto pt-6"
           >
-            <button className="w-full text-white/50 hover:text-white/70 transition-colors text-sm pointer-events-auto">
-              Use Passcode
+            <button className="w-full text-black font-semibold py-3 px-6 rounded-2xl transition-all duration-200 pointer-events-auto hover:bg-white/5 active:scale-95">
+              Get Support
             </button>
-            <button className="w-full text-white/50 hover:text-white/70 transition-colors text-sm pointer-events-auto">
-              Forgot Passcode?
-                         </button>
-           </motion.div>
+          </motion.div>
           </div>
         </div>
        </div>

@@ -4,10 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, PanInfo } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Wifi, Camera, CheckCircle } from 'lucide-react';
-import SplineBackground from '@/components/SplineBackground';
 
 export default function AppNavigation() {
   const [currentPage, setCurrentPage] = useState(1); // Start on pay page (index 1)
+  const [showInvestScreen, setShowInvestScreen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right' | 'up' | 'down'>('up');
   const [isConnectedToX, setIsConnectedToX] = useState(false);
@@ -29,12 +29,49 @@ export default function AppNavigation() {
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
   const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [settingsSubPage, setSettingsSubPage] = useState<'main' | 'currency' | 'language' | 'support' | 'rewards'>('main');
+  const [blurLevel, setBlurLevel] = useState(0); // 0 = no blur, 1 = 5%, 2 = 10%, 3 = 15%
   const router = useRouter();
+
+  // Calculate blur level based on current navigation state
+  const calculateBlurLevel = () => {
+    // Level 3: Deep screens (15% blur) - Success states and deep interactions
+    if (sendPaymentSuccess || isUserConfirmed) {
+      return 3;
+    }
+    
+    // Level 2: Sub-screens (10% blur) - Modals and sub-pages
+    if (showDepositModal || showCurrencyModal || showLanguageModal || showSupportModal || showRewardsModal || 
+        showSendScreen || showInvestScreen || settingsSubPage !== 'main') {
+      return 2;
+    }
+    
+    // Level 1: Main menu (5% blur) - Default unlocked state
+    return 1;
+  };
+
+  // Update blur level whenever relevant state changes
+  useEffect(() => {
+    const newBlurLevel = calculateBlurLevel();
+    setBlurLevel(newBlurLevel);
+    console.log('Blur level updated:', newBlurLevel, 'Class:', getBlurClass());
+  }, [showDepositModal, showCurrencyModal, showLanguageModal, showSupportModal, showRewardsModal, 
+      showSendScreen, showInvestScreen, settingsSubPage, sendPaymentSuccess, isUserConfirmed]);
+
+  // Get blur class based on blur level
+  const getBlurClass = () => {
+    switch (blurLevel) {
+      case 0: return ''; // No blur
+      case 1: return 'backdrop-blur-[5px]'; // 5% blur
+      case 2: return 'backdrop-blur-[10px]'; // 10% blur
+      case 3: return 'backdrop-blur-[15px]'; // 15% blur
+      default: return 'backdrop-blur-[5px]'; // Default to 5%
+    }
+  };
 
   // Prevent scrolling on mobile devices
   useEffect(() => {
     const preventScroll = (e: TouchEvent) => {
-      // Allow touch events on SplineBackground
+      // Allow touch events on background animations
       const target = e.target as HTMLElement;
       if (target.closest('.spline-background')) {
         return;
@@ -103,7 +140,7 @@ export default function AppNavigation() {
     },
     {
       id: 'receive',
-      title: 'Receive',
+      title: 'Deposit',
       subtitle: 'Get paid in seconds',
       action: 'Show QR Code'
     },
@@ -164,6 +201,9 @@ export default function AppNavigation() {
           if (currentPage === 1) { // Pay screen
             setShowSendScreen(true);
             setSlideDirection('down');
+          } else if (currentPage === 2) { // Deposit screen
+            setShowInvestScreen(true);
+            setSlideDirection('down');
           }
           break;
         case 'arrowup':
@@ -172,12 +212,20 @@ export default function AppNavigation() {
           if (currentPage === 1 && showSendScreen) { // Pay screen with send screen open
             setShowSendScreen(false);
             setSlideDirection('up');
+          } else if (currentPage === 2 && showInvestScreen) { // Deposit screen with invest screen open
+            setShowInvestScreen(false);
+            setSlideDirection('up');
           }
           break;
         case 'enter':
         case ' ':
           event.preventDefault();
           handleEnterKey();
+          break;
+        case 'escape':
+        case 'esc':
+          event.preventDefault();
+          handleEscapeKey();
           break;
       }
     };
@@ -190,14 +238,46 @@ export default function AppNavigation() {
     setIsDragging(false);
     const threshold = 30; // Reduced threshold for more sensitive swipes
     
-    // Horizontal swiping for page navigation only
-    if (Math.abs(info.offset.x) > threshold) {
-      if (info.offset.x > 0) {
-        // Swipe right - go to previous page (with infinite loop)
-        navigateToPreviousPage();
-      } else {
-        // Swipe left - go to next page (with infinite loop)
-        navigateToNextPage();
+    // Check for left-to-right swipe (escape gesture) first
+    if (info.offset.x > threshold) {
+      // Swipe right - handle as escape gesture
+      handleEscapeKey();
+      return;
+    }
+    
+    // Check for right-to-left swipe (next page)
+    if (info.offset.x < -threshold) {
+      // Swipe left - go to next page (with infinite loop)
+      navigateToNextPage();
+      return;
+    }
+    
+    // Vertical swiping for sub-screen navigation
+    if (Math.abs(info.offset.y) > threshold) {
+      // Handle vertical swiping for pay screen
+      if (currentPage === 1 && Math.abs(info.offset.y) > 30) {
+        if (info.offset.y > 0) {
+          // Swipe down - show send screen
+          setShowSendScreen(true);
+        } else {
+          // Swipe up - hide send screen
+          if (showSendScreen) {
+            setShowSendScreen(false);
+          }
+        }
+      }
+      
+      // Handle vertical swiping for deposit screen
+      if (currentPage === 2 && Math.abs(info.offset.y) > 30) {
+        if (info.offset.y > 0) {
+          // Swipe down - show invest screen
+          setShowInvestScreen(true);
+        } else {
+          // Swipe up - hide invest screen
+          if (showInvestScreen) {
+            setShowInvestScreen(false);
+          }
+        }
       }
     }
   };
@@ -233,6 +313,64 @@ export default function AppNavigation() {
       // Other pages - use the regular action
       handleActionClick();
     }
+  };
+
+  const handleEscapeKey = () => {
+    // Handle escape key to go back through navigation levels
+    // Priority order: modals > sub-screens > main screens
+    
+    // Close any open modals first
+    if (showDepositModal) {
+      setShowDepositModal(false);
+      return;
+    }
+    if (showCurrencyModal) {
+      setShowCurrencyModal(false);
+      return;
+    }
+    if (showLanguageModal) {
+      setShowLanguageModal(false);
+      return;
+    }
+    if (showSupportModal) {
+      setShowSupportModal(false);
+      return;
+    }
+    if (showRewardsModal) {
+      setShowRewardsModal(false);
+      return;
+    }
+    
+    // Close settings sub-pages
+    if (settingsSubPage !== 'main') {
+      setSettingsSubPage('main');
+      return;
+    }
+    
+    // Close sub-screens (send screen, invest screen)
+    if (showSendScreen) {
+      setShowSendScreen(false);
+      setSlideDirection('up');
+      return;
+    }
+    if (showInvestScreen) {
+      setShowInvestScreen(false);
+      setSlideDirection('up');
+      return;
+    }
+    
+    // Reset payment success state
+    if (sendPaymentSuccess) {
+      setSendPaymentSuccess(false);
+      setIsUserConfirmed(false);
+      setSendAmount('');
+      setSendToHandle('');
+      return;
+    }
+    
+    // If we're at the root level, lock the wallet and navigate to locked screen
+    console.log('Locking wallet and navigating to locked screen');
+    router.push('/locked-screen');
   };
 
   const searchTwitterUser = async (handle: string) => {
@@ -329,9 +467,6 @@ export default function AppNavigation() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden no-scroll">
-      {/* Spline Background Animation */}
-      <SplineBackground scale={1.2} />
-
       {/* Sozu Cash Logo */}
       <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
         <img 
@@ -357,9 +492,12 @@ export default function AppNavigation() {
         
 
         
-        <div className="relative z-20 text-center max-w-sm mx-auto w-full pointer-events-auto">
+        <div className="relative z-20 text-center w-80 mx-auto pointer-events-auto flex justify-center">
           {/* Fixed Glassmorphism Card */}
           <motion.div
+            initial={{ width: "320px" }}
+            animate={{ width: "384px" }}
+            transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.2}
@@ -380,8 +518,21 @@ export default function AppNavigation() {
                   }
                 }
               }
+              // Handle vertical swiping for deposit screen
+              if (currentPage === 2 && Math.abs(info.offset.y) > 30) {
+                if (info.offset.y > 0) {
+                  // Swipe down - show invest screen
+                  setShowInvestScreen(true);
+                } else {
+                  // Swipe up - hide invest screen
+                  if (showInvestScreen) {
+                    setShowInvestScreen(false);
+                  }
+                }
+              }
             }}
-            className="bg-gray-800/40 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl w-full h-96 flex items-center justify-center cursor-grab active:cursor-grabbing"
+            className={`border border-white/10 rounded-3xl p-8 shadow-2xl h-96 flex items-center justify-center cursor-grab active:cursor-grabbing ${getBlurClass()}`}
+            style={{ transformOrigin: "center" }}
           >
             {/* Animated Page Content */}
             <motion.div
@@ -420,7 +571,7 @@ export default function AppNavigation() {
                 
                 {/* Profile Picture */}
                 <div className="flex justify-center mb-3 flex-shrink-0">
-                  <div className="w-16 h-16 bg-gray-800/40 backdrop-blur-lg border border-white/20 rounded-full flex items-center justify-center overflow-hidden">
+                  <div className="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center overflow-hidden">
                     <img 
                       src={userProfile.image} 
                       alt={userProfile.name}
@@ -437,7 +588,7 @@ export default function AppNavigation() {
                       <p className="text-white/50 text-xs mb-1">Wallet Address</p>
                       <button 
                         onClick={handleCopyAddress}
-                        className="w-full px-2 py-1.5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-center space-x-2 pointer-events-auto"
+                                                  className="w-full px-2 py-1.5 rounded-lg hover:bg-white/5 transition-all duration-200 flex items-center justify-center space-x-2 pointer-events-auto"
                       >
                         <code className="text-white/70 text-xs break-all">
                           {truncateAddress(walletData.address)}
@@ -452,14 +603,14 @@ export default function AppNavigation() {
                     <div className="space-y-1.5">
                       <button 
                         onClick={() => console.log('Create new wallet')}
-                        className="w-full text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs pointer-events-auto"
+                        className="w-full border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/5 transition-all duration-200 text-xs pointer-events-auto"
                       >
                         Create New Wallet
                       </button>
                       
                       <button 
                         onClick={() => console.log('Import wallet')}
-                        className="w-full text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs pointer-events-auto"
+                        className="w-full border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/5 transition-all duration-200 text-xs pointer-events-auto"
                       >
                         Import Wallet
                       </button>
@@ -468,7 +619,7 @@ export default function AppNavigation() {
                       {!isConnectedToX ? (
                         <button 
                           onClick={handleConnectX}
-                          className="w-full text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs pointer-events-auto flex items-center justify-center space-x-2"
+                          className="w-full border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/5 transition-all duration-200 text-xs pointer-events-auto flex items-center justify-center space-x-2"
                         >
                           <span className="text-xs">𝕏</span>
                           <span className="text-xs">Connect with X</span>
@@ -538,7 +689,7 @@ export default function AppNavigation() {
                           // For demo: navigate to pay screen
                           router.push('/pay');
                         }}
-                        className="w-20 h-20 bg-gray-800/40 backdrop-blur-lg border border-white/20 rounded-full flex items-center justify-center hover:bg-gray-700/40 hover:scale-105 transition-all cursor-pointer pointer-events-auto"
+                        className="w-20 h-20 border border-white/20 rounded-full flex items-center justify-center hover:bg-white/5 hover:scale-105 transition-all cursor-pointer pointer-events-auto"
                       >
                         <Wifi size={32} className="rotate-45" />
                       </button>
@@ -578,7 +729,7 @@ export default function AppNavigation() {
                                 searchTwitterUser(newHandle);
                               }}
                               placeholder="username"
-                              className="w-full bg-gray-800/40 backdrop-blur-lg border border-white/20 text-white text-lg font-semibold text-center py-4 pl-8 pr-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto"
+                              className="w-full border border-white/20 text-white text-lg font-semibold text-center py-4 pl-8 pr-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto"
                             />
                           </div>
                         </div>
@@ -638,7 +789,7 @@ export default function AppNavigation() {
                                  placeholder="0.00"
                                  step="0.01"
                                  min="0"
-                                 className="w-full bg-gray-800/40 backdrop-blur-lg border border-white/20 text-white text-lg font-semibold text-center py-3 pl-8 pr-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto"
+                                 className="w-full border border-white/20 text-white text-lg font-semibold text-center py-3 pl-8 pr-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto"
                                />
                              </div>
                            </motion.div>
@@ -647,9 +798,9 @@ export default function AppNavigation() {
                          {/* Send Button - Always positioned at bottom */}
                          <div className="mt-auto pt-4">
                            <button 
-                             onClick={handleSendPayment}
-                             disabled={!sendToHandle.trim() || !isUserConfirmed || !sendAmount.trim()}
-                             className="w-full bg-gray-800/40 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-gray-700/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto"
+                                                           onClick={handleSendPayment}
+                              disabled={!sendToHandle.trim() || !isUserConfirmed || !sendAmount.trim()}
+                              className="w-full border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto"
                            >
                              {isSearchingUser ? 'Searching...' : 'Send Payment'}
                            </button>
@@ -733,48 +884,128 @@ export default function AppNavigation() {
             {currentPage === 2 && (
               /* Receive Screen */
               <>
-                {/* Title */}
-                <motion.h1 
-                  initial={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
-                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
-                  transition={{ duration: 0.6, ease: "easeOut" }}
-                  className="text-lg font-bold text-white mb-4 text-center"
-                >
-                  Deposit
-                </motion.h1>
-                
-                {/* Amount Input Field */}
-                <div className="relative mb-6">
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    value={receiveAmount}
-                    onChange={handleReceiveAmountChange}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleReceiveSubmit();
-                      }
-                    }}
-                    placeholder="0.00"
-                    className="w-full bg-gray-800/40 backdrop-blur-lg border border-white/20 text-white text-4xl font-bold text-center py-8 px-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto"
-                  />
-                  {receiveAmount && (
-                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50 text-lg">
-                      USD
+                {!showInvestScreen ? (
+                  <>
+                    {/* Title */}
+                    <motion.h1 
+                      initial={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+                      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                      exit={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
+                      transition={{ duration: 0.6, ease: "easeOut" }}
+                      className="text-lg font-bold text-white mb-4 text-center"
+                    >
+                      Deposit
+                    </motion.h1>
+                    
+                    {/* Amount Input Field */}
+                    <div className="relative mb-6">
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={receiveAmount}
+                        onChange={handleReceiveAmountChange}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleReceiveSubmit();
+                          }
+                        }}
+                        placeholder="0.00"
+                                              className="w-full border border-white/20 text-white text-4xl font-bold text-center py-8 px-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto"
+                      />
+                      {receiveAmount && (
+                        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50 text-lg">
+                          USD
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
 
-                {/* Enter Button */}
-                <button 
-                  onClick={handleReceiveSubmit}
-                  disabled={!receiveAmount || parseFloat(receiveAmount) <= 0}
-                  className="w-full bg-gray-800/40 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-gray-700/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto"
-                >
-                  Enter
-                </button>
+                    {/* Enter Button */}
+                    <button 
+                      onClick={handleReceiveSubmit}
+                      disabled={!receiveAmount || parseFloat(receiveAmount) <= 0}
+                                      className="w-full border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto"
+                    >
+                      Enter
+                    </button>
+                  </>
+                ) : (
+                  /* Invest Screen */
+                  <motion.div
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 50 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    className="w-full h-full flex flex-col justify-center"
+                  >
+                    {/* Title */}
+                    <motion.h1 
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: 0.1 }}
+                      className="text-lg font-bold text-white mb-4 text-center"
+                    >
+                      Invest
+                    </motion.h1>
+                    
+                    {/* Balance Display */}
+                    <div className="mb-6 text-center">
+                      <p className="text-white/50 text-sm mb-1">Available to Invest</p>
+                      <p className="text-3xl font-bold text-white mb-2">$1,234.56</p>
+                      <p className="text-white/70 text-sm">Earn up to 18.7% APY</p>
+                    </div>
+
+                    {/* Investment Options */}
+                    <div className="space-y-3 mb-6">
+                      <div className="border border-white/20 rounded-2xl p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-white font-semibold text-sm">Mantle Yield Fund</h3>
+                            <p className="text-white/70 text-xs">High-yield DeFi strategies</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-green-400 font-bold text-lg">12.5%</p>
+                            <p className="text-white/50 text-xs">APY</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border border-white/20 rounded-2xl p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-white font-semibold text-sm">Stable Growth Fund</h3>
+                            <p className="text-white/70 text-xs">Conservative strategies</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-green-400 font-bold text-lg">8.2%</p>
+                            <p className="text-white/50 text-xs">APY</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border border-white/20 rounded-2xl p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-white font-semibold text-sm">DeFi Accelerator</h3>
+                            <p className="text-white/70 text-xs">Aggressive optimization</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-green-400 font-bold text-lg">18.7%</p>
+                            <p className="text-white/50 text-xs">APY</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* View All Funds Button */}
+                    <button 
+                      onClick={() => router.push('/invest')}
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-4 px-6 rounded-2xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 pointer-events-auto"
+                    >
+                      View All Funds
+                    </button>
+                  </motion.div>
+                )}
               </>
             )}
 
@@ -805,14 +1036,14 @@ export default function AppNavigation() {
                         <h3 className="text-white/50 text-xs font-medium uppercase tracking-wide">Preferences</h3>
                         <button 
                           onClick={() => setSettingsSubPage('currency')}
-                          className="w-full text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs pointer-events-auto"
+                          className="w-full border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/5 transition-all duration-200 text-left text-xs pointer-events-auto"
                         >
                           Display Currency: {selectedCurrency}
                         </button>
                         
                         <button 
                           onClick={() => setSettingsSubPage('language')}
-                          className="w-full text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs pointer-events-auto"
+                          className="w-full border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/5 transition-all duration-200 text-left text-xs pointer-events-auto"
                         >
                           Language: {selectedLanguage}
                         </button>
@@ -823,14 +1054,14 @@ export default function AppNavigation() {
                         <h3 className="text-white/50 text-xs font-medium uppercase tracking-wide">Support</h3>
                         <button 
                           onClick={() => setSettingsSubPage('support')}
-                          className="w-full text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs pointer-events-auto"
+                          className="w-full border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/5 transition-all duration-200 text-left text-xs pointer-events-auto"
                         >
                           More Information
                         </button>
                         
                         <button 
                           onClick={() => window.open('https://t.me/blessedux', '_blank')}
-                          className="w-full text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs pointer-events-auto"
+                          className="w-full border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/5 transition-all duration-200 text-left text-xs pointer-events-auto"
                         >
                           Customer Support
                         </button>
@@ -841,7 +1072,7 @@ export default function AppNavigation() {
                         <h3 className="text-white/50 text-xs font-medium uppercase tracking-wide">Rewards</h3>
                         <button 
                           onClick={() => setSettingsSubPage('rewards')}
-                          className="w-full text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs pointer-events-auto"
+                          className="w-full border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/5 transition-all duration-200 text-left text-xs pointer-events-auto"
                         >
                           Rewards Program
                         </button>
@@ -867,7 +1098,7 @@ export default function AppNavigation() {
                             setSelectedCurrency(currency);
                             setSettingsSubPage('main');
                           }}
-                          className="w-full text-white font-semibold py-3 px-4 rounded-lg hover:bg-white/20 transition-all duration-200 text-left pointer-events-auto"
+                          className="w-full border border-white/20 text-white font-semibold py-3 px-4 rounded-lg hover:bg-white/5 transition-all duration-200 text-left pointer-events-auto"
                         >
                           {currency} {selectedCurrency === currency && '✓'}
                         </button>
@@ -886,7 +1117,7 @@ export default function AppNavigation() {
                             setSelectedLanguage(language);
                             setSettingsSubPage('main');
                           }}
-                          className="w-full text-white font-semibold py-3 px-4 rounded-lg hover:bg-white/20 transition-all duration-200 text-left pointer-events-auto"
+                          className="w-full border border-white/20 text-white font-semibold py-3 px-4 rounded-lg hover:bg-white/5 transition-all duration-200 text-left pointer-events-auto"
                         >
                           {language} {selectedLanguage === language && '✓'}
                         </button>
@@ -925,7 +1156,7 @@ export default function AppNavigation() {
                   <div className="mt-4 pt-4">
                     <button
                       onClick={() => setSettingsSubPage('main')}
-                      className="w-full bg-gray-800/40 backdrop-blur-lg border border-white/20 text-white font-semibold py-3 px-4 rounded-xl hover:bg-gray-700/40 transition-all duration-200 pointer-events-auto"
+                      className="w-full border border-white/20 text-white font-semibold py-3 px-4 rounded-xl hover:bg-white/5 transition-all duration-200 pointer-events-auto"
                     >
                       ← Back to Settings
                     </button>
@@ -944,14 +1175,14 @@ export default function AppNavigation() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+          className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-6"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="bg-gray-800/40 backdrop-blur-xl border border-white/25 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto"
+            className="border border-white/10 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto backdrop-blur-[10px]"
           >
             {/* Header */}
             <div className="text-center mb-6">
@@ -962,7 +1193,7 @@ export default function AppNavigation() {
             {/* Wallet Address */}
             <div className="mb-6">
               <p className="text-white/50 text-sm mb-2">Your Wallet Address</p>
-              <div className="bg-gray-800/40 rounded-2xl p-4 border border-white/20">
+              <div className="rounded-2xl p-4 border border-white/20">
                 <div className="flex items-center justify-between">
                   <code className="text-white/70 text-xs break-all">{walletData.address}</code>
                   <button 
@@ -985,7 +1216,7 @@ export default function AppNavigation() {
               <div className="space-y-2">
                 <button 
                   onClick={() => window.open('https://coinmarketcap.com/currencies/mantle/', '_blank')}
-                  className="w-full flex items-center justify-between p-3 bg-gray-800/40 rounded-xl border border-white/20 hover:bg-gray-700/40 transition-all duration-200 pointer-events-auto"
+                  className="w-full flex items-center justify-between p-3 rounded-xl border border-white/20 hover:bg-white/5 transition-all duration-200 pointer-events-auto"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
@@ -1003,8 +1234,8 @@ export default function AppNavigation() {
                   <span className="text-white/50 text-xs">View Price</span>
                 </button>
                 <button 
-                  onClick={() => window.open('https://app.uniswap.org/swap?outputCurrency=0xA0b86a33E6441b8c4C8C8C8C8C8C8C8C8C8C8C8C8C&chain=mantle', '_blank')}
-                  className="w-full flex items-center justify-between p-3 bg-gray-800/40 rounded-xl border border-white/20 hover:bg-gray-700/40 transition-all duration-200 pointer-events-auto"
+                  onClick={() => window.open('https://app.uniswap.org/swap?outputCurrency=0xA0b86a33E6441b8c4C8C8C8C8C8C8C8C8C8C8C8C8C8C&chain=mantle', '_blank')}
+                  className="w-full flex items-center justify-between p-3 rounded-xl border border-white/20 hover:bg-white/5 transition-all duration-200 pointer-events-auto"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
@@ -1032,7 +1263,7 @@ export default function AppNavigation() {
             {/* Close Button */}
             <button
               onClick={() => setShowDepositModal(false)}
-              className="w-full bg-white text-black font-semibold py-4 px-6 rounded-2xl hover:bg-gray-100 transition-all duration-200 pointer-events-auto"
+              className="w-full border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/5 transition-all duration-200 pointer-events-auto"
             >
               Close
             </button>
@@ -1046,14 +1277,14 @@ export default function AppNavigation() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+          className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-6"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="bg-gray-800/40 backdrop-blur-xl border border-white/25 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto"
+            className="border border-white/10 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto backdrop-blur-[10px]"
           >
             <h2 className="text-2xl font-bold text-white mb-6 text-center">Select Currency</h2>
             <div className="space-y-3">
@@ -1063,8 +1294,8 @@ export default function AppNavigation() {
                   onClick={() => handleCurrencyChange(currency)}
                   className={`w-full p-4 rounded-2xl border transition-all duration-200 pointer-events-auto ${
                     selectedCurrency === currency
-                      ? 'bg-gray-700/40 border-white/40 text-white'
-                      : 'bg-gray-800/40 border-white/20 text-white/70 hover:bg-gray-700/40'
+                      ? 'border-white/40 text-white'
+                      : 'border-white/20 text-white/70 hover:bg-white/5'
                   }`}
                 >
                   {currency}
@@ -1073,7 +1304,7 @@ export default function AppNavigation() {
             </div>
             <button
               onClick={() => setShowCurrencyModal(false)}
-              className="w-full mt-6 bg-white text-black font-semibold py-4 px-6 rounded-2xl hover:bg-gray-100 transition-all duration-200 pointer-events-auto"
+              className="w-full mt-6 border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/5 transition-all duration-200 pointer-events-auto"
             >
               Cancel
             </button>
@@ -1087,14 +1318,14 @@ export default function AppNavigation() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+          className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-6"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="bg-gray-800/40 backdrop-blur-xl border border-white/25 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto"
+            className="border border-white/10 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto backdrop-blur-[10px]"
           >
             <h2 className="text-2xl font-bold text-white mb-6 text-center">Select Language</h2>
             <div className="space-y-3">
@@ -1104,8 +1335,8 @@ export default function AppNavigation() {
                   onClick={() => handleLanguageChange(language)}
                   className={`w-full p-4 rounded-2xl border transition-all duration-200 pointer-events-auto ${
                     selectedLanguage === language
-                      ? 'bg-white/20 border-white/40 text-white'
-                      : 'bg-white/10 border-white/20 text-white/70 hover:bg-white/20'
+                      ? 'border-white/40 text-white'
+                      : 'border-white/20 text-white/70 hover:bg-white/5'
                   }`}
                 >
                   {language}
@@ -1114,7 +1345,7 @@ export default function AppNavigation() {
             </div>
             <button
               onClick={() => setShowLanguageModal(false)}
-              className="w-full mt-6 bg-white text-black font-semibold py-4 px-6 rounded-2xl hover:bg-gray-100 transition-all duration-200 pointer-events-auto"
+              className="w-full mt-6 border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/5 transition-all duration-200 pointer-events-auto"
             >
               Cancel
             </button>
@@ -1128,14 +1359,14 @@ export default function AppNavigation() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+          className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-6"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto"
+            className="border border-white/10 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto backdrop-blur-[10px]"
           >
             <h2 className="text-2xl font-bold text-white mb-6 text-center">About Sozu Cash</h2>
             <div className="space-y-4 text-white/70 text-sm">
@@ -1153,7 +1384,7 @@ export default function AppNavigation() {
             </div>
             <button
               onClick={() => setShowSupportModal(false)}
-              className="w-full mt-6 bg-white text-black font-semibold py-4 px-6 rounded-2xl hover:bg-gray-100 transition-all duration-200 pointer-events-auto"
+              className="w-full mt-6 border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/5 transition-all duration-200 pointer-events-auto"
             >
               Close
             </button>
@@ -1167,14 +1398,14 @@ export default function AppNavigation() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+          className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-6"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto"
+            className="border border-white/10 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto backdrop-blur-[10px]"
           >
             <h2 className="text-2xl font-bold text-white mb-6 text-center">Rewards Program</h2>
             <div className="space-y-4 text-white/70 text-sm">
@@ -1189,7 +1420,7 @@ export default function AppNavigation() {
             </div>
             <button
               onClick={() => setShowRewardsModal(false)}
-              className="w-full mt-6 bg-white text-black font-semibold py-4 px-6 rounded-2xl hover:bg-gray-100 transition-all duration-200 pointer-events-auto"
+              className="w-full mt-6 border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/5 transition-all duration-200 pointer-events-auto"
             >
               Close
             </button>

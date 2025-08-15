@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import SplineBackground from './_components/SplineBackground'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -44,6 +45,10 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#ffffff" />
       </head>
       <body className={`${inter.className} bg-white`} style={{ backgroundColor: 'white' }}>
+        {/* Persistent Spline Background */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <SplineBackground scale={1.2} />
+        </div>
         {children}
       </body>
     </html>

@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, PanInfo, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { QrCode, Wifi, CheckCircle, ArrowLeft } from 'lucide-react';
-import SplineBackground from '../_components/SplineBackground';
 import QRCodeDisplay from '../_components/QRCodeDisplay';
 
 export default function ReceiveScreen() {
@@ -104,9 +103,9 @@ export default function ReceiveScreen() {
     }
   }, []);
 
-  // Simulate payment received (for demo purposes) - works in both invoice and QR code screens
+  // Simulate payment received (for demo purposes) - triggers after 4 seconds on any receive page with amount
   useEffect(() => {
-    if (showQR && amount && !paymentReceived && !sendMode) {
+    if (amount && !paymentReceived && !sendMode) {
       console.log('Setting up payment simulation for amount:', amount);
       // Simulate payment received after 4 seconds
       const timer = setTimeout(() => {
@@ -120,7 +119,7 @@ export default function ReceiveScreen() {
         clearTimeout(timer);
       };
     }
-  }, [showQR, amount, paymentReceived, sendMode]);
+  }, [amount, paymentReceived, sendMode]);
 
   // For send mode, immediately show confirmation
   useEffect(() => {
@@ -131,23 +130,6 @@ export default function ReceiveScreen() {
       setShowPaymentConfirmation(true);
     }
   }, [sendMode, amount, paymentReceived]);
-
-  // Payment simulation for QR code screen
-  useEffect(() => {
-    if (showQRCode && amount && !paymentReceived && !sendMode) {
-      console.log('QR Code screen - setting up payment simulation timer');
-      const timer = setTimeout(() => {
-        console.log('QR Code screen - payment simulation triggered');
-        setReceivedAmount(amount);
-        setPaymentReceived(true);
-        setShowPaymentConfirmation(true);
-      }, 4000);
-      return () => {
-        console.log('Clearing QR code payment simulation timer');
-        clearTimeout(timer);
-      };
-    }
-  }, [showQRCode, amount, paymentReceived, sendMode]);
 
   // Auto-confirm pending invoices after 4 seconds
   useEffect(() => {
@@ -319,10 +301,7 @@ export default function ReceiveScreen() {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
-      {/* Spline Background Animation */}
-      <SplineBackground scale={1.2} />
-
+    <div className="relative w-full h-screen overflow-hidden no-scroll">
       {/* Sozu Cash Logo */}
       <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
         <img 
@@ -339,12 +318,13 @@ export default function ReceiveScreen() {
       {/* Main Content */}
       <motion.div
         className="relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-4 py-8 pointer-events-none"
+        style={{ backgroundColor: 'transparent' }}
       >
 
         
-        <div className="relative z-20 text-center max-w-sm mx-auto w-full pt-20 pointer-events-auto">
+        <div className="relative z-20 text-center w-80 mx-auto pt-20 pointer-events-auto" style={{ backgroundColor: 'transparent' }}>
                       {/* Glassmorphism Card */}
-            <div className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl w-full h-96 flex items-center justify-center pointer-events-none">
+            <div className="border border-white/10 rounded-3xl p-8 shadow-2xl w-full h-96 flex items-center justify-center pointer-events-none backdrop-blur-[10px]">
             
             {!showQR && !showQRCode ? (
               /* Amount Input Screen */
@@ -369,7 +349,7 @@ export default function ReceiveScreen() {
                     onChange={handleAmountChange}
                     onKeyDown={handleKeyDown}
                     placeholder="0.00"
-                    className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white text-4xl font-bold text-center py-8 px-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto"
+                    className="w-full border border-white/20 text-white text-4xl font-bold text-center py-8 px-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto"
                   />
                   {amount && (
                     <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50 text-lg">
@@ -382,7 +362,7 @@ export default function ReceiveScreen() {
                 <button 
                   onClick={handleDeposit}
                   disabled={!amount || parseFloat(amount) <= 0}
-                  className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto"
+                                      className="w-full border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto"
                 >
                   Deposit
                 </button>
@@ -393,7 +373,7 @@ export default function ReceiveScreen() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
-                className="space-y-4 w-full h-full flex flex-col"
+                className="w-full h-full flex flex-col overflow-hidden"
               >
                 {/* Amount Display */}
                 <div className="text-center mb-4">
@@ -411,7 +391,7 @@ export default function ReceiveScreen() {
                     <div className="absolute inset-0 rounded-full border border-white/20 animate-ping" style={{ animationDelay: '1s' }}></div>
                     
                     {/* NFC Icon */}
-                    <div className="relative z-10 w-16 h-16 bg-white/10 backdrop-blur-lg border border-white/20 rounded-full flex items-center justify-center">
+                    <div className="relative z-10 w-16 h-16 border border-white/20 rounded-full flex items-center justify-center">
                       <Wifi size={32} className="rotate-45" />
                     </div>
                   </div>
@@ -420,7 +400,7 @@ export default function ReceiveScreen() {
                 {/* Show QR Code Button */}
                 <button 
                   onClick={handleShowQRCode}
-                  className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-3 px-4 rounded-xl hover:bg-white/20 transition-all duration-200 flex items-center justify-center space-x-3 text-sm pointer-events-auto"
+                                      className="w-full border border-white/20 text-white font-semibold py-3 px-4 rounded-xl hover:bg-white/5 transition-all duration-200 flex items-center justify-center space-x-3 text-sm pointer-events-auto"
                 >
                   <QrCode size={20} />
                   <span>Show QR Code</span>
@@ -434,56 +414,60 @@ export default function ReceiveScreen() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
-                className="space-y-6 w-full h-full flex flex-col"
+                className="w-full h-full flex flex-col overflow-hidden"
               >
-                {/* Success Animation */}
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 10, delay: 0.2 }}
-                  className="w-20 h-20 mx-auto mb-6 bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-400/30"
-                >
-                  <CheckCircle size={40} className="text-green-400" />
-                </motion.div>
+                {/* Scrollable Content Area */}
+                <div className="flex-1 overflow-y-auto space-y-6 pr-1">
+                  {/* Success Animation */}
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 10, delay: 0.2 }}
+                    className="w-20 h-20 mx-auto mb-6 bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-400/30"
+                  >
+                    <CheckCircle size={40} className="text-green-400" />
+                  </motion.div>
 
-                <motion.h2
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="text-2xl font-bold text-white mb-4 text-center"
-                >
-                  {sendMode ? 'Payment Sent!' : 'Payment Received!'}
-                </motion.h2>
-                
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                  className="text-white/70 mb-6 text-center"
-                >
-                  {sendMode 
-                    ? `Payment sent to @${sendToHandle} successfully`
-                    : 'You\'ve received a payment successfully'
-                  }
-                </motion.p>
+                  <motion.h2
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="text-2xl font-bold text-white mb-4 text-center"
+                  >
+                    {sendMode ? 'Payment Sent!' : 'Payment Received!'}
+                  </motion.h2>
+                  
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="text-white/70 mb-6 text-center"
+                  >
+                    {sendMode 
+                      ? `Payment sent to @${sendToHandle} successfully`
+                      : 'You\'ve received a payment successfully'
+                    }
+                  </motion.p>
 
-                {/* Payment Details */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 }}
-                  className="bg-white/10 rounded-2xl p-4 mb-6"
-                >
-                  <p className="text-white/50 text-sm text-center">
-                    {sendMode ? 'Amount Sent' : 'Amount Received'}
-                  </p>
-                  <p className="text-3xl font-bold text-white text-center">{formatAmount(receivedAmount)}</p>
-                  <p className="text-white/50 text-xs mt-2 text-center">Transaction ID: 0xabcd...efgh</p>
-                  {sendMode && (
-                    <p className="text-white/50 text-xs mt-1 text-center">To: @{sendToHandle}</p>
-                  )}
-                </motion.div>
+                  {/* Payment Details */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8 }}
+                    className="rounded-2xl p-4 mb-6"
+                  >
+                    <p className="text-white/50 text-sm text-center">
+                      {sendMode ? 'Amount Sent' : 'Amount Received'}
+                    </p>
+                    <p className="text-3xl font-bold text-white text-center">{formatAmount(receivedAmount)}</p>
+                    <p className="text-white/50 text-xs mt-2 text-center">Transaction ID: 0xabcd...efgh</p>
+                    {sendMode && (
+                      <p className="text-white/50 text-xs mt-1 text-center">To: @{sendToHandle}</p>
+                    )}
+                  </motion.div>
+                </div>
 
+                {/* Fixed Bottom Button */}
                 <motion.button
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -494,7 +478,7 @@ export default function ReceiveScreen() {
                     setReceivedAmount('');
                     router.push('/app-navigation');
                   }}
-                  className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-4 rounded-2xl font-semibold text-lg hover:from-green-600 hover:to-blue-600 active:scale-95 transition-all pointer-events-auto"
+                  className="w-full bg-white text-black py-3 rounded-2xl font-semibold text-base hover:bg-gray-100 active:scale-95 transition-all pointer-events-auto flex-shrink-0"
                 >
                   Done
                 </motion.button>
@@ -526,7 +510,7 @@ export default function ReceiveScreen() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.3 }}
-                  className="p-3 bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl"
+                  className="p-3 border border-white/10 rounded-xl"
                 >
                   <p className="text-white/50 text-xs mb-1">Payment Link</p>
                   <div className="flex items-center justify-between">
@@ -545,7 +529,7 @@ export default function ReceiveScreen() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.5 }}
-                  className="p-3 bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg"
+                  className="p-3 border border-white/10 rounded-lg"
                 >
                   <p className="text-white/50 text-xs mb-1">Wallet Address</p>
                   <div className="flex items-center justify-between">

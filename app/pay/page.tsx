@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Wifi, Camera, ArrowLeft, CheckCircle } from 'lucide-react';
-import SplineBackground from '../_components/SplineBackground';
 
 export default function PayScreen() {
   const [currentStep, setCurrentStep] = useState<'success'>('success');
@@ -43,10 +42,7 @@ export default function PayScreen() {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
-      {/* Spline Background Animation */}
-      <SplineBackground scale={1.2} />
-
+    <div className="relative w-full h-screen overflow-hidden no-scroll">
       {/* Sozu Cash Logo */}
       <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
         <img 
@@ -59,13 +55,13 @@ export default function PayScreen() {
       {/* Main Content */}
       <motion.div
         className="relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-4 py-8 pointer-events-none"
-        style={{ cursor: 'default' }}
+        style={{ backgroundColor: 'transparent', cursor: 'default' }}
       >
 
         
-        <div className="relative z-20 text-center max-w-sm mx-auto w-full pt-20 pointer-events-auto">
+        <div className="relative z-20 text-center w-80 mx-auto pt-20 pointer-events-auto" style={{ backgroundColor: 'transparent' }}>
           {/* Glassmorphism Card */}
-          <div className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl w-full h-96 flex items-center justify-center pointer-events-none">
+          <div className="border border-white/10 rounded-3xl p-8 shadow-2xl w-full h-96 flex items-center justify-center pointer-events-none backdrop-blur-[10px]">
             
             {currentStep === 'success' && (
               /* Payment Success Screen */
@@ -108,7 +104,7 @@ export default function PayScreen() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8 }}
-                  className="bg-white/10 rounded-2xl p-4 mb-6"
+                  className="rounded-2xl p-4 mb-6"
                 >
                   <p className="text-white/50 text-sm text-center">Amount Sent</p>
                   <p className="text-3xl font-bold text-white text-center">{formatAmount(amount)}</p>
