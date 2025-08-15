@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import SplineBackground from './_components/SplineBackground';
+import LavaLampBackground from './_components/LavaLampBackground';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -10,9 +10,10 @@ export default function LandingPage() {
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-black">
       {/* Background Animation */}
-      <div className="fixed inset-0 z-0">
-        <SplineBackground scale={1.2} enableInteractions={true} />
-      </div>
+      <LavaLampBackground />
+
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/60 z-[1]" />
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-12">
@@ -86,7 +87,7 @@ export default function LandingPage() {
           ].map((feature, index) => (
             <div 
               key={feature.title}
-              className="text-center p-6 rounded-2xl border border-white/10 backdrop-blur-sm"
+              className="text-center p-6 rounded-2xl border border-white/10 backdrop-blur-sm bg-black/20"
             >
               <h3 className="text-white font-bold text-lg mb-2">{feature.title}</h3>
               <p className="text-white/70">{feature.description}</p>
