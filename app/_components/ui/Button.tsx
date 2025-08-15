@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, HTMLMotionProps } from 'framer-motion';
+import React from 'react';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 type ButtonSize = 'sm' | 'md' | 'lg';
@@ -11,6 +12,7 @@ interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'whileTap'> {
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export function Button({
