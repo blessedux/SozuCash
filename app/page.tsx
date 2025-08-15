@@ -60,7 +60,7 @@ export default function LandingPage() {
                 fontWeight: 600
               }}
             >
-              Free. Permissionless. Instant.
+              The Real Digital Cash
             </h1>
             
             <p 
@@ -74,7 +74,7 @@ export default function LandingPage() {
                 fontWeight: 400
               }}
             >
-              No banks. No borders. No fees.
+              1-tap to pay in USDC on Mantle. Permissionless. Anonymous. Instant settlement.
             </p>
 
             {/* CTA Button */}
@@ -82,12 +82,12 @@ export default function LandingPage() {
               onClick={() => router.push('/locked-screen')}
               className="bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-8 rounded-2xl text-lg shadow-2xl hover:shadow-white/10 hover:scale-105 active:scale-95 transition-all duration-300"
             >
-              🚀 Open App
+              Get Your Free Wallet — No Banks. No Borders.
             </button>
           </div>
         </div>
 
-        {/* Why SozuCash Section - Second Viewport */}
+        {/* It's your money, evolved - Second Viewport */}
         <div className="h-screen flex items-center justify-center snap-start">
           <div className={`max-w-4xl mx-auto px-6 transition-opacity duration-1000 ${currentSection === 1 ? 'opacity-100' : 'opacity-0'}`}>
             <h2 
@@ -101,69 +101,11 @@ export default function LandingPage() {
                 fontWeight: 600
               }}
             >
-              Why SozuCash?
-            </h2>
-            
-            <div className="grid md:grid-cols-2 gap-6">
-              {[
-                { title: 'Free Forever', desc: 'No transaction fees, no maintenance costs.' },
-                { title: 'Permissionless Access', desc: 'Anyone can open an account instantly.' },
-                { title: 'Instant Final Settlement', desc: 'Transactions are confirmed in seconds.' },
-                { title: 'Anonymous by Design', desc: 'Your funds, your privacy, your control.' },
-                { title: 'On-Chain Yield', desc: 'Earn from your deposits while you spend.' }
-              ].map((feature, index) => (
-                <div key={index} className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
-                  <h3 
-                    className="text-xl font-semibold mb-2"
-                    style={{
-                      mixBlendMode: 'difference',
-                      color: '#ffffff',
-                      WebkitTextFillColor: '#ffffff',
-                      textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)',
-                      fontFamily: "'Helvetica', sans-serif",
-                      fontWeight: 600
-                    }}
-                  >
-                    {feature.title}
-                  </h3>
-                  <p 
-                    className="text-white/80"
-                    style={{
-                      mixBlendMode: 'difference',
-                      color: '#ffffff',
-                      WebkitTextFillColor: '#ffffff',
-                      textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)',
-                      fontFamily: "'Helvetica', sans-serif",
-                      fontWeight: 400
-                    }}
-                  >
-                    {feature.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Powered by Mantle Section - Third Viewport */}
-        <div className="h-screen flex items-center justify-center snap-start">
-          <div className={`max-w-4xl mx-auto px-6 text-center transition-opacity duration-1000 ${currentSection === 2 ? 'opacity-100' : 'opacity-0'}`}>
-            <h2 
-              className="text-3xl md:text-4xl font-bold mb-6"
-              style={{
-                mixBlendMode: 'difference',
-                color: '#ffffff',
-                WebkitTextFillColor: '#ffffff',
-                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
-                fontFamily: "'Helvetica', sans-serif",
-                fontWeight: 600
-              }}
-            >
-              Powered by Mantle Network
+              It's your money, evolved
             </h2>
             
             <p 
-              className="text-xl mb-8 text-white/90"
+              className="text-lg md:text-xl mb-8 text-white/80 text-center"
               style={{
                 mixBlendMode: 'difference',
                 color: '#ffffff',
@@ -173,35 +115,50 @@ export default function LandingPage() {
                 fontWeight: 400
               }}
             >
-              SozuCash runs on Mantle Network — a next-gen EVM-compatible blockchain delivering:
+              SozuCash is your DeFi-powered, instant-settlement payment app.
             </p>
-            
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
-              {[
-                'Ultra-low costs',
-                'High scalability', 
-                'Global reach'
-              ].map((feature, index) => (
-                <div key={index} className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6">
-                  <p 
-                    className="text-lg font-semibold"
-                    style={{
-                      mixBlendMode: 'difference',
-                      color: '#ffffff',
-                      WebkitTextFillColor: '#ffffff',
-                      textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)',
-                      fontFamily: "'Helvetica', sans-serif",
-                      fontWeight: 600
-                    }}
-                  >
-                    {feature}
-                  </p>
-                </div>
-              ))}
+
+            <div className="grid md:grid-cols-3 gap-6 mt-12">
+              <div className="text-center">
+                <div className="text-4xl mb-4">⚡</div>
+                <h3 className="text-xl font-semibold mb-3">Runs on Mantle Network</h3>
+                <p className="text-gray-300">Fast, low-cost, and secure</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4">🌍</div>
+                <h3 className="text-xl font-semibold mb-3">Works Anywhere</h3>
+                <p className="text-gray-300">NFC or QR accepted worldwide</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4">🔓</div>
+                <h3 className="text-xl font-semibold mb-3">No Permission</h3>
+                <p className="text-gray-300">No banks, no borders, no limits</p>
+              </div>
             </div>
+          </div>
+        </div>
+
+        {/* Works right from your phone - Third Viewport */}
+        <div className="h-screen flex items-center justify-center snap-start">
+          <div className={`max-w-4xl mx-auto px-6 transition-opacity duration-1000 ${currentSection === 2 ? 'opacity-100' : 'opacity-0'}`}>
+            <h2 
+              className="text-3xl md:text-4xl font-bold mb-8 text-center"
+              style={{
+                mixBlendMode: 'difference',
+                color: '#ffffff',
+                WebkitTextFillColor: '#ffffff',
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                fontFamily: "'Helvetica', sans-serif",
+                fontWeight: 600
+              }}
+            >
+              Works right from your phone
+            </h2>
             
             <p 
-              className="text-lg text-white/80"
+              className="text-lg md:text-xl mb-8 text-white/80 text-center"
               style={{
                 mixBlendMode: 'difference',
                 color: '#ffffff',
@@ -211,85 +168,36 @@ export default function LandingPage() {
                 fontWeight: 400
               }}
             >
-              By leveraging Mantle, we bring USDC (digital dollars) to anyone, anywhere — with the speed and smoothness of Google Pay, but fully self-custodial and trustless.
+              Download the app and you're set — your SozuCash wallet is ready in seconds.
             </p>
-          </div>
-        </div>
 
-        {/* How It Works Section - Fourth Viewport */}
-        <div className="h-screen flex items-center justify-center snap-start">
-          <div className={`max-w-4xl mx-auto px-6 text-center transition-opacity duration-1000 ${currentSection === 3 ? 'opacity-100' : 'opacity-0'}`}>
-            <h2 
-              className="text-3xl md:text-4xl font-bold mb-8"
-              style={{
-                mixBlendMode: 'difference',
-                color: '#ffffff',
-                WebkitTextFillColor: '#ffffff',
-                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
-                fontFamily: "'Helvetica', sans-serif",
-                fontWeight: 600
-              }}
-            >
-              How It Works
-            </h2>
-            
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                { step: '1', title: 'Open the app', desc: 'instantly get your free EVM wallet.' },
-                { step: '2', title: 'Start transacting', desc: 'send and receive USDC in seconds.' },
-                { step: '3', title: 'Earn while you hold', desc: 'your balance generates yield automatically.' }
-              ].map((item, index) => (
-                <div key={index} className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-8">
-                  <div 
-                    className="text-4xl font-bold mb-4"
-                    style={{
-                      mixBlendMode: 'difference',
-                      color: '#ffffff',
-                      WebkitTextFillColor: '#ffffff',
-                      textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
-                      fontFamily: "'Helvetica', sans-serif",
-                      fontWeight: 600
-                    }}
-                  >
-                    {item.step}
-                  </div>
-                  <h3 
-                    className="text-xl font-semibold mb-2"
-                    style={{
-                      mixBlendMode: 'difference',
-                      color: '#ffffff',
-                      WebkitTextFillColor: '#ffffff',
-                      textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)',
-                      fontFamily: "'Helvetica', sans-serif",
-                      fontWeight: 600
-                    }}
-                  >
-                    {item.title}
-                  </h3>
-                  <p 
-                    className="text-white/80"
-                    style={{
-                      mixBlendMode: 'difference',
-                      color: '#ffffff',
-                      WebkitTextFillColor: '#ffffff',
-                      textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)',
-                      fontFamily: "'Helvetica', sans-serif",
-                      fontWeight: 400
-                    }}
-                  >
-                    {item.desc}
-                  </p>
-                </div>
-              ))}
+            <div className="grid md:grid-cols-3 gap-6 mt-12">
+              <div className="text-center">
+                <div className="text-4xl mb-4">📱</div>
+                <h3 className="text-xl font-semibold mb-3">Pay with NFC or QR</h3>
+                <p className="text-gray-300">Tap or scan to pay instantly</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4">💰</div>
+                <h3 className="text-xl font-semibold mb-3">Fund with USDC</h3>
+                <p className="text-gray-300">On Mantle Network</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4">🔑</div>
+                <h3 className="text-xl font-semibold mb-3">Full Control</h3>
+                <p className="text-gray-300">Keep your keys, own your money</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Future of Money Section - Fifth Viewport */}
+        {/* Send it, receive it, settle instantly - Fourth Viewport */}
         <div className="h-screen flex items-center justify-center snap-start">
-          <div className={`max-w-4xl mx-auto px-6 text-center transition-opacity duration-1000 ${currentSection === 4 ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`max-w-4xl mx-auto px-6 transition-opacity duration-1000 ${currentSection === 3 ? 'opacity-100' : 'opacity-0'}`}>
             <h2 
-              className="text-3xl md:text-4xl font-bold mb-6"
+              className="text-3xl md:text-4xl font-bold mb-8 text-center"
               style={{
                 mixBlendMode: 'difference',
                 color: '#ffffff',
@@ -299,11 +207,11 @@ export default function LandingPage() {
                 fontWeight: 600
               }}
             >
-              The Future of Money is Here
+              Send it, receive it, settle instantly
             </h2>
             
             <p 
-              className="text-xl text-white/90 mb-8"
+              className="text-lg md:text-xl mb-8 text-white/80 text-center"
               style={{
                 mixBlendMode: 'difference',
                 color: '#ffffff',
@@ -313,90 +221,313 @@ export default function LandingPage() {
                 fontWeight: 400
               }}
             >
-              SozuCash is the most competitive, permissionless, and borderless way to trade goods and services — giving everyone the right to transact freely.
+              Send or collect USDC instantly with a tap or a scan.
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-6 mt-12">
+              <div className="text-center">
+                <div className="text-4xl mb-4">👤</div>
+                <h3 className="text-xl font-semibold mb-3">No Usernames</h3>
+                <p className="text-gray-300">No middlemen, direct payments</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4">⚡</div>
+                <h3 className="text-xl font-semibold mb-3">Instant Settlement</h3>
+                <p className="text-gray-300">Payments land in seconds</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4">🔒</div>
+                <h3 className="text-xl font-semibold mb-3">Always Final</h3>
+                <p className="text-gray-300">No reversals, instant settlement</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Spend anywhere — and earn while you grow the network - Fifth Viewport */}
+        <div className="h-screen flex items-center justify-center snap-start">
+          <div className={`max-w-4xl mx-auto px-6 transition-opacity duration-1000 ${currentSection === 4 ? 'opacity-100' : 'opacity-0'}`}>
+            <h2 
+              className="text-3xl md:text-4xl font-bold mb-8 text-center"
+              style={{
+                mixBlendMode: 'difference',
+                color: '#ffffff',
+                WebkitTextFillColor: '#ffffff',
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                fontFamily: "'Helvetica', sans-serif",
+                fontWeight: 600
+              }}
+            >
+              Spend anywhere — and earn while you grow the network
+            </h2>
+            
+            <p 
+              className="text-lg md:text-xl mb-8 text-white/80 text-center"
+              style={{
+                mixBlendMode: 'difference',
+                color: '#ffffff',
+                WebkitTextFillColor: '#ffffff',
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                fontFamily: "'Helvetica', sans-serif",
+                fontWeight: 400
+              }}
+            >
+              SozuCash works anywhere in the world, with anyone who has an EVM wallet or the SozuCash app installed.
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-6 mt-12">
+              <div className="text-center">
+                <div className="text-4xl mb-4">🌍</div>
+                <h3 className="text-xl font-semibold mb-3">Global Payments</h3>
+                <p className="text-gray-300">No banks, no borders</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4">🤝</div>
+                <h3 className="text-xl font-semibold mb-3">Peer-to-Peer</h3>
+                <p className="text-gray-300">Direct merchant payments</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4">🎁</div>
+                <h3 className="text-xl font-semibold mb-3">Earn Rewards</h3>
+                <p className="text-gray-300">Get paid for referrals</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* MI5 — Your yield engine - Sixth Viewport */}
+        <div className="h-screen flex items-center justify-center snap-start">
+          <div className={`max-w-4xl mx-auto px-6 transition-opacity duration-1000 ${currentSection === 5 ? 'opacity-100' : 'opacity-0'}`}>
+            <h2 
+              className="text-3xl md:text-4xl font-bold mb-8 text-center"
+              style={{
+                mixBlendMode: 'difference',
+                color: '#ffffff',
+                WebkitTextFillColor: '#ffffff',
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                fontFamily: "'Helvetica', sans-serif",
+                fontWeight: 600
+              }}
+            >
+              MI5 — Your yield engine
+            </h2>
+            
+            <p 
+              className="text-lg md:text-xl mb-8 text-white/80 text-center"
+              style={{
+                mixBlendMode: 'difference',
+                color: '#ffffff',
+                WebkitTextFillColor: '#ffffff',
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                fontFamily: "'Helvetica', sans-serif",
+                fontWeight: 400
+              }}
+            >
+              While you're spending, MI5 is working.
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-8 mt-12">
+              <div className="text-center">
+                <div className="text-4xl mb-4">📈</div>
+                <h3 className="text-xl font-semibold mb-3">Smart DeFi Protocol</h3>
+                <p className="text-gray-300">Allocates wrapped ETH, BTC, and stablecoins for optimized returns</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4">💸</div>
+                <h3 className="text-xl font-semibold mb-3">Ecosystem Funding</h3>
+                <p className="text-gray-300">Earnings flow back to fund cashback and incentives</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 10% Instant Cashback - Seventh Viewport */}
+        <div className="h-screen flex items-center justify-center snap-start">
+          <div className={`max-w-4xl mx-auto px-6 transition-opacity duration-1000 ${currentSection === 6 ? 'opacity-100' : 'opacity-0'}`}>
+            <h2 
+              className="text-3xl md:text-4xl font-bold mb-8 text-center"
+              style={{
+                mixBlendMode: 'difference',
+                color: '#ffffff',
+                WebkitTextFillColor: '#ffffff',
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                fontFamily: "'Helvetica', sans-serif",
+                fontWeight: 600
+              }}
+            >
+              10% Instant Cashback
+            </h2>
+            
+            <p 
+              className="text-lg md:text-xl mb-8 text-white/80 text-center"
+              style={{
+                mixBlendMode: 'difference',
+                color: '#ffffff',
+                WebkitTextFillColor: '#ffffff',
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                fontFamily: "'Helvetica', sans-serif",
+                fontWeight: 400
+              }}
+            >
+              Every payment you make gets 10% back — instantly.
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-6 mt-12">
+              <div className="text-center">
+                <div className="text-4xl mb-4">🎯</div>
+                <h3 className="text-xl font-semibold mb-3">Funded by MI5</h3>
+                <p className="text-gray-300">Yield and ecosystem incentives</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4">⚡</div>
+                <h3 className="text-xl font-semibold mb-3">No Waiting</h3>
+                <p className="text-gray-300">Instant cashback on every payment</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4">📋</div>
+                <h3 className="text-xl font-semibold mb-3">No Fine Print</h3>
+                <p className="text-gray-300">No categories, no restrictions</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Passkeys Security - Eighth Viewport */}
+        <div className="h-screen flex items-center justify-center snap-start">
+          <div className={`max-w-4xl mx-auto px-6 transition-opacity duration-1000 ${currentSection === 7 ? 'opacity-100' : 'opacity-0'}`}>
+            <h2 
+              className="text-3xl md:text-4xl font-bold mb-8 text-center"
+              style={{
+                mixBlendMode: 'difference',
+                color: '#ffffff',
+                WebkitTextFillColor: '#ffffff',
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                fontFamily: "'Helvetica', sans-serif",
+                fontWeight: 600
+              }}
+            >
+              Passkeys Security
+            </h2>
+            
+            <p 
+              className="text-lg md:text-xl mb-8 text-white/80 text-center"
+              style={{
+                mixBlendMode: 'difference',
+                color: '#ffffff',
+                WebkitTextFillColor: '#ffffff',
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                fontFamily: "'Helvetica', sans-serif",
+                fontWeight: 400
+              }}
+            >
+              Your wallet is protected by the same level of security you expect from modern devices.
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-6 mt-12">
+              <div className="text-center">
+                <div className="text-4xl mb-4">👁️</div>
+                <h3 className="text-xl font-semibold mb-3">Face ID & Touch ID</h3>
+                <p className="text-gray-300">Biometric authentication</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4">🔐</div>
+                <h3 className="text-xl font-semibold mb-3">Device-Level Security</h3>
+                <p className="text-gray-300">Modern device protection</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4">🔑</div>
+                <h3 className="text-xl font-semibold mb-3">Non-Custodial</h3>
+                <p className="text-gray-300">Only you control your keys</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Privacy First - Ninth Viewport */}
+        <div className="h-screen flex items-center justify-center snap-start">
+          <div className={`max-w-4xl mx-auto px-6 transition-opacity duration-1000 ${currentSection === 8 ? 'opacity-100' : 'opacity-0'}`}>
+            <h2 
+              className="text-3xl md:text-4xl font-bold mb-8 text-center"
+              style={{
+                mixBlendMode: 'difference',
+                color: '#ffffff',
+                WebkitTextFillColor: '#ffffff',
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                fontFamily: "'Helvetica', sans-serif",
+                fontWeight: 600
+              }}
+            >
+              Privacy First
+            </h2>
+            
+            <div className="grid md:grid-cols-3 gap-6 mt-12">
+              <div className="text-center">
+                <div className="text-4xl mb-4">🔒</div>
+                <h3 className="text-xl font-semibold mb-3">Permissionless</h3>
+                <p className="text-gray-300">Anonymous and private</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4">👤</div>
+                <h3 className="text-xl font-semibold mb-3">Pseudonymous</h3>
+                <p className="text-gray-300">On-chain payments in USDC</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-4xl mb-4">🚫</div>
+                <h3 className="text-xl font-semibold mb-3">No Tracking</h3>
+                <p className="text-gray-300">No transaction tracking, no data sales</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Final CTA - Tenth Viewport */}
+        <div className="h-screen flex items-center justify-center snap-start">
+          <div className={`max-w-4xl mx-auto px-6 text-center transition-opacity duration-1000 ${currentSection === 9 ? 'opacity-100' : 'opacity-0'}`}>
+            <h2 
+              className="text-3xl md:text-5xl font-bold mb-8"
+              style={{
+                mixBlendMode: 'difference',
+                color: '#ffffff',
+                WebkitTextFillColor: '#ffffff',
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                fontFamily: "'Helvetica', sans-serif",
+                fontWeight: 600
+              }}
+            >
+              SozuCash — Cash, without compromise.
+            </h2>
+            
+            <p 
+              className="text-xl md:text-2xl mb-8 text-white/80"
+              style={{
+                mixBlendMode: 'difference',
+                color: '#ffffff',
+                WebkitTextFillColor: '#ffffff',
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                fontFamily: "'Helvetica', sans-serif",
+                fontWeight: 400
+              }}
+            >
+              Instant. Borderless. Yours.
             </p>
 
             <button
               onClick={() => router.push('/locked-screen')}
               className="bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-8 rounded-2xl text-lg shadow-2xl hover:shadow-white/10 hover:scale-105 active:scale-95 transition-all duration-300"
             >
-              🚀 Launch SozuCash App
+              Get Started Now
             </button>
-          </div>
-        </div>
-
-        {/* Contact & Links Section - Sixth Viewport */}
-        <div className="h-screen flex items-center justify-center snap-start">
-          <div className={`max-w-4xl mx-auto px-6 text-center transition-opacity duration-1000 ${currentSection === 5 ? 'opacity-100' : 'opacity-0'}`}>
-            <h2 
-              className="text-3xl md:text-4xl font-bold mb-8"
-              style={{
-                mixBlendMode: 'difference',
-                color: '#ffffff',
-                WebkitTextFillColor: '#ffffff',
-                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
-                fontFamily: "'Helvetica', sans-serif",
-                fontWeight: 600
-              }}
-            >
-              Contact & Links
-            </h2>
-            
-            <div className="grid md:grid-cols-3 gap-6">
-              {[
-                { icon: '📩', label: 'Email', link: 'hello@sozu.cash', href: 'mailto:hello@sozu.cash' },
-                { icon: '💻', label: 'GitHub', link: 'github.com/sozu-cash', href: 'https://github.com/sozu-cash' },
-                { icon: '🐦', label: 'Twitter/X', link: '@SozuCash', href: 'https://twitter.com/SozuCash' }
-              ].map((item, index) => (
-                <a
-                  key={index}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300"
-                >
-                  <div 
-                    className="text-3xl mb-2"
-                    style={{
-                      mixBlendMode: 'difference',
-                      color: '#ffffff',
-                      WebkitTextFillColor: '#ffffff',
-                      textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)',
-                      fontFamily: "'Helvetica', sans-serif",
-                      fontWeight: 600
-                    }}
-                  >
-                    {item.icon}
-                  </div>
-                  <h3 
-                    className="text-lg font-semibold mb-1"
-                    style={{
-                      mixBlendMode: 'difference',
-                      color: '#ffffff',
-                      WebkitTextFillColor: '#ffffff',
-                      textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)',
-                      fontFamily: "'Helvetica', sans-serif",
-                      fontWeight: 600
-                    }}
-                  >
-                    {item.label}
-                  </h3>
-                  <p 
-                    className="text-white/80"
-                    style={{
-                      mixBlendMode: 'difference',
-                      color: '#ffffff',
-                      WebkitTextFillColor: '#ffffff',
-                      textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)',
-                      fontFamily: "'Helvetica', sans-serif",
-                      fontWeight: 400
-                    }}
-                  >
-                    {item.link}
-                  </p>
-                </a>
-              ))}
-            </div>
           </div>
         </div>
       </div>

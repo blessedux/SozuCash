@@ -52,7 +52,6 @@ export default function SplineBackground({
 
     const handleMouseEnter = () => {
       setIsHovered(true);
-      iframe.style.pointerEvents = 'auto';
       
       // Send hover start event to Spline
       iframe.contentWindow?.postMessage({
@@ -63,7 +62,6 @@ export default function SplineBackground({
 
     const handleMouseLeave = () => {
       setIsHovered(false);
-      iframe.style.pointerEvents = 'none';
       
       // Send hover end event to Spline
       iframe.contentWindow?.postMessage({
@@ -151,7 +149,10 @@ export default function SplineBackground({
     <div 
       ref={containerRef}
       className={`absolute inset-0 z-0 overflow-hidden ${className}`}
-      style={{ cursor: enableInteractions ? 'default' : 'none' }}
+      style={{ 
+        cursor: enableInteractions ? 'default' : 'none',
+        pointerEvents: 'auto' // Enable pointer events for the container
+      }}
     >
       <iframe 
         ref={iframeRef}
@@ -159,10 +160,10 @@ export default function SplineBackground({
         frameBorder='0' 
         width='100%' 
         height='100%'
-        className="w-full h-full pointer-events-none"
+        className="w-full h-full"
         style={{ 
           transform: `scale(${scale})`,
-          pointerEvents: 'none',
+          pointerEvents: 'auto', // Enable pointer events for the iframe
           transition: 'opacity 0.3s ease-in-out'
         }}
         allow="autoplay; fullscreen"

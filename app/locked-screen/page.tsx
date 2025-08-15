@@ -25,10 +25,10 @@ export default function LockedScreen() {
       <SplineBackground scale={1.2} />
 
       {/* Content Overlay */}
-      <div className="relative z-10 w-full h-full flex items-center justify-center px-4">
+      <div className="relative z-10 w-full h-full flex items-center justify-center px-4 pointer-events-none">
         <div className="text-center max-w-sm mx-auto">
           {/* Glassmorphism Card */}
-          <div className="bg-black/60 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl">
+          <div className="bg-black/60 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl pointer-events-none">
           {/* Logo */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -74,7 +74,7 @@ export default function LockedScreen() {
             <button
               onClick={handleUnlock}
               disabled={isUnlocking}
-              className={`w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl transition-all duration-200 ${
+              className={`w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl transition-all duration-200 pointer-events-auto ${
                 isUnlocking 
                   ? 'opacity-50 cursor-not-allowed' 
                   : 'hover:bg-white/20 active:scale-95'
@@ -102,10 +102,10 @@ export default function LockedScreen() {
             transition={{ duration: 0.6, delay: 1.0 }}
             className="mt-6 space-y-3"
           >
-            <button className="w-full text-white/50 hover:text-white/70 transition-colors text-sm">
+            <button className="w-full text-white/50 hover:text-white/70 transition-colors text-sm pointer-events-auto">
               Use Passcode
             </button>
-            <button className="w-full text-white/50 hover:text-white/70 transition-colors text-sm">
+            <button className="w-full text-white/50 hover:text-white/70 transition-colors text-sm pointer-events-auto">
               Forgot Passcode?
                          </button>
            </motion.div>
