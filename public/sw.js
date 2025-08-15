@@ -1,9 +1,10 @@
-const CACHE_NAME = 'sozu-cash-v1'
+const CACHE_NAME = 'sozu-cash-v2'
 const urlsToCache = [
   '/',
   '/manifest.json',
-  '/icon-192x192.png',
-  '/icon-512x512.png',
+  '/android-chrome-192x192.png',
+  '/sozu-logo.png',
+  '/favicon.ico',
 ]
 
 // Install event
