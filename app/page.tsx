@@ -20,8 +20,16 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Add landing-page class to body to prevent white background
+  useEffect(() => {
+    document.body.classList.add('landing-page');
+    return () => {
+      document.body.classList.remove('landing-page');
+    };
+  }, []);
+
   return (
-    <div className="relative w-full h-screen overflow-y-scroll snap-y snap-mandatory" style={{ isolation: 'isolate' }}>
+    <div className="relative w-full h-screen overflow-y-scroll snap-y snap-mandatory landing-page" style={{ isolation: 'isolate' }}>
       {/* Lava Lamp Background - Fixed for parallax */}
       <LavaLampBackground />
       
@@ -37,42 +45,19 @@ export default function LandingPage() {
                 alt="Sozu Cash"
                 width={300}
                 height={112}
-                style={{
-                  mixBlendMode: 'difference',
-                  color: '#ffffff',
-                  WebkitTextFillColor: '#ffffff',
-                  textShadow: 'none',
-                  fontFamily: "'Helvetica', sans-serif",
-                  fontWeight: 600
-                }}
+                className="filter brightness-0 invert"
               />
             </div>
 
             {/* Hero Text */}
             <h1 
-              className="text-4xl md:text-6xl font-bold mb-6"
-              style={{
-                mixBlendMode: 'difference',
-                color: '#ffffff',
-                WebkitTextFillColor: '#ffffff',
-                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
-                fontFamily: "'Helvetica', sans-serif",
-                fontWeight: 600
-              }}
+              className="text-4xl md:text-6xl font-bold mb-6 text-white"
             >
               The Real Digital Cash
             </h1>
             
             <p 
               className="text-xl md:text-2xl mb-8 text-white/90"
-              style={{
-                mixBlendMode: 'difference',
-                color: '#ffffff',
-                WebkitTextFillColor: '#ffffff',
-                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
-                fontFamily: "'Helvetica', sans-serif",
-                fontWeight: 400
-              }}
             >
               1-tap to pay in USDC on Mantle. Permissionless. Anonymous. Instant settlement.
             </p>
@@ -91,29 +76,13 @@ export default function LandingPage() {
         <div className="h-screen flex items-center justify-center snap-start">
           <div className={`max-w-4xl mx-auto px-6 transition-opacity duration-1000 ${currentSection === 1 ? 'opacity-100' : 'opacity-0'}`}>
             <h2 
-              className="text-3xl md:text-4xl font-bold mb-8 text-center"
-              style={{
-                mixBlendMode: 'difference',
-                color: '#ffffff',
-                WebkitTextFillColor: '#ffffff',
-                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
-                fontFamily: "'Helvetica', sans-serif",
-                fontWeight: 600
-              }}
+              className="text-3xl md:text-4xl font-bold mb-8 text-center text-white"
             >
               It's your money, evolved
             </h2>
             
             <p 
               className="text-lg md:text-xl mb-8 text-white/80 text-center"
-              style={{
-                mixBlendMode: 'difference',
-                color: '#ffffff',
-                WebkitTextFillColor: '#ffffff',
-                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
-                fontFamily: "'Helvetica', sans-serif",
-                fontWeight: 400
-              }}
             >
               SozuCash is your DeFi-powered, instant-settlement payment app.
             </p>
@@ -144,29 +113,13 @@ export default function LandingPage() {
         <div className="h-screen flex items-center justify-center snap-start">
           <div className={`max-w-4xl mx-auto px-6 transition-opacity duration-1000 ${currentSection === 2 ? 'opacity-100' : 'opacity-0'}`}>
             <h2 
-              className="text-3xl md:text-4xl font-bold mb-8 text-center"
-              style={{
-                mixBlendMode: 'difference',
-                color: '#ffffff',
-                WebkitTextFillColor: '#ffffff',
-                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
-                fontFamily: "'Helvetica', sans-serif",
-                fontWeight: 600
-              }}
+              className="text-3xl md:text-4xl font-bold mb-8 text-center text-white"
             >
               Works right from your phone
             </h2>
             
             <p 
               className="text-lg md:text-xl mb-8 text-white/80 text-center"
-              style={{
-                mixBlendMode: 'difference',
-                color: '#ffffff',
-                WebkitTextFillColor: '#ffffff',
-                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
-                fontFamily: "'Helvetica', sans-serif",
-                fontWeight: 400
-              }}
             >
               Download the app and you're set — your SozuCash wallet is ready in seconds.
             </p>

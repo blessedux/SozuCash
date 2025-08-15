@@ -10,10 +10,14 @@
   }
   
   body {
-    @apply bg-white text-black;
-    background-color: white !important;
+    @apply text-white;
     min-height: 100vh;
     min-height: 100dvh; /* Dynamic viewport height for mobile */
+  }
+
+  /* Only apply white background when not in app navigation and not on landing page */
+  body:not(.no-scroll):not(.landing-page) {
+    background-color: white !important;
   }
 
   /* Ensure consistent white background across all mobile devices */
@@ -56,6 +60,16 @@
     background-color: white !important;
   }
 
+  /* Allow LavaLampBackground to override white background */
+  .lava-lamp-container {
+    background-color: transparent !important;
+  }
+
+  /* Ensure landing page background works */
+  .landing-page {
+    background-color: transparent !important;
+  }
+
   /* iPhone specific fixes */
   @supports (-webkit-touch-callout: none) {
     body {
@@ -93,12 +107,24 @@
     overflow: hidden !important;
     -webkit-overflow-scrolling: none !important;
     overscroll-behavior: none !important;
-    touch-action: none !important;
+    touch-action: pan-x pan-y !important; /* Allow pan gestures for SplineBackground */
     -webkit-touch-callout: none !important;
     -webkit-user-select: none !important;
     -moz-user-select: none !important;
     -ms-user-select: none !important;
     user-select: none !important;
+  }
+
+  /* Allow SplineBackground to receive pointer events */
+  .no-scroll .spline-background {
+    pointer-events: auto !important;
+    touch-action: auto !important;
+    background-color: transparent !important;
+  }
+
+  /* Ensure SplineBackground is visible in app navigation */
+  .no-scroll {
+    background-color: transparent !important;
   }
 
   /* Prevent scrolling on mobile devices */
@@ -112,7 +138,20 @@
       overflow: hidden !important;
       -webkit-overflow-scrolling: none !important;
       overscroll-behavior: none !important;
-      touch-action: pan-x pan-y !important; /* Only allow pan gestures for swiping */
+      touch-action: pan-x pan-y !important; /* Allow pan gestures for SplineBackground */
+    }
+
+    /* Allow SplineBackground to work on mobile */
+    .no-scroll .spline-background {
+      pointer-events: auto !important;
+      touch-action: auto !important;
+      position: absolute !important;
+      background-color: transparent !important;
+    }
+
+    /* Ensure app navigation background is transparent on mobile */
+    .no-scroll {
+      background-color: transparent !important;
     }
 
     /* Disable scroll on body when app navigation is active */

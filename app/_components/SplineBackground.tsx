@@ -148,7 +148,7 @@ export default function SplineBackground({
   return (
     <div 
       ref={containerRef}
-      className={`absolute inset-0 z-0 overflow-hidden ${className}`}
+      className={`absolute inset-0 z-0 overflow-hidden spline-background ${className}`}
       style={{ 
         cursor: enableInteractions ? 'default' : 'none',
         pointerEvents: 'auto' // Enable pointer events for the container

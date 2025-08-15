@@ -319,7 +319,7 @@ export default function ReceiveScreen() {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black">
+    <div className="relative w-full h-screen overflow-hidden">
       {/* Spline Background Animation */}
       <SplineBackground scale={1.2} />
 
@@ -340,8 +340,7 @@ export default function ReceiveScreen() {
       <motion.div
         className="relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-4 py-8 pointer-events-none"
       >
-        {/* Dark Glassmorphism Overlay */}
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm pointer-events-none"></div>
+
         
         <div className="relative z-20 text-center max-w-sm mx-auto w-full pt-20 pointer-events-auto">
                       {/* Glassmorphism Card */}

@@ -20,7 +20,7 @@ export default function LockedScreen() {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black">
+    <div className="relative w-full h-screen overflow-hidden">
       {/* Spline Background Animation */}
       <SplineBackground scale={1.2} />
 

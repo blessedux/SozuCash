@@ -154,7 +154,7 @@ function LavaLampShader() {
 
 export default function LavaLampBackground() {
   return (
-    <div className="fixed inset-0 w-full h-full z-0" style={{ zIndex: 0 }}>
+    <div className="fixed inset-0 w-full h-full z-0 lava-lamp-container" style={{ zIndex: 0 }}>
       <Canvas
         camera={{
           left: -0.5,

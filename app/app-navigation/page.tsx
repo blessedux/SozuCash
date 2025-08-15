@@ -28,13 +28,22 @@ export default function AppNavigation() {
   const [showRewardsModal, setShowRewardsModal] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
   const [selectedLanguage, setSelectedLanguage] = useState('English');
+  const [settingsSubPage, setSettingsSubPage] = useState<'main' | 'currency' | 'language' | 'support' | 'rewards'>('main');
   const router = useRouter();
 
   // Prevent scrolling on mobile devices
   useEffect(() => {
     const preventScroll = (e: TouchEvent) => {
+      // Allow touch events on SplineBackground
+      const target = e.target as HTMLElement;
+      if (target.closest('.spline-background')) {
+        return;
+      }
       e.preventDefault();
     };
+
+    // Add no-scroll class to body
+    document.body.classList.add('no-scroll');
 
     // Disable scrolling on mobile
     document.body.style.overflow = 'hidden';
@@ -49,6 +58,9 @@ export default function AppNavigation() {
     document.addEventListener('touchstart', preventScroll, { passive: false });
 
     return () => {
+      // Remove no-scroll class from body
+      document.body.classList.remove('no-scroll');
+      
       // Re-enable scrolling when component unmounts
       document.body.style.overflow = '';
       document.body.style.position = '';
@@ -316,7 +328,7 @@ export default function AppNavigation() {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black no-scroll">
+    <div className="relative w-full h-screen overflow-hidden no-scroll">
       {/* Spline Background Animation */}
       <SplineBackground scale={1.2} />
 
@@ -341,8 +353,7 @@ export default function AppNavigation() {
       <motion.div
         className="relative z-10 w-full h-full flex items-center justify-center px-4 pointer-events-none"
       >
-        {/* Dark Glassmorphism Overlay */}
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm pointer-events-none"></div>
+
         
 
         
@@ -370,7 +381,7 @@ export default function AppNavigation() {
                 }
               }
             }}
-            className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl w-full h-96 flex items-center justify-center cursor-grab active:cursor-grabbing"
+            className="bg-gray-800/40 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl w-full h-96 flex items-center justify-center cursor-grab active:cursor-grabbing"
           >
             {/* Animated Page Content */}
             <motion.div
@@ -409,7 +420,7 @@ export default function AppNavigation() {
                 
                 {/* Profile Picture */}
                 <div className="flex justify-center mb-3 flex-shrink-0">
-                  <div className="w-16 h-16 bg-white/10 backdrop-blur-lg border border-white/20 rounded-full flex items-center justify-center overflow-hidden">
+                  <div className="w-16 h-16 bg-gray-800/40 backdrop-blur-lg border border-white/20 rounded-full flex items-center justify-center overflow-hidden">
                     <img 
                       src={userProfile.image} 
                       alt={userProfile.name}
@@ -426,7 +437,7 @@ export default function AppNavigation() {
                       <p className="text-white/50 text-xs mb-1">Wallet Address</p>
                       <button 
                         onClick={handleCopyAddress}
-                        className="w-full bg-white/5 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-center space-x-2 pointer-events-auto"
+                        className="w-full px-2 py-1.5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-center space-x-2 pointer-events-auto"
                       >
                         <code className="text-white/70 text-xs break-all">
                           {truncateAddress(walletData.address)}
@@ -441,14 +452,14 @@ export default function AppNavigation() {
                     <div className="space-y-1.5">
                       <button 
                         onClick={() => console.log('Create new wallet')}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs pointer-events-auto"
+                        className="w-full text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs pointer-events-auto"
                       >
                         Create New Wallet
                       </button>
                       
                       <button 
                         onClick={() => console.log('Import wallet')}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs pointer-events-auto"
+                        className="w-full text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs pointer-events-auto"
                       >
                         Import Wallet
                       </button>
@@ -457,13 +468,13 @@ export default function AppNavigation() {
                       {!isConnectedToX ? (
                         <button 
                           onClick={handleConnectX}
-                          className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs pointer-events-auto flex items-center justify-center space-x-2"
+                          className="w-full text-white font-semibold py-1.5 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-xs pointer-events-auto flex items-center justify-center space-x-2"
                         >
                           <span className="text-xs">𝕏</span>
                           <span className="text-xs">Connect with X</span>
                         </button>
                       ) : (
-                        <div className="w-full bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg p-1.5 flex items-center space-x-2">
+                        <div className="w-full rounded-lg p-1.5 flex items-center space-x-2">
                           <img 
                             src={userProfile.image} 
                             alt={userProfile.name}
@@ -495,14 +506,14 @@ export default function AppNavigation() {
                     className="w-full h-full flex flex-col"
                   >
                     {/* Title */}
-                    <motion.h1 
-                      initial={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
-                      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                      exit={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
-                      transition={{ duration: 0.6, ease: "easeOut" }}
-                      className="text-lg font-bold text-white mb-4 text-center"
-                    >
-                      Pay
+                                            <motion.h1 
+                          initial={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+                          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                          exit={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
+                          transition={{ duration: 0.6, ease: "easeOut" }}
+                          className="text-lg font-bold text-white mb-4 text-center"
+                        >
+                          Pay
                     </motion.h1>
                     
                     {/* USD Balance Display */}
@@ -527,7 +538,7 @@ export default function AppNavigation() {
                           // For demo: navigate to pay screen
                           router.push('/pay');
                         }}
-                        className="w-20 h-20 bg-white/10 backdrop-blur-lg border border-white/20 rounded-full flex items-center justify-center hover:bg-white/20 hover:scale-105 transition-all cursor-pointer pointer-events-auto"
+                        className="w-20 h-20 bg-gray-800/40 backdrop-blur-lg border border-white/20 rounded-full flex items-center justify-center hover:bg-gray-700/40 hover:scale-105 transition-all cursor-pointer pointer-events-auto"
                       >
                         <Wifi size={32} className="rotate-45" />
                       </button>
@@ -567,7 +578,7 @@ export default function AppNavigation() {
                                 searchTwitterUser(newHandle);
                               }}
                               placeholder="username"
-                              className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white text-lg font-semibold text-center py-4 pl-8 pr-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto"
+                              className="w-full bg-gray-800/40 backdrop-blur-lg border border-white/20 text-white text-lg font-semibold text-center py-4 pl-8 pr-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto"
                             />
                           </div>
                         </div>
@@ -627,7 +638,7 @@ export default function AppNavigation() {
                                  placeholder="0.00"
                                  step="0.01"
                                  min="0"
-                                 className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white text-lg font-semibold text-center py-3 pl-8 pr-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto"
+                                 className="w-full bg-gray-800/40 backdrop-blur-lg border border-white/20 text-white text-lg font-semibold text-center py-3 pl-8 pr-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto"
                                />
                              </div>
                            </motion.div>
@@ -638,7 +649,7 @@ export default function AppNavigation() {
                            <button 
                              onClick={handleSendPayment}
                              disabled={!sendToHandle.trim() || !isUserConfirmed || !sendAmount.trim()}
-                             className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto"
+                             className="w-full bg-gray-800/40 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-gray-700/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto"
                            >
                              {isSearchingUser ? 'Searching...' : 'Send Payment'}
                            </button>
@@ -685,7 +696,7 @@ export default function AppNavigation() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.8 }}
-                          className="bg-white/10 rounded-2xl p-4 mb-6"
+                          className="p-4 mb-6"
                         >
                           <p className="text-white/50 text-sm">Amount Sent</p>
                           <p className="text-3xl font-bold text-white">${sendAmount}</p>
@@ -747,7 +758,7 @@ export default function AppNavigation() {
                       }
                     }}
                     placeholder="0.00"
-                    className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white text-4xl font-bold text-center py-8 px-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto"
+                    className="w-full bg-gray-800/40 backdrop-blur-lg border border-white/20 text-white text-4xl font-bold text-center py-8 px-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto"
                   />
                   {receiveAmount && (
                     <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50 text-lg">
@@ -760,7 +771,7 @@ export default function AppNavigation() {
                 <button 
                   onClick={handleReceiveSubmit}
                   disabled={!receiveAmount || parseFloat(receiveAmount) <= 0}
-                  className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto"
+                  className="w-full bg-gray-800/40 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-gray-700/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto"
                 >
                   Enter
                 </button>
@@ -778,69 +789,148 @@ export default function AppNavigation() {
                   transition={{ duration: 0.6, ease: "easeOut" }}
                   className="text-lg font-bold text-white mb-4 flex-shrink-0 text-center"
                 >
-                  {pages[currentPage].title}
+                  {settingsSubPage === 'main' ? 'Settings' : 
+                   settingsSubPage === 'currency' ? 'Display Currency' :
+                   settingsSubPage === 'language' ? 'Language' :
+                   settingsSubPage === 'support' ? 'Support' :
+                   settingsSubPage === 'rewards' ? 'Rewards Program' : 'Settings'}
                 </motion.h1>
 
-                {/* Scrollable Settings Content */}
+                {/* Settings Content */}
                 <div className="flex-1 overflow-y-auto pr-1 min-h-0">
-                  <div className="space-y-1.5 pb-2">
+                  {settingsSubPage === 'main' && (
+                    <div className="space-y-1.5 pb-2">
+                      {/* Preferences Section */}
+                      <div className="space-y-1">
+                        <h3 className="text-white/50 text-xs font-medium uppercase tracking-wide">Preferences</h3>
+                        <button 
+                          onClick={() => setSettingsSubPage('currency')}
+                          className="w-full text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs pointer-events-auto"
+                        >
+                          Display Currency: {selectedCurrency}
+                        </button>
+                        
+                        <button 
+                          onClick={() => setSettingsSubPage('language')}
+                          className="w-full text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs pointer-events-auto"
+                        >
+                          Language: {selectedLanguage}
+                        </button>
+                      </div>
 
+                      {/* Support Section */}
+                      <div className="space-y-1">
+                        <h3 className="text-white/50 text-xs font-medium uppercase tracking-wide">Support</h3>
+                        <button 
+                          onClick={() => setSettingsSubPage('support')}
+                          className="w-full text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs pointer-events-auto"
+                        >
+                          More Information
+                        </button>
+                        
+                        <button 
+                          onClick={() => window.open('https://t.me/blessedux', '_blank')}
+                          className="w-full text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs pointer-events-auto"
+                        >
+                          Customer Support
+                        </button>
+                      </div>
 
-                    {/* Preferences Section */}
-                    <div className="space-y-1">
-                      <h3 className="text-white/50 text-xs font-medium uppercase tracking-wide">Preferences</h3>
-                      <button 
-                        onClick={() => setShowCurrencyModal(true)}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs pointer-events-auto"
-                      >
-                        💱 Display Currency: {selectedCurrency}
-                      </button>
-                      
-                      <button 
-                        onClick={() => setShowLanguageModal(true)}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs pointer-events-auto"
-                      >
-                        🌐 Language: {selectedLanguage}
-                      </button>
-                    </div>
-
-                    {/* Support Section */}
-                    <div className="space-y-1">
-                      <h3 className="text-white/50 text-xs font-medium uppercase tracking-wide">Support</h3>
-                      <button 
-                        onClick={() => setShowSupportModal(true)}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs pointer-events-auto"
-                      >
-                        ℹ️ More Information
-                      </button>
-                      
-                      <button 
-                        onClick={() => window.open('https://t.me/blessedux', '_blank')}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs pointer-events-auto"
-                      >
-                        🆘 Customer Support
-                      </button>
-                    </div>
-
-                    {/* Rewards Section */}
-                    <div className="space-y-1">
-                      <h3 className="text-white/50 text-xs font-medium uppercase tracking-wide">Rewards</h3>
-                      <button 
-                        onClick={() => setShowRewardsModal(true)}
-                        className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs pointer-events-auto"
-                      >
-                        🎁 Rewards Program
-                      </button>
-                      
-                      {/* Rewards Info */}
-                      <div className="p-1.5 bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg">
-                        <p className="text-white/70 text-xs">
-                          <span className="font-semibold text-white">Earn rewards!</span> Get cash back for each user you onboard.
-                        </p>
+                      {/* Rewards Section */}
+                      <div className="space-y-1">
+                        <h3 className="text-white/50 text-xs font-medium uppercase tracking-wide">Rewards</h3>
+                        <button 
+                          onClick={() => setSettingsSubPage('rewards')}
+                          className="w-full text-white font-semibold py-1 px-2 rounded-lg hover:bg-white/20 transition-all duration-200 text-left text-xs pointer-events-auto"
+                        >
+                          Rewards Program
+                        </button>
+                        
+                        {/* Rewards Info */}
+                        <div className="p-1.5">
+                          <p className="text-white/70 text-xs">
+                            <span className="font-semibold text-white">Earn rewards!</span> Get cash back for each user you onboard.
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
+
+                  {/* Currency Selection */}
+                  {settingsSubPage === 'currency' && (
+                    <div className="space-y-3 pb-2">
+                      <h3 className="text-white/70 text-sm mb-4">Select your preferred display currency</h3>
+                      {['USD', 'EUR', 'GBP', 'JPY', 'CAD'].map((currency) => (
+                        <button
+                          key={currency}
+                          onClick={() => {
+                            setSelectedCurrency(currency);
+                            setSettingsSubPage('main');
+                          }}
+                          className="w-full text-white font-semibold py-3 px-4 rounded-lg hover:bg-white/20 transition-all duration-200 text-left pointer-events-auto"
+                        >
+                          {currency} {selectedCurrency === currency && '✓'}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Language Selection */}
+                  {settingsSubPage === 'language' && (
+                    <div className="space-y-3 pb-2">
+                      <h3 className="text-white/70 text-sm mb-4">Select your preferred language</h3>
+                      {['English', 'Spanish', 'French', 'German', 'Chinese'].map((language) => (
+                        <button
+                          key={language}
+                          onClick={() => {
+                            setSelectedLanguage(language);
+                            setSettingsSubPage('main');
+                          }}
+                          className="w-full text-white font-semibold py-3 px-4 rounded-lg hover:bg-white/20 transition-all duration-200 text-left pointer-events-auto"
+                        >
+                          {language} {selectedLanguage === language && '✓'}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Support Information */}
+                  {settingsSubPage === 'support' && (
+                    <div className="space-y-3 pb-2">
+                      <h3 className="text-white/70 text-sm mb-4">Support Information</h3>
+                      <div className="space-y-2">
+                        <p className="text-white/70 text-sm">SozuCash is a decentralized payment app built on Mantle Network.</p>
+                        <p className="text-white/70 text-sm">For support, contact us at t.me/blessedux</p>
+                        <p className="text-white/70 text-sm">Version: 1.0.0</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Rewards Program */}
+                  {settingsSubPage === 'rewards' && (
+                    <div className="space-y-3 pb-2">
+                      <h3 className="text-white/70 text-sm mb-4">Rewards Program</h3>
+                      <div className="space-y-2">
+                        <p className="text-white/70 text-sm">Earn rewards for every user you onboard to SozuCash!</p>
+                        <p className="text-white/70 text-sm">• 5% cashback on referral fees</p>
+                        <p className="text-white/70 text-sm">• Exclusive early access to new features</p>
+                        <p className="text-white/70 text-sm">• Priority customer support</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
+
+                {/* Back Button for Sub-pages */}
+                {settingsSubPage !== 'main' && (
+                  <div className="mt-4 pt-4">
+                    <button
+                      onClick={() => setSettingsSubPage('main')}
+                      className="w-full bg-gray-800/40 backdrop-blur-lg border border-white/20 text-white font-semibold py-3 px-4 rounded-xl hover:bg-gray-700/40 transition-all duration-200 pointer-events-auto"
+                    >
+                      ← Back to Settings
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </motion.div>
@@ -854,14 +944,14 @@ export default function AppNavigation() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-6"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto"
+            className="bg-gray-800/40 backdrop-blur-xl border border-white/25 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto"
           >
             {/* Header */}
             <div className="text-center mb-6">
@@ -872,7 +962,7 @@ export default function AppNavigation() {
             {/* Wallet Address */}
             <div className="mb-6">
               <p className="text-white/50 text-sm mb-2">Your Wallet Address</p>
-              <div className="bg-white/10 rounded-2xl p-4 border border-white/20">
+              <div className="bg-gray-800/40 rounded-2xl p-4 border border-white/20">
                 <div className="flex items-center justify-between">
                   <code className="text-white/70 text-xs break-all">{walletData.address}</code>
                   <button 
@@ -895,7 +985,7 @@ export default function AppNavigation() {
               <div className="space-y-2">
                 <button 
                   onClick={() => window.open('https://coinmarketcap.com/currencies/mantle/', '_blank')}
-                  className="w-full flex items-center justify-between p-3 bg-white/10 rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-200 pointer-events-auto"
+                  className="w-full flex items-center justify-between p-3 bg-gray-800/40 rounded-xl border border-white/20 hover:bg-gray-700/40 transition-all duration-200 pointer-events-auto"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
@@ -914,7 +1004,7 @@ export default function AppNavigation() {
                 </button>
                 <button 
                   onClick={() => window.open('https://app.uniswap.org/swap?outputCurrency=0xA0b86a33E6441b8c4C8C8C8C8C8C8C8C8C8C8C8C8C&chain=mantle', '_blank')}
-                  className="w-full flex items-center justify-between p-3 bg-white/10 rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-200 pointer-events-auto"
+                  className="w-full flex items-center justify-between p-3 bg-gray-800/40 rounded-xl border border-white/20 hover:bg-gray-700/40 transition-all duration-200 pointer-events-auto"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
@@ -942,7 +1032,7 @@ export default function AppNavigation() {
             {/* Close Button */}
             <button
               onClick={() => setShowDepositModal(false)}
-              className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/20 transition-all duration-200 pointer-events-auto"
+              className="w-full bg-white text-black font-semibold py-4 px-6 rounded-2xl hover:bg-gray-100 transition-all duration-200 pointer-events-auto"
             >
               Close
             </button>
@@ -956,14 +1046,14 @@ export default function AppNavigation() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-6"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto"
+            className="bg-gray-800/40 backdrop-blur-xl border border-white/25 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto"
           >
             <h2 className="text-2xl font-bold text-white mb-6 text-center">Select Currency</h2>
             <div className="space-y-3">
@@ -973,8 +1063,8 @@ export default function AppNavigation() {
                   onClick={() => handleCurrencyChange(currency)}
                   className={`w-full p-4 rounded-2xl border transition-all duration-200 pointer-events-auto ${
                     selectedCurrency === currency
-                      ? 'bg-white/20 border-white/40 text-white'
-                      : 'bg-white/10 border-white/20 text-white/70 hover:bg-white/20'
+                      ? 'bg-gray-700/40 border-white/40 text-white'
+                      : 'bg-gray-800/40 border-white/20 text-white/70 hover:bg-gray-700/40'
                   }`}
                 >
                   {currency}
@@ -983,7 +1073,7 @@ export default function AppNavigation() {
             </div>
             <button
               onClick={() => setShowCurrencyModal(false)}
-              className="w-full mt-6 bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/20 transition-all duration-200 pointer-events-auto"
+              className="w-full mt-6 bg-white text-black font-semibold py-4 px-6 rounded-2xl hover:bg-gray-100 transition-all duration-200 pointer-events-auto"
             >
               Cancel
             </button>
@@ -997,14 +1087,14 @@ export default function AppNavigation() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-6"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto"
+            className="bg-gray-800/40 backdrop-blur-xl border border-white/25 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto"
           >
             <h2 className="text-2xl font-bold text-white mb-6 text-center">Select Language</h2>
             <div className="space-y-3">
@@ -1024,7 +1114,7 @@ export default function AppNavigation() {
             </div>
             <button
               onClick={() => setShowLanguageModal(false)}
-              className="w-full mt-6 bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/20 transition-all duration-200 pointer-events-auto"
+              className="w-full mt-6 bg-white text-black font-semibold py-4 px-6 rounded-2xl hover:bg-gray-100 transition-all duration-200 pointer-events-auto"
             >
               Cancel
             </button>
@@ -1063,7 +1153,7 @@ export default function AppNavigation() {
             </div>
             <button
               onClick={() => setShowSupportModal(false)}
-              className="w-full mt-6 bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/20 transition-all duration-200 pointer-events-auto"
+              className="w-full mt-6 bg-white text-black font-semibold py-4 px-6 rounded-2xl hover:bg-gray-100 transition-all duration-200 pointer-events-auto"
             >
               Close
             </button>
@@ -1086,20 +1176,20 @@ export default function AppNavigation() {
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl w-full max-w-sm pointer-events-auto"
           >
-            <h2 className="text-2xl font-bold text-white mb-6 text-center">🎁 Rewards Program</h2>
+            <h2 className="text-2xl font-bold text-white mb-6 text-center">Rewards Program</h2>
             <div className="space-y-4 text-white/70 text-sm">
-              <div className="bg-white/10 rounded-2xl p-4">
+              <div className="p-4">
                 <h3 className="text-white font-semibold mb-2">Referral Rewards</h3>
                 <p>Earn 10% cashback for each user you onboard to Sozu Cash.</p>
               </div>
-              <div className="bg-white/10 rounded-2xl p-4">
+              <div className="p-4">
                 <h3 className="text-white font-semibold mb-2">Transaction Rewards</h3>
                 <p>Get 10% instant cashback on every payment you make.</p>
               </div>
             </div>
             <button
               onClick={() => setShowRewardsModal(false)}
-              className="w-full mt-6 bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/20 transition-all duration-200 pointer-events-auto"
+              className="w-full mt-6 bg-white text-black font-semibold py-4 px-6 rounded-2xl hover:bg-gray-100 transition-all duration-200 pointer-events-auto"
             >
               Close
             </button>
