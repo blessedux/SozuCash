@@ -94,8 +94,7 @@ export default function AppNavigation() {
         router.push('/receive');
         break;
       case 'pay':
-        // TODO: Navigate to pay screen
-        console.log('Navigate to pay screen');
+        router.push('/pay');
         break;
       case 'settings':
         // TODO: Navigate to settings screen

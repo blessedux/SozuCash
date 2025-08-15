@@ -1,15 +1,18 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, PanInfo } from 'framer-motion';
+import { motion, PanInfo, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { QrCode, Wifi } from 'lucide-react';
+import { QrCode, Wifi, CheckCircle, ArrowLeft } from 'lucide-react';
 
 export default function ReceiveScreen() {
   const [amount, setAmount] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
+  const [paymentReceived, setPaymentReceived] = useState(false);
+  const [receivedAmount, setReceivedAmount] = useState('');
+  const [showPaymentConfirmation, setShowPaymentConfirmation] = useState(false);
   const [invoices, setInvoices] = useState([
     {
       id: 1,
@@ -82,6 +85,19 @@ export default function ReceiveScreen() {
       }
     }
   }, []);
+
+  // Simulate payment received (for demo purposes)
+  useEffect(() => {
+    if (showQR && !showQRCode && amount) {
+      // Simulate payment received after 5 seconds
+      const timer = setTimeout(() => {
+        setReceivedAmount(amount);
+        setPaymentReceived(true);
+        setShowPaymentConfirmation(true);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showQR, showQRCode, amount]);
 
   // Mock wallet address and payment URL
   const walletAddress = "0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6";
@@ -398,6 +414,80 @@ export default function ReceiveScreen() {
       </motion.div>
 
 
+      {/* Payment Confirmation Overlay */}
+      <AnimatePresence>
+        {showPaymentConfirmation && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl w-full max-w-sm"
+            >
+              {/* Success Animation */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 10, delay: 0.2 }}
+                className="w-20 h-20 mx-auto mb-6 bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-400/30"
+              >
+                <CheckCircle size={40} className="text-green-400" />
+              </motion.div>
+
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-2xl font-bold text-white mb-4 text-center"
+              >
+                Payment Received!
+              </motion.h2>
+              
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="text-white/70 mb-6 text-center"
+              >
+                You've received a payment successfully
+              </motion.p>
+
+              {/* Payment Details */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                className="bg-white/10 rounded-2xl p-4 mb-6"
+              >
+                <p className="text-white/50 text-sm text-center">Amount Received</p>
+                <p className="text-3xl font-bold text-white text-center">{formatAmount(receivedAmount)}</p>
+                <p className="text-white/50 text-xs mt-2 text-center">Transaction ID: 0xabcd...efgh</p>
+              </motion.div>
+
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.0 }}
+                onClick={() => {
+                  setShowPaymentConfirmation(false);
+                  setPaymentReceived(false);
+                  setReceivedAmount('');
+                  router.push('/app-navigation');
+                }}
+                className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-4 rounded-2xl font-semibold text-lg hover:from-green-600 hover:to-blue-600 active:scale-95 transition-all"
+              >
+                Done
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
