@@ -30,7 +30,12 @@ export function ReceivePage() {
       // Auto-confirm after 4 seconds
       setTimeout(() => {
         confirmDeposit();
+        // Navigate back to cash screen and reset to pay screen (index 1)
         router.push('/cash');
+        // Give time for navigation to complete before resetting page
+        setTimeout(() => {
+          window.location.reload(); // This ensures clean state and resets navigation
+        }, 100);
       }, 4000);
     }
   };

@@ -38,10 +38,10 @@ export default function SplineBackground({
       // Send enhanced mouse data to Spline iframe
       iframe.contentWindow?.postMessage({
         type: 'mouseMove',
-        x: x,
-        y: y,
-        deltaX: deltaX,
-        deltaY: deltaY,
+        x: x / rect.width,  // Normalize coordinates
+        y: y / rect.height,
+        deltaX: deltaX / rect.width,
+        deltaY: deltaY / rect.height,
         isHovered: isHovered,
         isMouseDown: isMouseDown
       }, '*');
@@ -52,8 +52,6 @@ export default function SplineBackground({
 
     const handleMouseEnter = () => {
       setIsHovered(true);
-      
-      // Send hover start event to Spline
       iframe.contentWindow?.postMessage({
         type: 'mouseEnter',
         isHovered: true
@@ -62,8 +60,6 @@ export default function SplineBackground({
 
     const handleMouseLeave = () => {
       setIsHovered(false);
-      
-      // Send hover end event to Spline
       iframe.contentWindow?.postMessage({
         type: 'mouseLeave',
         isHovered: false
@@ -73,26 +69,20 @@ export default function SplineBackground({
     const handleMouseDown = (e: MouseEvent) => {
       isMouseDown = true;
       const rect = container.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
       iframe.contentWindow?.postMessage({
         type: 'mouseDown',
-        x: x,
-        y: y
+        x: (e.clientX - rect.left) / rect.width,
+        y: (e.clientY - rect.top) / rect.height
       }, '*');
     };
 
     const handleMouseUp = (e: MouseEvent) => {
       isMouseDown = false;
       const rect = container.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
       iframe.contentWindow?.postMessage({
         type: 'mouseUp',
-        x: x,
-        y: y
+        x: (e.clientX - rect.left) / rect.width,
+        y: (e.clientY - rect.top) / rect.height
       }, '*');
     };
 
@@ -100,13 +90,10 @@ export default function SplineBackground({
       e.preventDefault();
       const touch = e.touches[0];
       const rect = container.getBoundingClientRect();
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
-      
       iframe.contentWindow?.postMessage({
         type: 'touchStart',
-        x: x,
-        y: y
+        x: (touch.clientX - rect.left) / rect.width,
+        y: (touch.clientY - rect.top) / rect.height
       }, '*');
     };
 
@@ -114,18 +101,15 @@ export default function SplineBackground({
       e.preventDefault();
       const touch = e.touches[0];
       const rect = container.getBoundingClientRect();
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
-      
       iframe.contentWindow?.postMessage({
         type: 'touchMove',
-        x: x,
-        y: y
+        x: (touch.clientX - rect.left) / rect.width,
+        y: (touch.clientY - rect.top) / rect.height
       }, '*');
     };
 
     // Add event listeners to the container
-    container.addEventListener('mousemove', handleMouseMove);
+    container.addEventListener('mousemove', handleMouseMove, { passive: true });
     container.addEventListener('mouseenter', handleMouseEnter);
     container.addEventListener('mouseleave', handleMouseLeave);
     container.addEventListener('mousedown', handleMouseDown);
@@ -148,10 +132,9 @@ export default function SplineBackground({
   return (
     <div 
       ref={containerRef}
-      className={`absolute inset-0 z-0 overflow-hidden spline-background ${className}`}
+      className={`fixed inset-0 z-0 overflow-hidden spline-background pointer-events-auto ${className}`}
       style={{ 
         cursor: enableInteractions ? 'default' : 'none',
-        pointerEvents: 'auto' // Enable pointer events for the container
       }}
     >
       <iframe 
@@ -160,16 +143,14 @@ export default function SplineBackground({
         frameBorder='0' 
         width='100%' 
         height='100%'
-        className="w-full h-full"
+        className="w-full h-full pointer-events-auto"
         style={{ 
           transform: `scale(${scale})`,
-          pointerEvents: 'auto', // Enable pointer events for the iframe
           transition: 'opacity 0.3s ease-in-out'
         }}
         allow="autoplay; fullscreen"
         allowFullScreen
         title="Spline Background Animation"
-
       />
     </div>
   );
