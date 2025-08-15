@@ -7,6 +7,7 @@ import { AnimatedTransition } from '../../shared/AnimatedTransition';
 import { NFCPayment } from '../features/NFCPayment';
 import { UserSearch } from '../features/UserSearch';
 import { PaymentForm } from '../features/PaymentForm';
+import { useBalance } from '../../../_context/BalanceContext';
 
 interface UserProfile {
   pfp: string;
@@ -19,6 +20,7 @@ export function PayPage() {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [sendPaymentSuccess, setSendPaymentSuccess] = useState(false);
   const router = useRouter();
+  const { balance, formatBalance } = useBalance();
 
   const handleUserSelect = (user: UserProfile) => {
     setSelectedUser(user);
@@ -65,7 +67,7 @@ export function PayPage() {
               onClick={() => router.push('/receive')}
               className="text-4xl font-bold text-white hover:text-blue-400 transition-colors cursor-pointer pointer-events-auto"
             >
-              $0.00
+              {formatBalance(balance)}
             </button>
           </div>
 
@@ -134,9 +136,9 @@ export function PayPage() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200, damping: 10 }}
-                className="w-20 h-20 mx-auto bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-400/30"
+                className="w-20 h-20 mx-auto border-2 border-white/20 rounded-full flex items-center justify-center"
               >
-                <span className="text-green-400 text-4xl">✓</span>
+                <span className="text-white text-4xl">✓</span>
               </motion.div>
 
               <motion.button

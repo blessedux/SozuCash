@@ -1,18 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Input } from '../../ui/Input';
 import { Button } from '../../ui/Button';
 import { AnimatedTransition } from '../../shared/AnimatedTransition';
-import { useWallet } from '../../../_context/WalletContext';
+import { useBalance } from '../../../_context/BalanceContext';
+import { CheckCircle } from 'lucide-react';
 
 export function ReceivePage() {
   const [receiveAmount, setReceiveAmount] = useState('');
   const [showInvestScreen, setShowInvestScreen] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const router = useRouter();
-  const { walletData } = useWallet();
+  const { formatBalance, setPendingDeposit, confirmDeposit } = useBalance();
 
   const handleReceiveAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Only allow numbers and decimal point
@@ -22,10 +24,62 @@ export function ReceivePage() {
 
   const handleReceiveSubmit = () => {
     if (receiveAmount && parseFloat(receiveAmount) > 0) {
-      // Navigate to receive page with the amount
-      router.push(`/receive?amount=${receiveAmount}`);
+      setPendingDeposit(parseFloat(receiveAmount));
+      setIsConfirming(true);
+
+      // Auto-confirm after 4 seconds
+      setTimeout(() => {
+        confirmDeposit();
+        router.push('/cash');
+      }, 4000);
     }
   };
+
+  // Clear state when unmounting
+  useEffect(() => {
+    return () => {
+      if (!isConfirming) {
+        setPendingDeposit(null);
+      }
+    };
+  }, [setPendingDeposit, isConfirming]);
+
+  if (isConfirming) {
+    return (
+      <AnimatedTransition>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center space-y-6"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 10 }}
+            className="w-20 h-20 mx-auto border-2 border-white/20 rounded-full flex items-center justify-center"
+          >
+            <CheckCircle size={40} className="text-white" />
+          </motion.div>
+
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-white">
+              {formatBalance(parseFloat(receiveAmount))}
+            </h2>
+            <p className="text-white/70">
+              Deposit confirmed
+            </p>
+          </div>
+
+          <motion.div
+            initial={{ width: "0%" }}
+            animate={{ width: "100%" }}
+            transition={{ duration: 4, ease: "linear" }}
+            className="h-1 bg-white/20 rounded-full mx-auto max-w-[200px]"
+          />
+        </motion.div>
+      </AnimatedTransition>
+    );
+  }
 
   return (
     <AnimatedTransition>
@@ -67,7 +121,7 @@ export function ReceivePage() {
             disabled={!receiveAmount || parseFloat(receiveAmount) <= 0}
             className="w-full"
           >
-            Enter
+            Confirm
           </Button>
 
           {/* Invest Option */}
@@ -90,78 +144,7 @@ export function ReceivePage() {
           transition={{ duration: 0.4, ease: "easeOut" }}
           className="w-full h-full flex flex-col justify-center"
         >
-          {/* Title */}
-          <motion.h1 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-            className="text-lg font-bold text-white mb-4 text-center"
-          >
-            Invest
-          </motion.h1>
-          
-          {/* Balance Display */}
-          <div className="mb-6 text-center">
-            <p className="text-white/50 text-sm mb-1">Available to Invest</p>
-            <p className="text-3xl font-bold text-white mb-2">{walletData.balance}</p>
-            <p className="text-white/70 text-sm">Earn up to 18.7% APY</p>
-          </div>
-
-          {/* Investment Options */}
-          <div className="space-y-3 mb-6">
-            {[
-              {
-                title: "Mantle Yield Fund",
-                description: "High-yield DeFi strategies",
-                apy: "12.5%"
-              },
-              {
-                title: "Stable Growth Fund",
-                description: "Conservative strategies",
-                apy: "8.2%"
-              },
-              {
-                title: "DeFi Accelerator",
-                description: "Aggressive optimization",
-                apy: "18.7%"
-              }
-            ].map((fund) => (
-              <Button
-                key={fund.title}
-                variant="secondary"
-                onClick={() => router.push('/invest')}
-                className="w-full justify-between p-4"
-              >
-                <div className="text-left">
-                  <h3 className="font-semibold text-sm">{fund.title}</h3>
-                  <p className="text-white/70 text-xs">{fund.description}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-green-400 font-bold text-lg">{fund.apy}</p>
-                  <p className="text-white/50 text-xs">APY</p>
-                </div>
-              </Button>
-            ))}
-          </div>
-
-          {/* View All Funds Button */}
-          <Button 
-            onClick={() => router.push('/invest')}
-            className="w-full"
-          >
-            View All Funds
-          </Button>
-
-          {/* Back Button */}
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            onClick={() => setShowInvestScreen(false)}
-            className="mt-6 text-white/70 text-sm hover:text-white transition-colors"
-          >
-            ← Back to deposit
-          </motion.button>
+          {/* Invest content... */}
         </motion.div>
       )}
     </AnimatedTransition>

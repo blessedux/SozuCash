@@ -2,6 +2,7 @@
 
 import { NavigationProvider } from '../_context/NavigationContext';
 import { WalletProvider } from '../_context/WalletContext';
+import { BalanceProvider } from '../_context/BalanceContext';
 import { SwipeNavigation } from '../_components/shared/SwipeNavigation';
 import { AnimatePresence } from 'framer-motion';
 import { WalletPage } from '../_components/cash/pages/WalletPage';
@@ -62,6 +63,7 @@ export default function CashLayout({
   return (
     <NavigationProvider>
       <WalletProvider>
+        <BalanceProvider>
         <div className="relative w-full h-screen overflow-hidden no-scroll">
           {/* Persistent Background */}
           <div className="fixed inset-0 z-0">
@@ -119,6 +121,7 @@ export default function CashLayout({
             </div>
           )}
         </div>
+        </BalanceProvider>
       </WalletProvider>
     </NavigationProvider>
   );
