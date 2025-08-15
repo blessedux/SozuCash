@@ -23,7 +23,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#8b5cf6',
+  themeColor: '#ffffff',
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({
@@ -38,8 +39,11 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="theme-color" content="#ffffff" />
+        <meta name="msapplication-TileColor" content="#ffffff" />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} bg-white`} style={{ backgroundColor: 'white' }}>
         {children}
       </body>
     </html>

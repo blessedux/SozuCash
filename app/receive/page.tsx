@@ -104,9 +104,9 @@ export default function ReceiveScreen() {
     }
   }, []);
 
-  // Simulate payment received (for demo purposes)
+  // Simulate payment received (for demo purposes) - works in both invoice and QR code screens
   useEffect(() => {
-    if (showQR && !showQRCode && amount && !paymentReceived) {
+    if (showQR && amount && !paymentReceived && !sendMode) {
       console.log('Setting up payment simulation for amount:', amount);
       // Simulate payment received after 4 seconds
       const timer = setTimeout(() => {
@@ -120,7 +120,7 @@ export default function ReceiveScreen() {
         clearTimeout(timer);
       };
     }
-  }, [showQR, showQRCode, amount, paymentReceived]);
+  }, [showQR, amount, paymentReceived, sendMode]);
 
   // For send mode, immediately show confirmation
   useEffect(() => {
@@ -131,6 +131,23 @@ export default function ReceiveScreen() {
       setShowPaymentConfirmation(true);
     }
   }, [sendMode, amount, paymentReceived]);
+
+  // Payment simulation for QR code screen
+  useEffect(() => {
+    if (showQRCode && amount && !paymentReceived && !sendMode) {
+      console.log('QR Code screen - setting up payment simulation timer');
+      const timer = setTimeout(() => {
+        console.log('QR Code screen - payment simulation triggered');
+        setReceivedAmount(amount);
+        setPaymentReceived(true);
+        setShowPaymentConfirmation(true);
+      }, 4000);
+      return () => {
+        console.log('Clearing QR code payment simulation timer');
+        clearTimeout(timer);
+      };
+    }
+  }, [showQRCode, amount, paymentReceived, sendMode]);
 
   // Auto-confirm pending invoices after 4 seconds
   useEffect(() => {

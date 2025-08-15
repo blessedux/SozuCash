@@ -6,10 +6,128 @@
 @layer base {
   html {
     /* Removed scroll-behavior: smooth to prevent conflicts with Lenis */
+    background-color: white;
   }
   
   body {
-    @apply bg-black text-white;
+    @apply bg-white text-black;
+    background-color: white !important;
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
+  }
+
+  /* Ensure consistent white background across all mobile devices */
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Fix for iPhone safe areas and status bar */
+  @supports (padding: max(0px)) {
+    body {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+  }
+
+    /* Ensure viewport is always white */
+  #__next {
+    background-color: white;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  /* Force white background on all page containers */
+  .page-container,
+  [data-page],
+  main,
+  div[role="main"] {
+    background-color: white !important;
+  }
+
+  /* Fix for any potential purple backgrounds */
+  * {
+    background-color: inherit;
+  }
+
+    /* Ensure root elements maintain white background */
+  html, body, #__next, #root {
+    background-color: white !important;
+  }
+
+  /* iPhone specific fixes */
+  @supports (-webkit-touch-callout: none) {
+    body {
+      background-color: white !important;
+      -webkit-background-color: white !important;
+    }
+    
+    /* Fix for iPhone status bar area */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: env(safe-area-inset-top);
+      background-color: white;
+      z-index: 9999;
+    }
+  }
+
+  /* Android and other mobile devices */
+  @media screen and (max-width: 768px) {
+    body {
+      background-color: white !important;
+    }
+    
+    /* Ensure no purple backgrounds on mobile */
+    * {
+      background-color: inherit;
+    }
+  }
+
+  /* Disable scrolling for app navigation */
+  .no-scroll {
+    overflow: hidden !important;
+    -webkit-overflow-scrolling: none !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+  }
+
+  /* Prevent scrolling on mobile devices */
+  @media screen and (max-width: 768px) {
+    .no-scroll {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      overflow: hidden !important;
+      -webkit-overflow-scrolling: none !important;
+      overscroll-behavior: none !important;
+      touch-action: pan-x pan-y !important; /* Only allow pan gestures for swiping */
+    }
+
+    /* Disable scroll on body when app navigation is active */
+    body:has(.no-scroll) {
+      overflow: hidden !important;
+      position: fixed !important;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* Ensure no bounce scrolling on iOS */
+    html, body {
+      overscroll-behavior: none !important;
+      -webkit-overflow-scrolling: auto !important;
+    }
   }
 }
 

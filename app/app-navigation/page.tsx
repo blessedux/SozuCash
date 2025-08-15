@@ -30,6 +30,38 @@ export default function AppNavigation() {
   const [selectedLanguage, setSelectedLanguage] = useState('English');
   const router = useRouter();
 
+  // Prevent scrolling on mobile devices
+  useEffect(() => {
+    const preventScroll = (e: TouchEvent) => {
+      e.preventDefault();
+    };
+
+    // Disable scrolling on mobile
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
+    document.body.style.overscrollBehavior = 'none';
+    (document.body.style as any)['-webkit-overflow-scrolling'] = 'auto';
+
+    // Add touch event listeners to prevent scrolling
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+    document.addEventListener('touchstart', preventScroll, { passive: false });
+
+    return () => {
+      // Re-enable scrolling when component unmounts
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.body.style.overscrollBehavior = '';
+      (document.body.style as any)['-webkit-overflow-scrolling'] = '';
+      
+      document.removeEventListener('touchmove', preventScroll);
+      document.removeEventListener('touchstart', preventScroll);
+    };
+  }, []);
+
   // Mock user data - in real app this would come from auth state
   const userProfile = {
     name: "John Doe",
@@ -284,7 +316,7 @@ export default function AppNavigation() {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black">
+    <div className="relative w-full h-screen overflow-hidden bg-black no-scroll">
       {/* Spline Background Animation */}
       <SplineBackground scale={1.2} />
 
