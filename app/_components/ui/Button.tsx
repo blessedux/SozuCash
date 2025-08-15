@@ -1,11 +1,11 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, HTMLMotionProps } from 'framer-motion';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'whileTap'> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   isLoading?: boolean;
@@ -27,7 +27,7 @@ export function Button({
   const baseStyles = 'font-semibold rounded-2xl transition-all duration-200 flex items-center justify-center pointer-events-auto';
   
   const variantStyles = {
-    primary: 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700',
+    primary: 'border border-white/20 text-white backdrop-blur-[10px] hover:bg-white/5',
     secondary: 'border border-white/20 text-white hover:bg-white/5 backdrop-blur-[10px]',
     ghost: 'text-white hover:bg-white/5',
   };
@@ -40,9 +40,22 @@ export function Button({
 
   const disabledStyles = disabled || isLoading ? 'opacity-50 cursor-not-allowed' : '';
 
+  const content = isLoading ? (
+    <div className="flex items-center space-x-2">
+      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+      <span>Loading...</span>
+    </div>
+  ) : (
+    <div className="flex items-center space-x-2">
+      {leftIcon && <span>{leftIcon}</span>}
+      <span>{children}</span>
+      {rightIcon && <span>{rightIcon}</span>}
+    </div>
+  );
+
   return (
     <motion.button
-      whileTap={{ scale: disabled || isLoading ? 1 : 0.98 }}
+      whileTap={disabled || isLoading ? undefined : { scale: 0.98 }}
       className={`
         ${baseStyles}
         ${variantStyles[variant]}
@@ -53,18 +66,7 @@ export function Button({
       disabled={disabled || isLoading}
       {...props}
     >
-      {isLoading ? (
-        <div className="flex items-center space-x-2">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-          <span>Loading...</span>
-        </div>
-      ) : (
-        <div className="flex items-center space-x-2">
-          {leftIcon && <span>{leftIcon}</span>}
-          <span>{children}</span>
-          {rightIcon && <span>{rightIcon}</span>}
-        </div>
-      )}
+      {content}
     </motion.button>
   );
 }

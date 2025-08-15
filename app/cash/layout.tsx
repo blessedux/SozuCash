@@ -10,6 +10,7 @@ import { ReceivePage } from '../_components/cash/pages/ReceivePage';
 import { SettingsPage } from '../_components/cash/pages/SettingsPage';
 import { useNavigation } from '../_context/NavigationContext';
 import { useKeyboardNavigation } from '../_hooks/useKeyboardNavigation';
+import { useSessionTimeout } from '../_hooks/useSessionTimeout';
 import SplineBackground from '../_components/SplineBackground';
 import { Camera } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -18,11 +19,15 @@ function CashContent() {
   const { currentPage } = useNavigation();
   const router = useRouter();
 
-  // Setup keyboard navigation
+  // Setup keyboard navigation (only for desktop)
   useKeyboardNavigation({
-    onEscape: () => router.push('/app'),
+    onEscape: () => {
+      // Only allow ESC key to lock on desktop
+      if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+        router.push('/app');
+      }
+    },
     onEnter: () => {
-      // Handle enter based on current page
       switch (currentPage) {
         case 1: // Pay
           router.push('/pay');
@@ -52,6 +57,7 @@ export default function CashLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  useSessionTimeout(); // Add session timeout
 
   return (
     <NavigationProvider>
@@ -104,12 +110,14 @@ export default function CashLayout({
             </div>
           </div>
 
-          {/* Lock Screen Hint */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
-            <p className="text-white/50 text-sm">
-              Press ESC to lock
-            </p>
-          </div>
+          {/* Lock Screen Hint - Only show on desktop */}
+          {typeof window !== 'undefined' && window.innerWidth >= 768 && (
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+              <p className="text-white/50 text-sm">
+                Press ESC to lock
+              </p>
+            </div>
+          )}
         </div>
       </WalletProvider>
     </NavigationProvider>
