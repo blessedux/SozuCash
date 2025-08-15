@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, PanInfo } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Wifi, Camera, CheckCircle } from 'lucide-react';
+import SplineBackground from '../_components/SplineBackground';
 
 export default function AppNavigation() {
   const [currentPage, setCurrentPage] = useState(1); // Start on pay page (index 1)
@@ -71,7 +72,7 @@ export default function AppNavigation() {
   // Prevent scrolling on mobile devices
   useEffect(() => {
     const preventScroll = (e: TouchEvent) => {
-      // Allow touch events on background animations
+      // Allow touch events on SplineBackground
       const target = e.target as HTMLElement;
       if (target.closest('.spline-background')) {
         return;
@@ -467,6 +468,9 @@ export default function AppNavigation() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden no-scroll">
+      {/* Spline Background Animation */}
+      <SplineBackground scale={1.2} enableInteractions={true} />
+
       {/* Sozu Cash Logo */}
       <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
         <img 
@@ -492,7 +496,7 @@ export default function AppNavigation() {
         
 
         
-        <div className="relative z-20 text-center w-80 mx-auto pointer-events-auto flex justify-center">
+        <div className="relative z-20 text-center w-80 mx-auto pointer-events-none flex justify-center">
           {/* Fixed Glassmorphism Card */}
           <motion.div
             initial={{ width: "320px" }}
@@ -531,7 +535,7 @@ export default function AppNavigation() {
                 }
               }
             }}
-            className={`border border-white/10 rounded-3xl p-8 shadow-2xl h-96 flex items-center justify-center cursor-grab active:cursor-grabbing ${getBlurClass()}`}
+            className={`border border-white/10 rounded-3xl p-8 shadow-2xl h-96 flex items-center justify-center cursor-grab active:cursor-grabbing ${getBlurClass()} pointer-events-auto`}
             style={{ transformOrigin: "center" }}
           >
             {/* Animated Page Content */}
@@ -662,7 +666,7 @@ export default function AppNavigation() {
                           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                           exit={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
                           transition={{ duration: 0.6, ease: "easeOut" }}
-                          className="text-lg font-bold text-white mb-4 text-center"
+                          className="text-lg font-bold text-white mb-2 text-center -mt-2"
                         >
                           Pay
                     </motion.h1>
@@ -812,14 +816,14 @@ export default function AppNavigation() {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.3 }}
-                        className="space-y-6 w-full text-center"
+                        className="w-full h-full flex flex-col justify-center"
                       >
                         {/* Success Animation */}
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{ type: "spring", stiffness: 200, damping: 10, delay: 0.2 }}
-                          className="w-20 h-20 mx-auto mb-6 bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-400/30"
+                          className="w-20 h-20 mx-auto mb-4 bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-400/30"
                         >
                           <CheckCircle size={40} className="text-green-400" />
                         </motion.div>
@@ -828,7 +832,7 @@ export default function AppNavigation() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.4 }}
-                          className="text-2xl font-bold text-white mb-4"
+                          className="text-2xl font-bold text-white mb-3"
                         >
                           Payment Sent!
                         </motion.h2>
@@ -837,7 +841,7 @@ export default function AppNavigation() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.6 }}
-                          className="text-white/70 mb-6"
+                          className="text-white/70 mb-4"
                         >
                           Payment sent to @{sendToHandle} successfully
                         </motion.p>
@@ -847,7 +851,7 @@ export default function AppNavigation() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.8 }}
-                          className="p-4 mb-6"
+                          className="p-4 mb-6 border border-white/10 rounded-2xl"
                         >
                           <p className="text-white/50 text-sm">Amount Sent</p>
                           <p className="text-3xl font-bold text-white">${sendAmount}</p>
@@ -855,23 +859,26 @@ export default function AppNavigation() {
                           <p className="text-white/50 text-xs mt-1">To: @{sendToHandle}</p>
                         </motion.div>
 
-                        <motion.button
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 1.0 }}
-                          onClick={() => {
-                            setSendPaymentSuccess(false);
-                            setSendToHandle('');
-                            setSendAmount('');
-                            setTargetUserProfile(null);
-                            setUserFound(false);
-                            setIsUserConfirmed(false);
-                            setShowSendScreen(false);
-                          }}
-                          className="w-full bg-white text-black py-4 rounded-2xl font-semibold text-lg hover:bg-gray-100 active:scale-95 transition-all pointer-events-auto"
-                        >
-                          Done
-                        </motion.button>
+                        {/* Done Button - Positioned at bottom of card */}
+                        <div className="mt-auto pt-4">
+                          <motion.button
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 1.0 }}
+                            onClick={() => {
+                              setSendPaymentSuccess(false);
+                              setSendToHandle('');
+                              setSendAmount('');
+                              setTargetUserProfile(null);
+                              setUserFound(false);
+                              setIsUserConfirmed(false);
+                              setShowSendScreen(false);
+                            }}
+                            className="w-full bg-white text-black py-4 rounded-2xl font-semibold text-lg hover:bg-gray-100 active:scale-95 transition-all pointer-events-auto"
+                          >
+                            Done
+                          </motion.button>
+                        </div>
                       </motion.div>
                     )}
                   </motion.div>

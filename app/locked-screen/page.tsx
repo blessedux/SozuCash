@@ -74,7 +74,10 @@ export default function LockedScreen() {
             transition={{ duration: 0.6, delay: 1.0 }}
             className="mt-auto pt-6"
           >
-            <button className="w-full text-black font-semibold py-3 px-6 rounded-2xl transition-all duration-200 pointer-events-auto hover:bg-white/5 active:scale-95">
+            <button 
+              onClick={() => window.open('https://t.me/blessedux', '_blank')}
+              className="w-full text-black font-semibold py-3 px-6 rounded-2xl transition-all duration-200 pointer-events-auto hover:bg-white/5 active:scale-95"
+            >
               Get Support
             </button>
           </motion.div>

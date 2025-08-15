@@ -169,6 +169,7 @@ export default function SplineBackground({
         allow="autoplay; fullscreen"
         allowFullScreen
         title="Spline Background Animation"
+
       />
     </div>
   );
