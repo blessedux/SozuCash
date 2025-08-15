@@ -255,16 +255,30 @@ export default function AppNavigation() {
                 {/* USD Balance Display */}
                 <div className="mb-6">
                   <p className="text-white/50 text-sm mb-1">USD</p>
-                  <h2 className="text-4xl font-bold text-white">
+                  <button 
+                    onClick={() => {
+                      console.log('Balance clicked!');
+                      // For demo: simulate balance update
+                      alert('Balance updated! Demo feature.');
+                    }}
+                    className="text-4xl font-bold text-white hover:text-blue-400 transition-colors cursor-pointer"
+                  >
                     $1,234.56
-                  </h2>
+                  </button>
                 </div>
 
                 {/* NFC Icon */}
                 <div className="flex justify-center">
-                  <div className="w-20 h-20 bg-white/10 backdrop-blur-lg border border-white/20 rounded-full flex items-center justify-center">
+                  <button 
+                    onClick={() => {
+                      console.log('NFC icon clicked!');
+                      // For demo: navigate to pay screen
+                      router.push('/pay');
+                    }}
+                    className="w-20 h-20 bg-white/10 backdrop-blur-lg border border-white/20 rounded-full flex items-center justify-center hover:bg-white/20 hover:scale-105 transition-all cursor-pointer"
+                  >
                     <Wifi size={32} className="rotate-45" />
-                  </div>
+                  </button>
                 </div>
               </>
             )}
