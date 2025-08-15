@@ -1,39 +1,28 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Wifi, Camera, ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
+import { Wifi, Camera, ArrowLeft, CheckCircle } from 'lucide-react';
 
 export default function PayScreen() {
-  const [currentStep, setCurrentStep] = useState<'input' | 'nfc-ready' | 'processing' | 'success' | 'error'>('input');
+  const [currentStep, setCurrentStep] = useState<'input' | 'nfc-ready' | 'success'>('input');
   const [amount, setAmount] = useState('');
-  const [isNFCReady, setIsNFCReady] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'success' | 'error'>('pending');
   const router = useRouter();
-
-  // Mock NFC detection
-  useEffect(() => {
-    if (currentStep === 'nfc-ready') {
-      const timer = setTimeout(() => {
-        setIsNFCReady(true);
-        setTimeout(() => {
-          setCurrentStep('processing');
-          // Simulate payment processing
-          setTimeout(() => {
-            setPaymentStatus('success');
-            setCurrentStep('success');
-          }, 2000);
-        }, 1500);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [currentStep]);
 
   const handlePay = () => {
     if (amount && parseFloat(amount) > 0) {
       setCurrentStep('nfc-ready');
     }
+  };
+
+  const handleNFCConfirm = () => {
+    console.log('NFC button clicked!'); // Debug log
+    setCurrentStep('success');
+    // Auto return to app after 3 seconds
+    setTimeout(() => {
+      router.push('/app-navigation');
+    }, 3000);
   };
 
   const handleBack = () => {
@@ -42,13 +31,7 @@ export default function PayScreen() {
     } else {
       setCurrentStep('input');
       setAmount('');
-      setIsNFCReady(false);
-      setPaymentStatus('pending');
     }
-  };
-
-  const handleDone = () => {
-    router.push('/app-navigation');
   };
 
   const formatAmount = (value: string) => {
@@ -158,79 +141,34 @@ export default function PayScreen() {
               className="w-full max-w-sm text-center"
             >
               <div className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl">
-                {/* NFC Animation */}
-                <motion.div
+                {/* NFC Icon - Clickable */}
+                <motion.button
+                  onClick={handleNFCConfirm}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   animate={{ 
-                    scale: isNFCReady ? [1, 1.2, 1] : [1, 1.1, 1],
-                    opacity: isNFCReady ? [0.5, 1, 0.5] : [0.3, 0.7, 0.3]
+                    boxShadow: [
+                      "0 0 0 0 rgba(59, 130, 246, 0.4)",
+                      "0 0 0 10px rgba(59, 130, 246, 0)",
+                      "0 0 0 0 rgba(59, 130, 246, 0)"
+                    ]
                   }}
                   transition={{ 
-                    duration: 2, 
-                    repeat: Infinity,
-                    ease: "easeInOut"
+                    boxShadow: { duration: 2, repeat: Infinity },
+                    scale: { duration: 0.1 }
                   }}
-                  className="w-32 h-32 mx-auto mb-6 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center border-2 border-blue-400/30"
+                  className="w-32 h-32 mx-auto mb-6 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center border-2 border-blue-400/30 hover:border-blue-400/60 transition-all cursor-pointer shadow-lg hover:shadow-blue-400/20"
                 >
                   <Wifi size={48} className="text-blue-400" />
-                </motion.div>
+                </motion.button>
 
-                <h2 className="text-2xl font-bold text-white mb-4">
-                  {isNFCReady ? 'NFC Detected!' : 'Ready for NFC'}
-                </h2>
-                <p className="text-white/70 mb-6">
-                  {isNFCReady 
-                    ? 'Processing payment...' 
-                    : 'Hold your device near the payment terminal'
-                  }
-                </p>
+                <h2 className="text-2xl font-bold text-white mb-4">Ready for NFC</h2>
+                <p className="text-white/70 mb-6">Tap the blue NFC icon below to confirm payment</p>
 
                 {/* Amount Display */}
                 <div className="bg-white/10 rounded-2xl p-4 mb-6">
                   <p className="text-white/50 text-sm">Sending</p>
                   <p className="text-3xl font-bold text-white">{formatAmount(amount)}</p>
-                </div>
-
-                {/* Loading Animation */}
-                <div className="flex justify-center">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full"
-                  />
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {currentStep === 'processing' && (
-            <motion.div
-              key="processing"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="w-full max-w-sm text-center"
-            >
-              <div className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl">
-                {/* Processing Animation */}
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  className="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center border-2 border-blue-400/30"
-                >
-                  <motion.div
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 1, repeat: Infinity }}
-                    className="w-8 h-8 bg-blue-400 rounded-full"
-                  />
-                </motion.div>
-
-                <h2 className="text-2xl font-bold text-white mb-4">Processing Payment</h2>
-                <p className="text-white/70 mb-6">Please wait while we confirm your transaction</p>
-
-                {/* Amount Display */}
-                <div className="bg-white/10 rounded-2xl p-4">
-                  <p className="text-white/50 text-sm">Amount</p>
-                  <p className="text-2xl font-bold text-white">{formatAmount(amount)}</p>
                 </div>
               </div>
             </motion.div>
@@ -285,47 +223,14 @@ export default function PayScreen() {
                   <p className="text-white/50 text-xs mt-2">Transaction ID: 0x1234...5678</p>
                 </motion.div>
 
-                <motion.button
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 }}
-                  onClick={handleDone}
-                  className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-4 rounded-2xl font-semibold text-lg hover:from-green-600 hover:to-blue-600 active:scale-95 transition-all"
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.0 }}
+                  className="text-white/50 text-sm"
                 >
-                  Done
-                </motion.button>
-              </div>
-            </motion.div>
-          )}
-
-          {currentStep === 'error' && (
-            <motion.div
-              key="error"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="w-full max-w-sm text-center"
-            >
-              <div className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl">
-                {/* Error Animation */}
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 10 }}
-                  className="w-20 h-20 mx-auto mb-6 bg-red-500/20 rounded-full flex items-center justify-center border-2 border-red-400/30"
-                >
-                  <XCircle size={40} className="text-red-400" />
-                </motion.div>
-
-                <h2 className="text-2xl font-bold text-white mb-4">Payment Failed</h2>
-                <p className="text-white/70 mb-6">Something went wrong. Please try again.</p>
-
-                <button
-                  onClick={handleBack}
-                  className="w-full bg-white/10 text-white py-4 rounded-2xl font-semibold text-lg hover:bg-white/20 active:scale-95 transition-all"
-                >
-                  Try Again
-                </button>
+                  Returning to app...
+                </motion.p>
               </div>
             </motion.div>
           )}

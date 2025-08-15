@@ -77,21 +77,13 @@ export default function LandingPage() {
               No banks. No borders. No fees.
             </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => router.push('/locked-screen')}
-                className="bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-8 rounded-2xl text-lg shadow-2xl hover:shadow-white/10 hover:scale-105 active:scale-95 transition-all duration-300"
-              >
-                🚀 Open App
-              </button>
-              <button
-                onClick={() => router.push('/demo')}
-                className="bg-white/5 backdrop-blur-lg border border-white/10 text-white/80 font-semibold py-4 px-8 rounded-2xl text-lg shadow-2xl hover:shadow-white/5 hover:scale-105 active:scale-95 transition-all duration-300"
-              >
-                🎬 View Demo
-              </button>
-            </div>
+            {/* CTA Button */}
+            <button
+              onClick={() => router.push('/locked-screen')}
+              className="bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-8 rounded-2xl text-lg shadow-2xl hover:shadow-white/10 hover:scale-105 active:scale-95 transition-all duration-300"
+            >
+              🚀 Open App
+            </button>
           </div>
         </div>
 
@@ -324,20 +316,12 @@ export default function LandingPage() {
               SozuCash is the most competitive, permissionless, and borderless way to trade goods and services — giving everyone the right to transact freely.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => router.push('/locked-screen')}
-                className="bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-8 rounded-2xl text-lg shadow-2xl hover:shadow-white/10 hover:scale-105 active:scale-95 transition-all duration-300"
-              >
-                🚀 Launch SozuCash App
-              </button>
-              <button
-                onClick={() => router.push('/demo')}
-                className="bg-white/5 backdrop-blur-lg border border-white/10 text-white/80 font-semibold py-4 px-8 rounded-2xl text-lg shadow-2xl hover:shadow-white/5 hover:scale-105 active:scale-95 transition-all duration-300"
-              >
-                🎬 View Demo Flow
-              </button>
-            </div>
+            <button
+              onClick={() => router.push('/locked-screen')}
+              className="bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-8 rounded-2xl text-lg shadow-2xl hover:shadow-white/10 hover:scale-105 active:scale-95 transition-all duration-300"
+            >
+              🚀 Launch SozuCash App
+            </button>
           </div>
         </div>
 

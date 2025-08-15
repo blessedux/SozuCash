@@ -99,6 +99,20 @@ export default function ReceiveScreen() {
     }
   }, [showQR, showQRCode, amount]);
 
+  // Auto-confirm pending invoices after 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setInvoices(prevInvoices => 
+        prevInvoices.map(invoice => 
+          invoice.status === 'pending' 
+            ? { ...invoice, status: 'completed', hash: `0x${Math.random().toString(36).substring(2, 15)}` }
+            : invoice
+        )
+      );
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Mock wallet address and payment URL
   const walletAddress = "0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6";
   
