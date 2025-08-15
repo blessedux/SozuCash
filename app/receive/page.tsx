@@ -113,6 +113,21 @@ export default function ReceiveScreen() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Add payment to invoice history when payment is received
+  useEffect(() => {
+    if (paymentReceived && receivedAmount) {
+      const newInvoice = {
+        id: Date.now(),
+        amount: parseFloat(receivedAmount),
+        status: 'completed' as const,
+        date: new Date().toISOString().split('T')[0],
+        hash: `0x${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
+      };
+      
+      setInvoices(prevInvoices => [newInvoice, ...prevInvoices]);
+    }
+  }, [paymentReceived, receivedAmount]);
+
   // Mock wallet address and payment URL
   const walletAddress = "0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6";
   

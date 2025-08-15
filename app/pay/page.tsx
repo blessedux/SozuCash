@@ -6,18 +6,26 @@ import { useRouter } from 'next/navigation';
 import { Wifi, Camera, ArrowLeft, CheckCircle } from 'lucide-react';
 
 export default function PayScreen() {
-  const [currentStep, setCurrentStep] = useState<'input' | 'nfc-ready' | 'success'>('input');
-  const [amount, setAmount] = useState('');
+  const [currentStep, setCurrentStep] = useState<'nfc-ready' | 'success'>('nfc-ready');
+  const [amount] = useState('9.99'); // Fixed amount for demo
   const router = useRouter();
-
-  const handlePay = () => {
-    if (amount && parseFloat(amount) > 0) {
-      setCurrentStep('nfc-ready');
-    }
-  };
 
   const handleNFCConfirm = () => {
     console.log('NFC button clicked!'); // Debug log
+    
+    // Add payment to local storage for demo purposes
+    const paymentHistory = JSON.parse(localStorage.getItem('paymentHistory') || '[]');
+    const newPayment = {
+      id: Date.now(),
+      amount: parseFloat(amount),
+      type: 'sent',
+      status: 'completed',
+      date: new Date().toISOString().split('T')[0],
+      hash: `0x${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
+    };
+    paymentHistory.unshift(newPayment);
+    localStorage.setItem('paymentHistory', JSON.stringify(paymentHistory));
+    
     setCurrentStep('success');
     // Auto return to app after 3 seconds
     setTimeout(() => {
@@ -26,12 +34,7 @@ export default function PayScreen() {
   };
 
   const handleBack = () => {
-    if (currentStep === 'input') {
-      router.back();
-    } else {
-      setCurrentStep('input');
-      setAmount('');
-    }
+    router.back();
   };
 
   const formatAmount = (value: string) => {
@@ -59,79 +62,6 @@ export default function PayScreen() {
       {/* Main Content */}
       <div className="relative z-10 flex items-center justify-center h-full px-6 -mt-16">
         <AnimatePresence mode="wait">
-          {currentStep === 'input' && (
-            <motion.div
-              key="input"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="w-full max-w-sm"
-            >
-              <div className="bg-black/30 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl">
-                <h2 className="text-2xl font-bold text-white mb-6 text-center">Send USDC</h2>
-                
-                {/* Amount Input */}
-                <div className="mb-6">
-                  <label className="block text-white/70 text-sm mb-2">Amount</label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      placeholder="0.00"
-                      className="w-full bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl px-4 py-4 text-white text-2xl font-semibold text-center placeholder-white/30 focus:outline-none focus:border-white/40 transition-all"
-                    />
-                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50 text-sm">
-                      USDC
-                    </div>
-                  </div>
-                </div>
-
-                {/* Payment Methods */}
-                <div className="space-y-3 mb-8">
-                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-blue-500/20 rounded-lg">
-                        <Wifi size={20} className="text-blue-400" />
-                      </div>
-                      <div>
-                        <p className="text-white font-medium">NFC Payment</p>
-                        <p className="text-white/50 text-sm">Tap to pay instantly</p>
-                      </div>
-                    </div>
-                    <div className="text-white/30">→</div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-green-500/20 rounded-lg">
-                        <Camera size={20} className="text-green-400" />
-                      </div>
-                      <div>
-                        <p className="text-white font-medium">QR Code</p>
-                        <p className="text-white/50 text-sm">Scan to pay</p>
-                      </div>
-                    </div>
-                    <div className="text-white/30">→</div>
-                  </div>
-                </div>
-
-                {/* Pay Button */}
-                <button
-                  onClick={handlePay}
-                  disabled={!amount || parseFloat(amount) <= 0}
-                  className={`w-full py-4 rounded-2xl font-semibold text-lg transition-all ${
-                    amount && parseFloat(amount) > 0
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 active:scale-95'
-                      : 'bg-white/10 text-white/50 cursor-not-allowed'
-                  }`}
-                >
-                  Pay {formatAmount(amount)}
-                </button>
-              </div>
-            </motion.div>
-          )}
-
           {currentStep === 'nfc-ready' && (
             <motion.div
               key="nfc-ready"
@@ -163,7 +93,7 @@ export default function PayScreen() {
                 </motion.button>
 
                 <h2 className="text-2xl font-bold text-white mb-4">Ready for NFC</h2>
-                <p className="text-white/70 mb-6">Tap the blue NFC icon below to confirm payment</p>
+                <p className="text-white/70 mb-6">Tap the blue NFC icon above to confirm payment</p>
 
                 {/* Amount Display */}
                 <div className="bg-white/10 rounded-2xl p-4 mb-6">
