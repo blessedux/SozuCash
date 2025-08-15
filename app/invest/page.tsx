@@ -77,33 +77,32 @@ export default function InvestPage() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden no-scroll">
-      {/* Sozu Cash Logo */}
-      <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
-        <img 
-          src="/sozu-logo.png" 
-          alt="Sozu Cash" 
-          className="w-20"
-        />
-      </div>
-
-      {/* Back Button */}
-      <button 
-        onClick={() => router.back()}
-        className="absolute top-8 left-4 z-20 text-white/70 hover:text-white transition-colors"
-      >
-        ← Back
-      </button>
-
       {/* Main Content */}
       <motion.div
         className="relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-4 py-8 pointer-events-none"
         style={{ backgroundColor: 'transparent' }}
       >
         
-        <div className="relative z-20 text-center w-80 mx-auto pt-20 pointer-events-auto" style={{ backgroundColor: 'transparent' }}>
+        <div className="relative z-20 text-center w-80 mx-auto pointer-events-auto" style={{ backgroundColor: 'transparent' }}>
           {/* Glassmorphism Card */}
           <div className="border border-white/10 rounded-3xl p-8 shadow-2xl w-full h-96 flex items-center justify-center pointer-events-none backdrop-blur-[10px]">
             <div className="w-full h-full flex flex-col overflow-hidden">
+              {/* Header with Logo and Back Button */}
+              <div className="flex items-center justify-between mb-4 flex-shrink-0">
+                <button 
+                  onClick={() => router.back()}
+                  className="text-white/70 hover:text-white transition-colors text-sm"
+                >
+                  ← Back
+                </button>
+                <img 
+                  src="/sozu-logo.png" 
+                  alt="Sozu Cash" 
+                  className="w-16"
+                />
+                <div className="w-12"></div>
+              </div>
+
               {/* Title */}
               <h1 className="text-xl font-bold text-white mb-4 text-center flex-shrink-0">Invest</h1>
 

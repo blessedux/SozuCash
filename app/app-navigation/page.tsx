@@ -226,7 +226,7 @@ export default function AppNavigation() {
         case 'escape':
         case 'esc':
           event.preventDefault();
-          handleEscapeKey();
+          // Remove escape key behavior - no longer locks screen
           break;
       }
     };
@@ -239,17 +239,17 @@ export default function AppNavigation() {
     setIsDragging(false);
     const threshold = 30; // Reduced threshold for more sensitive swipes
     
-    // Check for left-to-right swipe (escape gesture) first
-    if (info.offset.x > threshold) {
-      // Swipe right - handle as escape gesture
-      handleEscapeKey();
-      return;
-    }
-    
     // Check for right-to-left swipe (next page)
     if (info.offset.x < -threshold) {
       // Swipe left - go to next page (with infinite loop)
       navigateToNextPage();
+      return;
+    }
+    
+    // Check for left-to-right swipe (previous page)
+    if (info.offset.x > threshold) {
+      // Swipe right - go to previous page (with infinite loop)
+      navigateToPreviousPage();
       return;
     }
     
@@ -316,63 +316,7 @@ export default function AppNavigation() {
     }
   };
 
-  const handleEscapeKey = () => {
-    // Handle escape key to go back through navigation levels
-    // Priority order: modals > sub-screens > main screens
-    
-    // Close any open modals first
-    if (showDepositModal) {
-      setShowDepositModal(false);
-      return;
-    }
-    if (showCurrencyModal) {
-      setShowCurrencyModal(false);
-      return;
-    }
-    if (showLanguageModal) {
-      setShowLanguageModal(false);
-      return;
-    }
-    if (showSupportModal) {
-      setShowSupportModal(false);
-      return;
-    }
-    if (showRewardsModal) {
-      setShowRewardsModal(false);
-      return;
-    }
-    
-    // Close settings sub-pages
-    if (settingsSubPage !== 'main') {
-      setSettingsSubPage('main');
-      return;
-    }
-    
-    // Close sub-screens (send screen, invest screen)
-    if (showSendScreen) {
-      setShowSendScreen(false);
-      setSlideDirection('up');
-      return;
-    }
-    if (showInvestScreen) {
-      setShowInvestScreen(false);
-      setSlideDirection('up');
-      return;
-    }
-    
-    // Reset payment success state
-    if (sendPaymentSuccess) {
-      setSendPaymentSuccess(false);
-      setIsUserConfirmed(false);
-      setSendAmount('');
-      setSendToHandle('');
-      return;
-    }
-    
-    // If we're at the root level, lock the wallet and navigate to locked screen
-    console.log('Locking wallet and navigating to locked screen');
-    router.push('/locked-screen');
-  };
+
 
   const searchTwitterUser = async (handle: string) => {
     if (!handle.trim()) {
@@ -666,7 +610,7 @@ export default function AppNavigation() {
                           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                           exit={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
                           transition={{ duration: 0.6, ease: "easeOut" }}
-                          className="text-lg font-bold text-white mb-2 text-center -mt-2"
+                          className="text-lg font-bold text-white text-center -mt-6 drop-shadow-lg"
                         >
                           Pay
                     </motion.h1>
@@ -693,7 +637,7 @@ export default function AppNavigation() {
                           // For demo: navigate to pay screen
                           router.push('/pay');
                         }}
-                        className="w-20 h-20 border border-white/20 rounded-full flex items-center justify-center hover:bg-white/5 hover:scale-105 transition-all cursor-pointer pointer-events-auto"
+                        className="w-20 h-20 border border-white/20 rounded-full flex items-center justify-center hover:bg-white/5 hover:scale-105 transition-all cursor-pointer pointer-events-auto backdrop-blur-[15px]"
                       >
                         <Wifi size={32} className="rotate-45" />
                       </button>
@@ -715,7 +659,7 @@ export default function AppNavigation() {
                           initial={{ opacity: 0, y: -20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: 0.1 }}
-                          className="text-lg font-bold text-white mb-4 text-center"
+                          className="text-lg font-bold text-white mb-4 text-center drop-shadow-lg"
                         >
                           Send to User
                         </motion.h1>
@@ -804,7 +748,7 @@ export default function AppNavigation() {
                            <button 
                                                            onClick={handleSendPayment}
                               disabled={!sendToHandle.trim() || !isUserConfirmed || !sendAmount.trim()}
-                              className="w-full border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto"
+                              className="w-full border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto backdrop-blur-[15px]"
                            >
                              {isSearchingUser ? 'Searching...' : 'Send Payment'}
                            </button>
@@ -899,13 +843,13 @@ export default function AppNavigation() {
                       animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                       exit={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
                       transition={{ duration: 0.6, ease: "easeOut" }}
-                      className="text-lg font-bold text-white mb-4 text-center"
+                      className="text-lg font-bold text-white mb-8 text-center drop-shadow-2xl"
                     >
                       Deposit
                     </motion.h1>
                     
                     {/* Amount Input Field */}
-                    <div className="relative mb-6">
+                    <div className="relative mb-6 bg-transparent">
                       <input
                         type="text"
                         inputMode="decimal"
@@ -918,7 +862,7 @@ export default function AppNavigation() {
                           }
                         }}
                         placeholder="0.00"
-                                              className="w-full border border-white/20 text-white text-4xl font-bold text-center py-8 px-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto"
+                                              className="w-full border border-white/20 text-white text-4xl font-bold text-center py-8 px-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto shadow-lg bg-transparent"
                       />
                       {receiveAmount && (
                         <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50 text-lg">
@@ -931,7 +875,7 @@ export default function AppNavigation() {
                     <button 
                       onClick={handleReceiveSubmit}
                       disabled={!receiveAmount || parseFloat(receiveAmount) <= 0}
-                                      className="w-full border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto"
+                                      className="w-full border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-white/5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto backdrop-blur-[25px] shadow-lg"
                     >
                       Enter
                     </button>
