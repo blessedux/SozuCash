@@ -7,6 +7,7 @@ import { Input } from '../../ui/Input';
 import { Button } from '../../ui/Button';
 import { AnimatedTransition } from '../../shared/AnimatedTransition';
 import { useBalance } from '../../../_context/BalanceContext';
+import { useNavigation } from '../../../_context/NavigationContext';
 import { CheckCircle } from 'lucide-react';
 
 export function ReceivePage() {
@@ -15,6 +16,7 @@ export function ReceivePage() {
   const [isConfirming, setIsConfirming] = useState(false);
   const router = useRouter();
   const { formatBalance, setPendingDeposit, confirmDeposit } = useBalance();
+  const { setCurrentPage, setSlideDirection } = useNavigation();
 
   const handleReceiveAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Only allow numbers and decimal point
@@ -30,12 +32,9 @@ export function ReceivePage() {
       // Auto-confirm after 4 seconds
       setTimeout(() => {
         confirmDeposit();
-        // Navigate back to cash screen and reset to pay screen (index 1)
-        router.push('/cash');
-        // Give time for navigation to complete before resetting page
-        setTimeout(() => {
-          window.location.reload(); // This ensures clean state and resets navigation
-        }, 100);
+        // Navigate back to pay screen (index 1) with slide animation
+        setSlideDirection('up');
+        setCurrentPage(1);
       }, 4000);
     }
   };
