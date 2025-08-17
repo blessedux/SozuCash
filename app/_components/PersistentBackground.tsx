@@ -243,13 +243,11 @@ export default function PersistentBackground() {
     setEventCount(prev => prev + 1);
     setLastEventTime(now);
     
-    console.log(`🎯 Spline iframe mouse move! #${eventCount + 1} at ${now}`);
-    
     // Check if events are being throttled
     if (lastEventTime > 0) {
       const timeDiff = now - lastEventTime;
       if (timeDiff > 100) { // More than 100ms between events
-        console.log(`⚠️ Event gap detected: ${timeDiff}ms between events`);
+        // console.log(`⚠️ Event gap detected: ${timeDiff}ms between events`);
       }
     }
   }, [eventCount, lastEventTime]);
@@ -257,7 +255,7 @@ export default function PersistentBackground() {
   // Global event handler for Spline interactions
   const handleGlobalMouseMove = useCallback((e: MouseEvent) => {
     if (!iframeRef.current || !splineLoaded) {
-      console.log('Spline not ready:', { iframeExists: !!iframeRef.current, splineLoaded });
+      // console.log('Spline not ready:', { iframeExists: !!iframeRef.current, splineLoaded });
       return;
     }
 
@@ -292,16 +290,16 @@ export default function PersistentBackground() {
     
     // More aggressive debug logging
     if (Math.random() < 0.1) { // Log 10% of events to see more activity
-      console.log('🎯 Spline Event:', {
-        type: 'mouseMove',
-        x: normalizedX.toFixed(3),
-        y: normalizedY.toFixed(3),
-        deltaX: deltaX.toFixed(4),
-        deltaY: deltaY.toFixed(4),
-        isUIElement: !!isUIElement,
-        iframeExists: !!iframeRef.current,
-        splineLoaded: splineLoaded
-      });
+      // console.log('🎯 Spline Event:', {
+      //   type: 'mouseMove',
+      //   x: normalizedX.toFixed(3),
+      //   y: normalizedY.toFixed(3),
+      //   deltaX: deltaX.toFixed(4),
+      //   deltaY: deltaY.toFixed(4),
+      //   isUIElement: !!isUIElement,
+      //   iframeExists: !!iframeRef.current,
+      //   splineLoaded: splineLoaded
+      // });
     }
     
     // Send enhanced mouse data to Spline iframe (THROTTLED)
@@ -318,7 +316,7 @@ export default function PersistentBackground() {
         timestamp: now
       };
       
-      console.log('📤 Sending to Spline (THROTTLED):', message);
+      // console.log('📤 Sending to Spline (THROTTLED):', message);
       
       iframeRef.current.contentWindow?.postMessage(message, '*');
       
@@ -429,7 +427,7 @@ export default function PersistentBackground() {
     if (!iframeRef.current || !splineLoaded) return;
     
     try {
-      console.log('🧪 Attempting to force Spline interactions...');
+      // console.log('🧪 Attempting to force Spline interactions...');
       
       const iframe = iframeRef.current;
       
@@ -441,25 +439,25 @@ export default function PersistentBackground() {
         const splineProps = ['spline', 'SPLINE', 'Spline', 'scene', 'Scene', 'app', 'App'];
         splineProps.forEach(prop => {
           if (splineWindow && splineWindow[prop]) {
-            console.log(`🎯 Found Spline property: ${prop}`, splineWindow[prop]);
+            // console.log(`🎯 Found Spline property: ${prop}`, splineWindow[prop]);
             
             const obj = splineWindow[prop];
             
             // Try to enable interactions
             if (typeof obj.enableInteractions === 'function') {
               obj.enableInteractions();
-              console.log(`🎯 Enabled interactions on ${prop}`);
+              // console.log(`🎯 Enabled interactions on ${prop}`);
             }
             
             if (typeof obj.setInteractive === 'function') {
               obj.setInteractive(true);
-              console.log(`🎯 Set ${prop} to interactive`);
+              // console.log(`🎯 Set ${prop} to interactive`);
             }
           }
         });
         
       } catch (error) {
-        console.log('🔒 Cannot access Spline window (CORS)');
+        // console.log('🔒 Cannot access Spline window (CORS)');
       }
       
       // Method 2: Try to inject a script into the iframe
@@ -467,32 +465,32 @@ export default function PersistentBackground() {
         if (iframe.contentDocument) {
           const script = document.createElement('script');
           script.textContent = `
-            console.log('🎯 Script injected into Spline iframe');
+            // console.log('🎯 Script injected into Spline iframe');
             
             // Try to find and enable Spline interactions
             if (window.spline) {
-              console.log('🎯 Found window.spline:', window.spline);
+              // console.log('🎯 Found window.spline:', window.spline);
               if (window.spline.enableInteractions) {
                 window.spline.enableInteractions();
-                console.log('🎯 Enabled Spline interactions');
+                // console.log('🎯 Enabled Spline interactions');
               }
             }
             
             // Add event listeners to test if events are working
             document.addEventListener('mousemove', (e) => {
-              console.log('🎯 Spline iframe received mousemove:', e.clientX, e.clientY);
+              // console.log('🎯 Spline iframe received mousemove:', e.clientX, e.clientY);
             });
             
             document.addEventListener('click', (e) => {
-              console.log('🎯 Spline iframe received click:', e.clientX, e.clientY);
+              // console.log('🎯 Spline iframe received click:', e.clientX, e.clientY);
             });
           `;
           
           iframe.contentDocument.head.appendChild(script);
-          console.log('🎯 Script injected successfully');
+          // console.log('🎯 Script injected successfully');
         }
       } catch (error) {
-        console.log('🔒 Cannot inject script (CORS)');
+        // console.log('🔒 Cannot inject script (CORS)');
       }
       
     } catch (error) {
@@ -505,7 +503,7 @@ export default function PersistentBackground() {
   useEffect(() => {
     if (!splineLoaded) return;
     
-    console.log('🎯 Setting up working Spline event system...');
+    // console.log('🎯 Setting up working Spline event system...');
     
     const iframe = iframeRef.current;
     const container = containerRef.current;
@@ -544,20 +542,18 @@ export default function PersistentBackground() {
         
         // Dispatch directly on the iframe element
         iframe.dispatchEvent(mouseEvent);
-        console.log(`🎯 Dispatched direct mousemove event on iframe #${eventCount + 1}`);
         
         // Also try dispatching on the iframe's contentWindow if accessible
         if (iframe.contentWindow) {
           try {
             iframe.contentWindow.dispatchEvent(mouseEvent);
-            console.log(`🎯 Dispatched mousemove event on iframe contentWindow #${eventCount + 1}`);
           } catch (error) {
-            console.log('🔒 Cannot dispatch on contentWindow (CORS)');
+            // CORS restriction
           }
         }
         
       } catch (error) {
-        console.log('❌ Direct event dispatch failed:', error);
+        // Direct event dispatch failed
       }
       
       // METHOD 2: Also try postMessage as backup
@@ -588,9 +584,8 @@ export default function PersistentBackground() {
           view: window
         });
         iframe.dispatchEvent(mouseEvent);
-        console.log(`🎯 Dispatched direct mouseenter event on iframe #${eventCount + 1}`);
       } catch (error) {
-        console.log('❌ Direct mouseenter dispatch failed:', error);
+        // Direct mouseenter dispatch failed
       }
       
       // METHOD 2: PostMessage backup
@@ -613,9 +608,8 @@ export default function PersistentBackground() {
           view: window
         });
         iframe.dispatchEvent(mouseEvent);
-        console.log(`🎯 Dispatched direct mouseleave event on iframe #${eventCount + 1}`);
       } catch (error) {
-        console.log('❌ Direct mouseleave dispatch failed:', error);
+        // Direct mouseleave dispatch failed
       }
       
       // METHOD 2: PostMessage backup
@@ -639,7 +633,7 @@ export default function PersistentBackground() {
         y: (e.clientY - rect.top) / rect.height
       }, '*');
       
-      console.log(`🎯 Mouse down event #${eventCount + 1}`);
+      // console.log(`🎯 Mouse down event #${eventCount + 1}`);
     };
 
     const handleMouseUp = (e: MouseEvent) => {
@@ -656,7 +650,7 @@ export default function PersistentBackground() {
         y: (e.clientY - rect.top) / rect.height
       }, '*');
       
-      console.log(`🎯 Mouse up event #${eventCount + 1}`);
+      // console.log(`🎯 Mouse up event #${eventCount + 1}`);
     };
 
     const handleTouchStart = (e: TouchEvent) => {
@@ -674,7 +668,7 @@ export default function PersistentBackground() {
         y: (touch.clientY - rect.top) / rect.height
       }, '*');
       
-      console.log(`🎯 Touch start event #${eventCount + 1}`);
+      // console.log(`🎯 Touch start event #${eventCount + 1}`);
     };
 
     const handleTouchMove = (e: TouchEvent) => {
@@ -692,7 +686,7 @@ export default function PersistentBackground() {
         y: (touch.clientY - rect.top) / rect.height
       }, '*');
       
-      console.log(`🎯 Touch move event #${eventCount + 1}`);
+      // console.log(`🎯 Touch move event #${eventCount + 1}`);
     };
 
     // Add event listeners to the container
@@ -707,7 +701,7 @@ export default function PersistentBackground() {
     // Add simple message listener for Spline responses
     const handleMessage = (event: MessageEvent) => {
       if (event.source !== iframe.contentWindow) return;
-      console.log('📨 Message from Spline:', event.data);
+      // console.log('📨 Message from Spline:', event.data);
     };
     window.addEventListener('message', handleMessage);
 
@@ -728,65 +722,14 @@ export default function PersistentBackground() {
 
   return (
     <div className="fixed inset-0 z-[-1]">
-      {/* Debug Indicator */}
-      {splineLoaded && (
-        <div className="fixed top-4 left-4 z-[9999] pointer-events-none">
-          <div className="bg-black/50 text-white px-3 py-2 rounded-lg text-sm font-mono">
-            🎯 Spline Active
-            <br />
-            Events: {eventCount}
-            <br />
-            Last: {lastEventTime > 0 ? `${Date.now() - lastEventTime}ms ago` : 'None'}
-            <br />
-            Status: {isInteractingWithUI ? 'UI' : 'Background'}
-            <br />
-            Z-Index: -1
-            <br />
-            <span className="text-green-400">✅ Working Event System</span>
-            <br />
-            <span className="text-blue-400">🎯 Container Events Active</span>
-          </div>
-        </div>
-      )}
-
-      {/* Spline Interaction Test Indicator */}
-      {splineLoaded && (
-        <div className="fixed top-4 right-4 z-[9999] pointer-events-none">
-          <div className="bg-green-500/80 text-white px-3 py-2 rounded-lg text-sm font-mono">
-            🎯 Working Spline Events
-            <br />
-            Move mouse over background
-            <br />
-            Check console for logs
-            <br />
-            <span className="text-yellow-400">Using Container Events</span>
-          </div>
-        </div>
-      )}
-
-      {/* Event Debug Indicator */}
-      {splineLoaded && (
-        <div className="fixed bottom-4 left-4 z-[9999] pointer-events-none">
-          <div className="bg-red-500/80 text-white px-3 py-2 rounded-lg text-sm font-mono">
-            🧪 Event Debug Mode
-            <br />
-            Move mouse to see events
-            <br />
-            Check console for logs
-            <br />
-            <span className="text-yellow-400">Direct + PostMessage</span>
-          </div>
-        </div>
-      )}
-
       {/* Spline Background (Base Layer) */}
       <div 
         ref={containerRef}
         className="fixed inset-0 z-[-1] overflow-hidden spline-background"
-        style={{ 
+        style={{
           cursor: 'default',
           pointerEvents: 'auto', // Allow events to reach the iframe
-          zIndex: -1,
+          zIndex: -1, // Container style
           isolation: 'isolate'
         }}
       >
@@ -811,41 +754,41 @@ export default function PersistentBackground() {
           title="Spline Background Animation"
           onClick={(e) => {
             e.stopPropagation();
-            console.log('🎯 Spline iframe clicked!');
+            // console.log('🎯 Spline iframe clicked!');
           }}
           onMouseMove={(e) => {
             e.stopPropagation();
-            console.log('🎯 Spline iframe mouse move!', e.clientX, e.clientY);
+            // console.log('🎯 Spline iframe mouse move!', e.clientX, e.clientY);
             // Also send to global handler for Spline communication
             handleIframeMouseMove(e as any);
           }}
           onMouseEnter={(e) => {
             e.stopPropagation();
-            console.log('🎯 Spline iframe mouse enter!');
+            // console.log('🎯 Spline iframe mouse enter!');
           }}
           onMouseLeave={(e) => {
             e.stopPropagation();
-            console.log('🎯 Spline iframe mouse leave!');
+            // console.log('🎯 Spline iframe mouse leave!');
           }}
           onMouseDown={(e) => {
             e.stopPropagation();
-            console.log('🎯 Spline iframe mouse down!');
+            // console.log('🎯 Spline iframe mouse down!');
           }}
           onMouseUp={(e) => {
             e.stopPropagation();
-            console.log('🎯 Spline iframe mouse up!');
+            // console.log('🎯 Spline iframe mouse up!');
           }}
           onLoad={() => {
-            console.log('✅ Persistent Spline iframe loaded successfully');
+            // console.log('✅ Persistent Spline iframe loaded successfully');
             setSplineLoaded(true);
             
             // Debug: Check iframe properties
             if (iframeRef.current) {
-              console.log('🎯 Iframe properties:');
-              console.log('- pointerEvents:', iframeRef.current.style.pointerEvents);
-              console.log('- zIndex:', iframeRef.current.style.zIndex);
-              console.log('- className:', iframeRef.current.className);
-              console.log('- src:', iframeRef.current.src);
+              // console.log('🎯 Iframe properties:');
+              // console.log('- pointerEvents:', iframeRef.current.style.pointerEvents);
+              // console.log('- zIndex:', iframeRef.current.style.zIndex);
+              // console.log('- className:', iframeRef.current.className);
+              // console.log('- src:', iframeRef.current.src);
               
               // Force pointer events to be sure
               iframeRef.current.style.pointerEvents = 'auto';
@@ -853,28 +796,28 @@ export default function PersistentBackground() {
               
               // Try to add a click event listener to test if events are reaching the iframe
               iframeRef.current.addEventListener('click', (e) => {
-                console.log('🎯 Iframe received click event!', e);
+                // console.log('🎯 Iframe received click event!', e);
               });
               
               iframeRef.current.addEventListener('mousemove', (e) => {
-                console.log('🎯 Iframe received mousemove event!', e.clientX, e.clientY);
+                // console.log('🎯 Iframe received mousemove event!', e.clientX, e.clientY);
               });
               
-              console.log('🎯 Added event listeners to iframe for testing');
+              // console.log('🎯 Added event listeners to iframe for testing');
             }
             
             // Test iframe access
             try {
-              console.log('🧪 Testing iframe access...');
-              console.log('Iframe contentWindow:', iframeRef.current?.contentWindow ? 'global' : 'null');
-              console.log('Iframe contentDocument:', iframeRef.current?.contentDocument ? 'accessible' : 'null');
+              // console.log('🧪 Testing iframe access...');
+              // console.log('Iframe contentWindow:', iframeRef.current?.contentWindow ? 'global' : 'null');
+              // console.log('Iframe contentDocument:', iframeRef.current?.contentDocument ? 'accessible' : 'null');
               
               if (iframeRef.current?.contentWindow) {
-                console.log('🧪 Testing iframe interactivity...');
-                console.log('Iframe pointerEvents style:', iframeRef.current.style.pointerEvents);
-                console.log('Iframe zIndex style:', iframeRef.current.style.zIndex);
-                console.log('Iframe className:', iframeRef.current.className);
-                console.log('Iframe src:', iframeRef.current.src);
+                // console.log('🧪 Testing iframe interactivity...');
+                // console.log('Iframe pointerEvents style:', iframeRef.current.style.pointerEvents);
+                // console.log('Iframe zIndex style:', iframeRef.current.style.zIndex);
+                // console.log('Iframe className:', iframeRef.current.className);
+                // console.log('Iframe src:', iframeRef.current.src);
                 
                 // Test if we can send a simple message
                 iframeRef.current.contentWindow.postMessage({
@@ -883,7 +826,7 @@ export default function PersistentBackground() {
                   timestamp: Date.now()
                 }, '*');
                 
-                console.log('🧪 Initializing Spline scene...');
+                // console.log('🧪 Initializing Spline scene...');
                 
                 // Send initialization message
                 iframeRef.current.contentWindow.postMessage({
@@ -903,7 +846,7 @@ export default function PersistentBackground() {
                 
               }
             } catch (error) {
-              console.log('🔒 Iframe access restricted (CORS):', error instanceof Error ? error.message : String(error));
+              // console.log('🔒 Iframe access restricted (CORS):', error instanceof Error ? error.message : String(error));
             }
           }}
           onError={(e) => {
@@ -939,7 +882,7 @@ export default function PersistentBackground() {
           }}
           style={{ pointerEvents: 'none' }}
           onCreated={(gl) => {
-            console.log('Persistent Three.js Canvas created successfully');
+            // console.log('Persistent Three.js Canvas created successfully');
           }}
           onError={(error) => {
             console.error('Persistent Three.js Canvas error:', error);

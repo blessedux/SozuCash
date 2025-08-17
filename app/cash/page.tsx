@@ -73,8 +73,6 @@ function CashContent() {
     }
   };
 
-  console.log('CashContent rendering:', { currentPage, currentVerticalPage });
-
   return (
     <div className="w-full h-full">
       {/* Main horizontal navigation content - hidden when showing vertical content */}
@@ -266,12 +264,10 @@ function CashPageContent() {
               onMouseEnter={(e) => {
                 // Only capture events when mouse is over the card
                 e.currentTarget.style.pointerEvents = 'auto';
-                console.log('🎯 Card entered - events captured');
               }}
               onMouseLeave={(e) => {
                 // Allow events to pass through when mouse leaves the card
                 e.currentTarget.style.pointerEvents = 'none';
-                console.log('🎯 Card left - events passed through to background');
               }}
               onMouseMove={(e) => {
                 // Only handle card-specific mouse events when over the card

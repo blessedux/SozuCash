@@ -36,7 +36,7 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-          className="text-4xl md:text-5xl font-bold text-white text-center mb-6 drop-shadow-2xl"
+          className="text-4xl md:text-5xl font-bold text-black text-center mb-6 drop-shadow-2xl"
         >
           The Future of Payments
         </motion.h1>
@@ -45,7 +45,7 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
-          className="text-lg md:text-xl text-white/90 text-center max-w-2xl mb-12 drop-shadow-xl"
+          className="text-lg md:text-xl text-black/90 text-center max-w-2xl mb-12 drop-shadow-xl"
         >
           Experience seamless NFC payments and instant transfers on Mantle Network.
           No more waiting. No more fees. Just tap and pay.
@@ -87,10 +87,10 @@ export default function LandingPage() {
           ].map((feature, index) => (
             <div 
               key={feature.title}
-              className="text-center p-6 rounded-2xl border border-white/20 backdrop-blur-md bg-white/10 hover:bg-white/20 transition-all duration-300"
+              className="text-center p-6 rounded-2xl border border-black/20 backdrop-blur-md bg-white/10 hover:bg-white/20 transition-all duration-300"
             >
-              <h3 className="text-white font-bold text-lg mb-2 drop-shadow-lg">{feature.title}</h3>
-              <p className="text-white/90 drop-shadow-md">{feature.description}</p>
+              <h3 className="text-black font-bold text-lg mb-2 drop-shadow-lg">{feature.title}</h3>
+              <p className="text-black/90 drop-shadow-md">{feature.description}</p>
             </div>
           ))}
         </motion.div>
