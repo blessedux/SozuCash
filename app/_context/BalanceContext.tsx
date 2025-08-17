@@ -22,6 +22,7 @@ export function BalanceProvider({ children }: { children: React.ReactNode }) {
   const [balance, setBalance] = useState(0);
   const [pendingDeposit, setPendingDeposit] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [updateTrigger, setUpdateTrigger] = useState(0); // Force re-renders
 
   // Set mounted state after hydration
   useEffect(() => {
@@ -32,11 +33,15 @@ export function BalanceProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (mounted) {
       const storedBalance = localStorage.getItem(BALANCE_STORAGE_KEY);
+      console.log('Loading balance from storage:', storedBalance);
       if (storedBalance) {
         const parsedBalance = parseFloat(storedBalance);
         if (!isNaN(parsedBalance)) {
+          console.log('Setting initial balance to:', parsedBalance);
           setBalance(parsedBalance);
         }
+      } else {
+        console.log('No stored balance found, using default: 0');
       }
     }
   }, [mounted]);
@@ -44,13 +49,26 @@ export function BalanceProvider({ children }: { children: React.ReactNode }) {
   // Save balance to local storage whenever it changes
   useEffect(() => {
     if (mounted) {
+      console.log('Saving balance to storage:', balance);
       localStorage.setItem(BALANCE_STORAGE_KEY, balance.toString());
+      // Force a re-render of all components using this context
+      setUpdateTrigger(prev => prev + 1);
     }
   }, [balance, mounted]);
 
+  // Debug balance changes
+  useEffect(() => {
+    console.log('BalanceContext - Balance changed to:', balance);
+  }, [balance]);
+
   const addToBalance = useCallback((amount: number) => {
-    setBalance(prev => prev + amount);
-  }, []);
+    console.log('Adding to balance:', amount, 'Current balance:', balance);
+    setBalance(prev => {
+      const newBalance = prev + amount;
+      console.log('New balance will be:', newBalance);
+      return newBalance;
+    });
+  }, [balance]);
 
   const formatBalance = useCallback((amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -63,10 +81,15 @@ export function BalanceProvider({ children }: { children: React.ReactNode }) {
 
   const confirmDeposit = useCallback(() => {
     if (pendingDeposit !== null) {
+      console.log('Confirming deposit:', pendingDeposit);
+      console.log('Current balance before deposit:', balance);
       addToBalance(pendingDeposit);
       setPendingDeposit(null);
+      // Force immediate update
+      setUpdateTrigger(prev => prev + 1);
+      console.log('Deposit confirmed, updateTrigger incremented');
     }
-  }, [pendingDeposit, addToBalance]);
+  }, [pendingDeposit, addToBalance, balance]);
 
   // Process deposit from URL parameters (for mock integration)
   const processDepositFromURL = useCallback((amount: string) => {

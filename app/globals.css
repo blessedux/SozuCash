@@ -746,3 +746,35 @@ html:has(.test-page) {
   backdrop-filter: blur(25px) !important;
   border: 2px solid rgba(255, 255, 255, 0.4) !important;
 }
+
+/* Swipe gesture improvements */
+.cash-page {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; /* Allow touch actions but disable some defaults */
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure touch events are captured */
+.cash-page * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  touch-action: manipulation; /* Allow touch actions on all children */
+}
+
+/* Allow text selection in input fields */
+.cash-page input,
+.cash-page textarea {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  touch-action: manipulation; /* Allow touch actions on inputs */
+}

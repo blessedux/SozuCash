@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { NavigationProvider } from './_context/NavigationContext';
+import { AuthProvider } from './_context/AuthContext';
 import PersistentBackground from './_components/PersistentBackground';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -46,9 +47,11 @@ export default function RootLayout({
         {/* Persistent Background - Always present across all routes */}
         <PersistentBackground />
         
-        <NavigationProvider>
-          {children}
-        </NavigationProvider>
+        <AuthProvider>
+          <NavigationProvider>
+            {children}
+          </NavigationProvider>
+        </AuthProvider>
         
         <script
           dangerouslySetInnerHTML={{

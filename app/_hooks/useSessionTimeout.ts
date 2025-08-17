@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '../_context/AuthContext';
 
 const SESSION_TIMEOUT = 60 * 1000; // 60 seconds
 
 export function useSessionTimeout() {
-  const router = useRouter();
+  const { logout } = useAuth();
   const timeoutRef = useRef<NodeJS.Timeout>();
   const lastActivityRef = useRef<number>(Date.now());
 
@@ -20,10 +20,10 @@ export function useSessionTimeout() {
     timeoutRef.current = setTimeout(() => {
       // Only lock if the app has been inactive for the full duration
       if (Date.now() - lastActivityRef.current >= SESSION_TIMEOUT) {
-        router.push('/app');
+        logout();
       }
     }, SESSION_TIMEOUT);
-  }, [router]);
+  }, [logout]);
 
   // Reset timeout on user activity
   const handleActivity = useCallback(() => {

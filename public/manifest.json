@@ -2,7 +2,7 @@
   "name": "Sozu Cash",
   "short_name": "Sozu",
   "description": "NFC-first payments with one-tap flows on Mantle Network",
-  "start_url": "/",
+  "start_url": "/app",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",

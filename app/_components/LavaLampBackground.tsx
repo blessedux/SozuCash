@@ -93,17 +93,17 @@ void main() {
     vec2 newUV = (vUv - vec2(0.5)) * resolution.zw + vec2(0.5);
     vec3 cameraPos = vec3(0.0, 0.0, 5.0);
     vec3 ray = normalize(vec3((vUv - vec2(0.5)) * resolution.zw, -1));
-    vec3 color = vec3(1.0);
+    vec3 color = vec3(0.1, 0.2, 0.4); // Dark blue background
     
     float t = rayMarch(cameraPos, ray);
     if (t > 0.0) {
         vec3 p = cameraPos + ray * t;
         vec3 normal = getNormal(p);
         float fresnel = pow(1.0 + dot(ray, normal), 3.0);
-        color = vec3(fresnel);
+        color = vec3(0.8, 0.4, 0.2) * fresnel + vec3(0.2, 0.1, 0.3); // Orange lava with blue tint
         gl_FragColor = vec4(color, 1.0);
     } else {
-        gl_FragColor = vec4(1.0);
+        gl_FragColor = vec4(color, 1.0); // Use the dark blue background
     }
 }
 `
@@ -132,6 +132,7 @@ function LavaLampShader() {
     }
     
     uniforms.resolution.value.set(width, height, a1, a2)
+    console.log('LavaLampShader: Resolution updated', { width, height, a1, a2 });
   }, [size, uniforms])
 
   useFrame((state) => {
@@ -139,6 +140,8 @@ function LavaLampShader() {
       uniforms.time.value = state.clock.elapsedTime
     }
   })
+
+  console.log('LavaLampShader: Rendering');
 
   return (
     <mesh ref={meshRef}>
@@ -167,6 +170,12 @@ export default function LavaLampBackground() {
         }}
         orthographic
         gl={{ antialias: true }}
+        onCreated={(gl) => {
+          console.log('LavaLamp Canvas created successfully');
+        }}
+        onError={(error) => {
+          console.error('LavaLamp Canvas error:', error);
+        }}
       >
         <LavaLampShader />
       </Canvas>

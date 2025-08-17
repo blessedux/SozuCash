@@ -36,21 +36,21 @@ export function WalletPage() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex-shrink-0 p-6">
+      <div className="flex-shrink-0 p-4">
         {/* Title */}
         <motion.h1 
           initial={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           exit={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-lg font-bold text-white mb-4 text-center flex-shrink-0"
+          className="text-lg font-bold text-white mb-2 text-center flex-shrink-0"
         >
           Wallet
         </motion.h1>
         
         {/* Profile Picture */}
-        <div className="flex justify-center mb-3 flex-shrink-0">
-          <div className="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center overflow-hidden">
+        <div className="flex justify-center mb-2 flex-shrink-0">
+          <div className="w-12 h-12 border border-white/20 rounded-full flex items-center justify-center overflow-hidden">
             <img 
               src={userProfile.image} 
               alt={userProfile.name}
@@ -60,9 +60,9 @@ export function WalletPage() {
         </div>
       </div>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto pr-1 min-h-0">
-        <div className="space-y-2 pb-2">
+      {/* Content - No scrolling */}
+      <div className="flex-1 px-4 pb-4">
+        <div className="space-y-2">
           {/* Wallet Address */}
           <div className="text-center">
             <p className="text-white/50 text-xs mb-1">Wallet Address</p>

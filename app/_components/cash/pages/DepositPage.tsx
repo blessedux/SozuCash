@@ -10,7 +10,13 @@ import { useBalance } from '../../../_context/BalanceContext';
 export function DepositPage() {
   const [depositAmount, setDepositAmount] = useState('');
   const [isConfirming, setIsConfirming] = useState(false);
+  const [confirmedAmount, setConfirmedAmount] = useState<number | null>(null);
   const { confirmDeposit, formatBalance, setPendingDeposit, balance } = useBalance();
+
+  // Debug balance updates
+  useEffect(() => {
+    console.log('DepositPage - Balance updated:', balance);
+  }, [balance]);
 
   const handleDepositAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9.]/g, '');
@@ -20,14 +26,22 @@ export function DepositPage() {
   const handleDepositSubmit = () => {
     const amount = parseFloat(depositAmount);
     if (depositAmount && amount > 0) {
+      console.log('DepositPage - Starting deposit process:', amount);
       setPendingDeposit(amount);
+      setConfirmedAmount(amount);
       setIsConfirming(true);
 
       // Auto-confirm after 2 seconds
       setTimeout(() => {
+        console.log('DepositPage - Auto-confirming deposit:', amount);
         confirmDeposit();
-        setIsConfirming(false);
-        setDepositAmount('');
+        
+        // Add a small delay to ensure balance update is visible
+        setTimeout(() => {
+          setIsConfirming(false);
+          setDepositAmount('');
+          setConfirmedAmount(null);
+        }, 500); // Show confirmation for 500ms more
       }, 2000);
     }
   };
@@ -37,8 +51,12 @@ export function DepositPage() {
     return () => {
       setDepositAmount('');
       setIsConfirming(false);
+      setConfirmedAmount(null);
     };
   }, []);
+
+  // Calculate the new balance that will be shown after confirmation
+  const newBalance = confirmedAmount ? balance + confirmedAmount : balance;
 
   return (
     <div className="w-full h-full flex flex-col justify-center">
@@ -129,10 +147,10 @@ export function DepositPage() {
             className="text-center space-y-2 mb-4"
           >
             <p className="text-white/70">
-              <span className="text-green-400 font-semibold">+{formatBalance(parseFloat(depositAmount))}</span> added
+              <span className="text-green-400 font-semibold">+{formatBalance(confirmedAmount || 0)}</span> added
             </p>
             <p className="text-white/50 text-sm">
-              New Balance: <span className="text-white font-semibold">{formatBalance(balance)}</span>
+              New Balance: <span className="text-white font-semibold">{formatBalance(newBalance)}</span>
             </p>
           </motion.div>
           <button

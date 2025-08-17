@@ -3,34 +3,32 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { AnimatedTransition } from '../_components/shared/AnimatedTransition';
+import { useAuth } from '../_context/AuthContext';
 
 export default function LockedScreen() {
-  const [isUnlocking, setIsUnlocking] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const router = useRouter();
+  const { isAuthenticated, isLoading, authenticate } = useAuth();
 
   // Debug logging
   useEffect(() => {
     console.log('🔍 LockedScreen component mounted');
-    console.log('🔍 Component state:', { isUnlocking });
+    console.log('🔍 Auth state:', { isAuthenticated, isLoading });
     return () => {
       console.log('🔍 LockedScreen component unmounting');
     };
-  }, []);
+  }, [isAuthenticated, isLoading]);
 
+  // Redirect to cash page if already authenticated
   useEffect(() => {
-    console.log('🔍 isUnlocking changed:', isUnlocking);
-  }, [isUnlocking]);
+    if (isAuthenticated && !isLoading) {
+      router.push('/cash');
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   const handleUnlock = async () => {
     console.log('🔍 Unlock button clicked');
-    setIsUnlocking(true);
-    
-    // Simulate authentication process with better timing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Navigate to the main app
-    router.push('/cash');
+    await authenticate();
   };
 
   // Add app-route class to body for CSS styling (but not no-scroll)
@@ -44,7 +42,30 @@ export default function LockedScreen() {
     };
   }, []);
 
-  console.log('🔍 LockedScreen rendering, isUnlocking:', isUnlocking);
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="relative w-full h-screen overflow-hidden no-scroll">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30 z-[1] pointer-events-none" />
+        <div className="relative z-20 w-full h-full flex items-center justify-center px-4 pointer-events-none">
+          <div className="text-center w-80 mx-auto pointer-events-auto">
+            <div className="glassmorphic-card border border-white/20 rounded-3xl p-8 shadow-2xl h-96 flex flex-col w-full">
+              <div className="flex-1 flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if already authenticated (will redirect)
+  if (isAuthenticated) {
+    return null;
+  }
+
+  console.log('🔍 LockedScreen rendering, isAuthenticated:', isAuthenticated);
 
   return (
     <div className="relative w-full h-screen overflow-hidden no-scroll">
@@ -69,16 +90,16 @@ export default function LockedScreen() {
             <div className="flex-1 flex items-center justify-center mb-8">
               <button
                 onClick={handleUnlock}
-                disabled={isUnlocking}
+                disabled={isLoading}
                 className={`border border-white/30 text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-200 pointer-events-auto backdrop-blur-[20px] bg-white/20 min-h-[56px] flex items-center justify-center ${
-                  isUnlocking ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/30 active:scale-95'
+                  isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/30 active:scale-95'
                 }`}
               >
                 <div className="flex items-center justify-center space-x-3 min-w-[200px] bg-transparent">
-                  {isUnlocking && (
+                  {isLoading && (
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin bg-transparent" />
                   )}
-                  <span className="text-lg bg-transparent text-white">{isUnlocking ? 'Unlocking...' : 'Unlock with Passkeys'}</span>
+                  <span className="text-lg bg-transparent text-white">{isLoading ? 'Unlocking...' : 'Unlock with Passkeys'}</span>
                 </div>
               </button>
             </div>

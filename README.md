@@ -1,243 +1,123 @@
-# Sozu Cash — Permissionless P2P payments
+a# Sozu Cash - NFC Payment PWA
 
-A permissionless PWA with NFC-first payments and QR fallback, for accessible and frictionless Peer to Peer, private payments.
-
-## Vision
-
-**Goal**: Instant payments with a single tap. No KYC, no passwords, no friction.
-
-- **NFC-first**: Tap to pay, QR fallback everywhere
-- **Passkeys**: Biometric unlock (Face ID/Touch ID)
-- **One-tap flows**: If you tapped, that was your intent
-- **Mantle Network**: Fast, cheap USDC transfers
-- **PWA**: Install on home screen, works offline
+A Progressive Web App (PWA) for NFC-first payments with one-tap flows on Mantle Network.
 
 ## Features
 
-### Authentication
+- **PWA Support**: Installable on mobile devices with home screen access
+- **Authentication Flow**: Secure passkey-based authentication with session management
+- **NFC Payments**: Tap-to-pay functionality using Web NFC APIs
+- **QR Code Support**: Fallback payment method with QR code scanning
+- **Mantle Network**: Built on Mantle Network for fast, low-cost transactions
+- **Offline Support**: Service worker for offline functionality
 
-- **Passkeys (WebAuthn)**: Face ID/Touch ID unlock
-- **Privy SDK**: Embedded wallet creation
-- **No email/password**: Your keys stay in your device
+## PWA Installation
 
-### Payments
+### Android
 
-- **NFC Tags**: Android Web NFC read/write
-- **QR Codes**: Universal fallback for all devices
-- **One-tap auto-pay**: Unlocked = instant payment, no extra confirmation steps, no 2FA.
-- **USDC on Mantle**: Fast, cheap stablecoin transfers. No fees charged to the end user.
+1. Open the app in Chrome or any Chromium-based browser
+2. Tap the "Add to Home Screen" prompt or use the browser menu
+3. The app will be installed and accessible from your home screen
+4. When opened from home screen, users are directed to the authentication screen
 
-### User Experience
+### iOS
 
-- **Quick Window**: 60-second auto-pay sessions
-- **Spend caps**: Configurable limits for safety
-- **Optimistic UI**: "Paid ✓" immediately, then status
-- **Offline support**: Service worker for reliability
+1. Open the app in Safari
+2. Tap the share button and select "Add to Home Screen"
+3. The app will be installed and accessible from your home screen
+4. When opened from home screen, users are directed to the authentication screen
 
-## Architecture
+## Authentication Flow
 
-### Frontend (Next.js 14)
+The PWA implements a secure authentication flow:
 
-```
-/app
-  /i/[id]/page.tsx      # Deep-link: fetch invoice -> auto-pay
-  /receive/page.tsx     # Keypad -> sign invoice -> NFC write
-  /send/page.tsx        # Scan QR -> auto-pay
-  /_components/         # WaveOverlay, Keypad, BigQR, Toast
-  /_hooks/              # useQuickWindow, usePrivyWallet, useNFC
-/lib
-  invoices/             # Build, sign (EIP-712), verify, pin
-  payments/             # viem client, send, watcher
-  effects/              # Wave animations + haptics
-  rpc/                  # Multi-provider health/selection
-  nfc/                  # Android writer/reader helpers
-```
+1. **Home Screen Launch**: When opened from home screen, users are directed to `/app` (authentication screen)
+2. **Passkey Authentication**: Users authenticate using passkeys (WebAuthn)
+3. **Session Management**: Authentication state is stored locally with 24-hour expiration
+4. **Auto-logout**: Inactivity timeout of 60 seconds automatically logs users out
+5. **Manual Logout**: Users can manually lock the wallet using the lock button or ESC key
 
-### Backend (Vercel Edge Functions)
+## Development
 
-```
-/vercel
-  /edge/i/route.ts      # GET /i/:id shortlink -> JSON
-```
+```bash
+# Install dependencies
+npm install
 
-### Data Flow
+# Run development server
+npm run dev
 
-1. **Vendor creates invoice** → signs with EIP-712 → pins to IPFS
-2. **Short link generated** → `/i/ABC123` → Edge Function resolves
-3. **Payer taps NFC/QR** → deep link opens → auto-pay if unlocked
-4. **Transaction broadcast** → Mantle Network → confirmation
+# Build for production
+npm run build
 
-## Usage Flows
-
-### App Open (First Run)
-
-1. Splash screen → Passkey prompt (Face ID/biometrics)
-2. Privy creates embedded wallet on Mantle
-3. Home screen shows balance → user unlocked
-
-### Vendor — Create Invoice
-
-1. Navigate to `/receive` → keypad enter amount + memo
-2. Build + sign invoice → pin to IPFS → get short link
-3. **Android**: Write NDEF immediately → "Tag updated ✓"
-4. **iOS**: Show QR + note "Provision tag with Android"
-
-### Payer — Send Payment
-
-1. Tap vendor NFC tag (or scan QR) → deep link `/i/:id`
-2. If unlocked + Quick Window active → auto-sign & broadcast
-3. UI: "Paid ✓" (optimistic) + status chip
-4. If insufficient funds → full-screen failure toast + "Deposit"
-
-### QR Fallback (Universal)
-
-- Vendor shows QR of invoice link
-- Payer taps "Pay" → "Scan" → camera opens
-- Auto-pay upon decode (if unlocked)
-
-## Technical Stack
-
-### Client
-
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **State**: Zustand
-- **Wallet**: Privy SDK (embedded + passkeys)
-- **EVM**: viem (Mantle config)
-- **QR**: zxing-js/browser (scan), qrcode (generate)
-- **NFC**: Web NFC APIs (NDEFReader/Writer)
-- **Animations**: WebGL + SVG fallback
-
-### Backend
-
-- **Platform**: Vercel Edge Functions
-- **Runtime**: Node 20 (Edge Runtime)
-- **Storage**: Vercel KV (caching)
-- **IPFS**: web3.storage/Pinata client
-
-### Blockchain
-
-- **Network**: Mantle Network (L2)
-- **Token**: USDC
-- **Contracts**: ERC-20 direct transfer
-
-## Safety Features
-
-### Quick Window
-
-- **Default**: 60-second auto-pay window
-- **Spend cap**: $50 total, $25 per transaction
-- **Auto-extend**: +30s on successful payment near expiry
-
-### Security
-
-- **Anti-replay**: Nonce + expiration tracking
-- **Signature verification**: EIP-712 over all invoice fields
-- **Vendor allow-listing**: Optional vendor verification
-- **Local nonce cache**: Prevent double-spending
-
-## Invoice Schema
-
-```json
-{
-  "v": 1,
-  "net": "mantle",
-  "token": "USDC",
-  "dec": 6,
-  "to": "0xVENDOR",
-  "amt": "1250000",
-  "memo": "Americano x2",
-  "nonce": "0x04f3...af",
-  "exp": 1733184000,
-  "sig": "0x..." // EIP-712 over all fields
-}
+# Start production server
+npm start
 ```
 
-## 🎨 Design System
+## Environment Variables
 
-### Reused from Chrome Extension
+Create a `.env.local` file with the following variables:
 
-- **Locked screen**: Biometric prompt design
-- **Balance display**: Clean, minimal styling
-- **Button components**: Consistent interactions
-- **Dark mode**: Full theme support
-- **Toast system**: Success/error notifications
+```env
+NEXT_PUBLIC_MANTLE_CHAIN_ID=5000
+NEXT_PUBLIC_MANTLE_RPC_URLS=https://rpc.mantle.xyz
+NEXT_PUBLIC_USDC_ADDRESS=0x...
+PRIVY_APP_ID=your_privy_app_id
+PRIVY_APP_SECRET=your_privy_app_secret
+KV_REST_API_URL=your_vercel_kv_url
+KV_REST_API_TOKEN=your_vercel_kv_token
+```
 
-### New Components
+## Project Structure
 
-- **WaveOverlay**: Success animation on payment
-- **Keypad**: Amount input with haptic feedback
-- **BigQR**: Full-screen QR code display
-- **Camera**: QR scanner with real-time detection
+```
+app/
+├── _components/          # Reusable UI components
+├── _context/            # React contexts (Auth, Navigation, Wallet)
+├── _hooks/              # Custom React hooks
+├── _types/              # TypeScript type definitions
+├── app/                 # Authentication screen (/app)
+├── cash/                # Main wallet interface (/cash)
+├── auth/                # Legacy auth page
+└── layout.tsx           # Root layout with providers
+```
 
-## Known Limitations
+## Key Features
 
-### Platform Constraints
+### Authentication Context
 
-- **iOS NFC**: Cannot write tags from web (use Android to provision)
-- **Phone↔phone NFC**: Not available on web (future-proof payloads)
-- **Biometrics**: Cold starts may require Face ID once
+- Manages authentication state across the app
+- Handles session persistence and expiration
+- Provides logout functionality
 
-### Browser Support
+### Session Timeout
 
-- **Web NFC**: Chrome/Edge on Android only
-- **Passkeys**: Modern browsers with biometric hardware
-- **PWA**: All modern browsers
+- 60-second inactivity timeout
+- Automatically logs users out after inactivity
+- Resets on user activity (touch, scroll, keyboard)
+
+### PWA Configuration
+
+- `start_url: "/app"` - Directs to authentication screen when launched from home screen
+- Service worker for offline functionality
+- Manifest with proper icons and metadata
 
 ## Testing
 
-### Manual Testing
-
 ```bash
-# Android Chrome
-npm run test:android-nfc
+# Run tests
+npm test
 
-# iOS Safari
-npm run test:ios-deeplink
+# Run type checking
+npx tsc --noEmit
 
-# QR Scanner
-npm run test:qr-scan
-
-# Payment Flows
-npm run test:payment
+# Run linting
+npm run lint
 ```
 
-### Automated Testing
+## Deployment
 
-```bash
-npm run test:unit
-npm run test:integration
-npm run test:e2e
-```
-
-## Performance Targets
-
-- **App load**: < 2 seconds
-- **NFC read/write**: < 500ms
-- **Payment confirmation**: < 3 seconds
-- **Uptime**: 99.9% on Vercel
-- **One-tap success**: > 95%
+The app is configured for deployment on Vercel with Edge Functions for API routes.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Built on [Mantle Network](https://mantle.xyz)
-- Powered by [Privy](https://privy.io) for passkeys
-- Deployed on [Vercel](https://vercel.com)
-- Original Idea from SozuHaus Denver Feb 25' [SozuHaus](https://x.com/sozuhaus)
-
----
-
-## 📞 Support
-
-- **Documentation**: [docs.sozu.cash](https://docs.sozu.cash)
-
-- **Twitter**: [@sozucash](https://twitter.com/sozucash)
-
----
-
-_Sozu Cash — Tap to pay, instantly._
+MIT License

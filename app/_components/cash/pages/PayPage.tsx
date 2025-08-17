@@ -20,8 +20,33 @@ export function PayPage() {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [sendPaymentSuccess, setSendPaymentSuccess] = useState(false);
   const router = useRouter();
-  const { balance, formatBalance } = useBalance();
+  const { balance, formatBalance, addToBalance } = useBalance();
   const { setCurrentVerticalPage, currentPage } = useNavigation();
+
+  // Debug balance updates
+  useEffect(() => {
+    console.log('PayPage - Balance updated:', balance);
+  }, [balance]);
+
+  // Force re-render when balance changes
+  useEffect(() => {
+    console.log('PayPage - Re-rendering due to balance change:', balance);
+  }, [balance]);
+
+  // Debug component mount/unmount
+  useEffect(() => {
+    console.log('PayPage - Component mounted with balance:', balance);
+    return () => {
+      console.log('PayPage - Component unmounting with balance:', balance);
+    };
+  }, [balance]);
+
+  // Temporary test function
+  const testBalanceUpdate = () => {
+    console.log('Testing balance update - current balance:', balance);
+    addToBalance(100);
+    console.log('Added $100 to balance');
+  };
 
   const handleUserSelect = (user: UserProfile) => { setSelectedUser(user); };
   const handlePaymentComplete = (amount: string) => {
@@ -120,9 +145,20 @@ export function PayPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
               onClick={() => setShowSendScreen(true)}
-              className="text-white/70 text-sm hover:text-white transition-colors mt-4"
+              className="text-white text-sm hover:text-white mt-4"
             >
               Or send money to a user ↓
+            </motion.button>
+
+            {/* Temporary Test Button */}
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              onClick={testBalanceUpdate}
+              className="text-red-400 text-xs hover:text-red-300 mt-2"
+            >
+              Test: Add $100
             </motion.button>
           </div>
         </motion.div>

@@ -14,10 +14,22 @@ export function NavigationProvider({ children }: NavigationProps) {
   
   const [slideDirection, setSlideDirection] = useState<SlideDirection>('up');
   const [isDragging, setIsDragging] = useState(false);
+  const [lastNavigationTime, setLastNavigationTime] = useState(0);
 
   // Helper function for infinite carousel navigation
   const navigateHorizontal = (direction: 'left' | 'right') => {
-    console.log('navigateHorizontal called with direction:', direction);
+    const now = Date.now();
+    const timeSinceLastNav = now - lastNavigationTime;
+    
+    // Prevent rapid successive navigation calls (less than 300ms apart)
+    if (timeSinceLastNav < 300) {
+      console.log('Navigation blocked - too rapid:', timeSinceLastNav, 'ms');
+      return;
+    }
+    
+    console.log('navigateHorizontal called with direction:', direction, 'after', timeSinceLastNav, 'ms');
+    setLastNavigationTime(now);
+    
     if (direction === 'left') {
       // Go left: Pay -> Wallet -> Deposit -> Pay
       setCurrentPage(prev => {
@@ -37,7 +49,18 @@ export function NavigationProvider({ children }: NavigationProps) {
 
   // Helper function for vertical navigation
   const navigateVertical = (direction: 'up' | 'down') => {
-    console.log('navigateVertical called with direction:', direction);
+    const now = Date.now();
+    const timeSinceLastNav = now - lastNavigationTime;
+    
+    // Prevent rapid successive navigation calls (less than 300ms apart)
+    if (timeSinceLastNav < 300) {
+      console.log('Navigation blocked - too rapid:', timeSinceLastNav, 'ms');
+      return;
+    }
+    
+    console.log('navigateVertical called with direction:', direction, 'after', timeSinceLastNav, 'ms');
+    setLastNavigationTime(now);
+    
     if (direction === 'down') {
       // Go down to sub-screen
       switch (currentPage) {

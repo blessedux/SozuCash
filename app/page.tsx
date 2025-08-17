@@ -13,7 +13,7 @@ export default function LandingPage() {
       <LavaLampBackground />
 
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/40 z-[1]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-black/10 z-[1]" />
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-12">
