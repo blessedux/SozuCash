@@ -57,13 +57,22 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
         <input
           ref={ref}
           className={`
-            ${baseStyles}
-            ${sizeStyles}
-            ${disabledStyles}
-            ${errorStyles}
-            ${leftIcon ? 'pl-12' : ''}
-            ${rightIcon ? 'pr-12' : ''}
-            ${className}
+            w-full 
+            px-4 
+            py-3 
+            text-white 
+            placeholder-white/50 
+            bg-white/10 
+            border 
+            border-white/20 
+            rounded-xl 
+            backdrop-blur-[15px]
+            focus:outline-none 
+            focus:ring-2 
+            focus:ring-white/30 
+            transition-all 
+            duration-200
+            ${className || ''}
           `}
           disabled={disabled}
           {...props}

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '../../ui/Input';
-import { useWallet } from '../../../_context/WalletContext';
 
 interface UserProfile {
   pfp: string;
@@ -22,7 +21,6 @@ export function UserSearch({ onUserSelect, onUserConfirm }: UserSearchProps) {
   const [userFound, setUserFound] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isUserConfirmed, setIsUserConfirmed] = useState(false);
-  const { isConnectedToX } = useWallet();
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
@@ -71,14 +69,6 @@ export function UserSearch({ onUserSelect, onUserConfirm }: UserSearchProps) {
       }
     }
   };
-
-  if (!isConnectedToX) {
-    return (
-      <div className="text-center text-white/70">
-        Please connect your X account to search for users.
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4">

@@ -18,13 +18,12 @@ export function GlassmorphicCard({
 }: GlassmorphicCardProps) {
   const { handleDragStart, handleDragEnd } = useSwipe();
 
-  const getBlurClass = () => {
+  const getBlurClass = (blurLevel: number) => {
     switch (blurLevel) {
-      case 0: return ''; // No blur
-      case 1: return 'backdrop-blur-[5px]'; // 5% blur
-      case 2: return 'backdrop-blur-[10px]'; // 10% blur
-      case 3: return 'backdrop-blur-[15px]'; // 15% blur
-      default: return 'backdrop-blur-[5px]'; // Default to 5%
+      case 1: return 'backdrop-blur-[15px]'; // 15px blur
+      case 2: return 'backdrop-blur-[15px]'; // 15px blur
+      case 3: return 'backdrop-blur-[15px]'; // 15px blur
+      default: return 'backdrop-blur-[15px]'; // Default to 15px
     }
   };
 
@@ -51,7 +50,7 @@ export function GlassmorphicCard({
         justify-center 
         cursor-grab 
         active:cursor-grabbing 
-        ${getBlurClass()} 
+        ${getBlurClass(blurLevel)} 
         pointer-events-auto 
         transition-all 
         duration-500 

@@ -8,7 +8,7 @@ const WalletContext = createContext<WalletState | undefined>(undefined);
 // Mock data - in real app this would come from your backend/blockchain
 const mockUserProfile: UserProfile = {
   name: "John Doe",
-  image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+  image: "/pfp/pfp3.jpg",
   username: "@johndoe"
 };
 

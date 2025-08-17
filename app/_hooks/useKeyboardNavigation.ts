@@ -3,82 +3,97 @@
 import { useEffect } from 'react';
 import { useNavigation } from '../_context/NavigationContext';
 import { useRouter } from 'next/navigation';
+import { SCREEN_NAVIGATION } from '../_types/navigation';
 
-interface UseKeyboardNavigationProps {
+interface KeyboardNavigationConfig {
   onEscape?: () => void;
   onEnter?: () => void;
-  disableNavigation?: boolean;
+  enableVerticalNavigation?: boolean;
+  enableHorizontalNavigation?: boolean;
 }
 
 export function useKeyboardNavigation({
   onEscape,
   onEnter,
-  disableNavigation = false
-}: UseKeyboardNavigationProps = {}) {
+  enableVerticalNavigation = true,
+  enableHorizontalNavigation = true
+}: KeyboardNavigationConfig) {
   const { 
     currentPage, 
     setCurrentPage, 
-    setSlideDirection 
+    currentVerticalPage, 
+    setCurrentVerticalPage,
+    navigateHorizontal,
+    navigateVertical
   } = useNavigation();
-  const router = useRouter();
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Don't handle keyboard events if user is typing in an input field
-      if (event.target instanceof HTMLInputElement || 
-          event.target instanceof HTMLTextAreaElement) {
+      // Prevent navigation when typing in input fields
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
         return;
       }
 
-      switch (event.key.toLowerCase()) {
-        case 'arrowright':
-        case 'd':
-          if (!disableNavigation) {
-            event.preventDefault();
-            setSlideDirection('left');
-            setCurrentPage(currentPage === 3 ? 0 : currentPage + 1);
-          }
+      switch (event.key) {
+        case 'Escape':
+          event.preventDefault();
+          onEscape?.();
           break;
 
-        case 'arrowleft':
+        case 'Enter':
+          event.preventDefault();
+          onEnter?.();
+          break;
+
+        // Horizontal navigation (A/D keys and arrow keys)
         case 'a':
-          if (!disableNavigation) {
+        case 'A':
+        case 'ArrowLeft':
+          if (enableHorizontalNavigation) {
             event.preventDefault();
-            setSlideDirection('right');
-            setCurrentPage(currentPage === 0 ? 3 : currentPage - 1);
+            navigateHorizontal('left');
           }
           break;
 
-        case 'escape':
-        case 'esc':
-          event.preventDefault();
-          if (onEscape) {
-            onEscape();
-          } else {
-            // Default escape behavior: return to app screen
-            router.push('/app');
+        case 'd':
+        case 'D':
+        case 'ArrowRight':
+          if (enableHorizontalNavigation) {
+            event.preventDefault();
+            navigateHorizontal('right');
           }
           break;
 
-        case 'enter':
-        case ' ':
-          event.preventDefault();
-          if (onEnter) {
-            onEnter();
+        // Vertical navigation (W/S keys and up/down arrows)
+        case 'w':
+        case 'W':
+        case 'ArrowUp':
+          if (enableVerticalNavigation) {
+            event.preventDefault();
+            navigateVertical('up');
+          }
+          break;
+
+        case 's':
+        case 'S':
+        case 'ArrowDown':
+          if (enableVerticalNavigation) {
+            event.preventDefault();
+            navigateVertical('down');
+          }
+          break;
+
+        // Special case: S key for locking wallet (when not in vertical navigation)
+        case 'S':
+          if (!enableVerticalNavigation) {
+            event.preventDefault();
+            // This will be handled by the parent component
           }
           break;
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [
-    currentPage, 
-    setCurrentPage, 
-    setSlideDirection, 
-    disableNavigation, 
-    onEscape, 
-    onEnter,
-    router
-  ]);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onEscape, onEnter, enableVerticalNavigation, enableHorizontalNavigation, navigateHorizontal, navigateVertical]);
 }

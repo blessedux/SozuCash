@@ -20,15 +20,25 @@ export function SwipeNavigation({
   const { handleDragStart, handleDragEnd } = useSwipe();
 
   return (
-    <div className="relative z-20 text-center w-80 mx-auto pointer-events-none flex justify-center">
-      <AnimatePresence mode="wait">
-        <GlassmorphicCard
-          blurLevel={blurLevel}
-          className={className}
-        >
-          {children}
-        </GlassmorphicCard>
-      </AnimatePresence>
+    <div className="relative z-20 text-center w-80 mx-auto pointer-events-auto flex justify-center">
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.1}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        style={{ touchAction: 'none' }}
+        className="w-full"
+      >
+        <AnimatePresence mode="wait">
+          <GlassmorphicCard
+            blurLevel={blurLevel}
+            className={className}
+          >
+            {children}
+          </GlassmorphicCard>
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 }

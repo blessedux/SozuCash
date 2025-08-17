@@ -1,9 +1,10 @@
-import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import SplineBackground from './_components/SplineBackground'
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { NavigationProvider } from './_context/NavigationContext';
+import PersistentBackground from './_components/PersistentBackground';
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Sozu Cash — Tap to Pay',
@@ -26,43 +27,29 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
-}
-
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  themeColor: '#ffffff',
-  viewportFit: 'cover',
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/android-chrome-192x192.png" type="image/png" sizes="192x192" />
-        <link rel="apple-touch-icon" href="/android-chrome-192x192.png" />
-        <link rel="apple-touch-icon" sizes="192x192" href="/android-chrome-192x192.png" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Sozu Cash" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no" />
         <meta name="theme-color" content="#ffffff" />
         <meta name="msapplication-TileColor" content="#ffffff" />
         <meta name="msapplication-TileImage" content="/android-chrome-192x192.png" />
       </head>
-      <body className={`${inter.className} bg-white`} style={{ backgroundColor: 'white' }}>
-        {/* Persistent Spline Background */}
-        <div className="fixed inset-0 z-0 pointer-events-none">
-          <SplineBackground scale={1.2} />
-        </div>
-        {children}
+      <body className={inter.className}>
+        {/* Persistent Background - Always present across all routes */}
+        <PersistentBackground />
+        
+        <NavigationProvider>
+          {children}
+        </NavigationProvider>
+        
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -82,5 +69,5 @@ export default function RootLayout({
         />
       </body>
     </html>
-  )
+  );
 }

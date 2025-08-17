@@ -3,12 +3,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { TrendingUp, Shield, Zap, Star, ArrowRight, Info } from 'lucide-react';
+import { TrendingUp, Shield, Zap, Star, ArrowRight, Info, Lock } from 'lucide-react';
+import { useNavigation } from '../_context/NavigationContext';
 
 export default function InvestPage() {
   const router = useRouter();
+  const { setCurrentVerticalPage } = useNavigation();
   const [selectedFund, setSelectedFund] = useState<string | null>(null);
   const [investmentSuccess, setInvestmentSuccess] = useState(false);
+
+  // Set current vertical page to invest (3) when page mounts
+  useEffect(() => {
+    setCurrentVerticalPage(3);
+  }, [setCurrentVerticalPage]);
 
   // Mock investment funds data
   const investmentFunds = [
@@ -79,10 +86,29 @@ export default function InvestPage() {
     <div className="relative w-full h-screen overflow-hidden no-scroll">
       {/* Main Content */}
       <motion.div
-        className="relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-4 py-8 pointer-events-none"
+        className="relative z-30 w-full min-h-screen flex flex-col items-center justify-center px-4 py-8 pointer-events-none"
         style={{ backgroundColor: 'transparent' }}
       >
         
+        {/* Sozu Cash Logo */}
+        <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
+          <img 
+            src="/sozu-logo.png" 
+            alt="Sozu Cash" 
+            className="w-20"
+          />
+        </div>
+
+        {/* Mobile Lock Button - Top Left */}
+        <button
+          onClick={() => router.push('/app')}
+          className="absolute top-8 left-4 z-20 text-white/70 hover:text-white transition-colors pointer-events-auto md:hidden"
+          aria-label="Lock wallet"
+          title="Lock Wallet"
+        >
+          <Lock size={24} />
+        </button>
+
         <div className="relative z-20 text-center w-80 mx-auto pointer-events-auto" style={{ backgroundColor: 'transparent' }}>
           {/* Glassmorphism Card */}
           <div className="border border-white/10 rounded-3xl p-8 shadow-2xl w-full h-96 flex items-center justify-center pointer-events-none backdrop-blur-[10px]">

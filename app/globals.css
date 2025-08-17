@@ -6,7 +6,7 @@
 @layer base {
   html {
     /* Removed scroll-behavior: smooth to prevent conflicts with Lenis */
-    background-color: white;
+    background-color: #fafafa;
   }
   
   body {
@@ -16,8 +16,13 @@
   }
 
   /* Only apply white background when not in app navigation and not on landing page */
-  body:not(.no-scroll):not(.landing-page) {
-    background-color: white !important;
+  body:not(.no-scroll):not(.landing-page):not(.app-route) {
+    background-color: #fafafa !important;
+  }
+
+  /* App routes should have consistent dark backgrounds */
+  body.app-route {
+    background-color: transparent !important;
   }
 
   /* Ensure consistent white background across all mobile devices */
@@ -37,7 +42,7 @@
 
     /* Ensure viewport is always white */
   #__next {
-    background-color: white;
+    background-color: #fafafa;
     min-height: 100vh;
     min-height: 100dvh;
   }
@@ -47,7 +52,7 @@
   [data-page],
   main,
   div[role="main"] {
-    background-color: white !important;
+    background-color: #fafafa !important;
   }
 
   /* Fix for any potential purple backgrounds */
@@ -57,12 +62,52 @@
 
     /* Ensure root elements maintain white background */
   html, body, #__next, #root {
-    background-color: white !important;
+    background-color: #fafafa !important;
+  }
+
+  /* App route specific overrides */
+  body.app-route,
+  body.app-route #__next,
+  body.app-route #root {
+    background-color: transparent !important;
   }
 
   /* Allow LavaLampBackground to override white background */
   .lava-lamp-container {
     background-color: transparent !important;
+  }
+
+  /* Ensure SplineBackground has proper interaction handling */
+  .spline-background {
+    pointer-events: auto !important;
+    z-index: 0 !important;
+  }
+
+  .spline-background iframe {
+    pointer-events: auto !important;
+    border: none !important;
+    outline: none !important;
+  }
+
+  /* Ensure LavaLamp overlay doesn't block SplineBackground interactions */
+  .lava-lamp-overlay {
+    pointer-events: none !important;
+    z-index: 1 !important;
+  }
+
+  .lava-lamp-overlay canvas {
+    pointer-events: none !important;
+  }
+
+  /* Force SplineBackground to be interactive */
+  .spline-background * {
+    pointer-events: auto !important;
+  }
+
+  /* Ensure no other elements block SplineBackground */
+  .hybrid-background .spline-background {
+    pointer-events: auto !important;
+    z-index: 0 !important;
   }
 
   /* Ensure landing page background works */
@@ -472,4 +517,10 @@ html:has(.test-page) {
 
 .qr-frame::after {
   @apply bottom-0 right-0 border-l-0 border-t-0;
+}
+
+/* Ensure HybridBackground is visible */
+.hybrid-background {
+  background-color: transparent !important;
+  z-index: 0 !important;
 }

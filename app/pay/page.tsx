@@ -1,14 +1,30 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Wifi, Camera, ArrowLeft, CheckCircle } from 'lucide-react';
+import { CheckCircle, Lock } from 'lucide-react';
+import HybridBackground from '../_components/HybridBackground';
+import { useNavigation } from '../_context/NavigationContext';
 
 export default function PayScreen() {
   const [currentStep, setCurrentStep] = useState<'success'>('success');
   const [amount] = useState('9.99'); // Fixed amount for demo
   const router = useRouter();
+  const { setCurrentVerticalPage } = useNavigation();
+
+  // Set app-route class on body for consistent background styling
+  useEffect(() => {
+    document.body.classList.add('app-route');
+    return () => {
+      document.body.classList.remove('app-route');
+    };
+  }, []);
+
+  // Set current vertical page to pay (1) when pay page mounts
+  useEffect(() => {
+    setCurrentVerticalPage(1);
+  }, [setCurrentVerticalPage]);
 
   // Add payment to tracking and auto return to app after 3 seconds
   useEffect(() => {
@@ -27,7 +43,7 @@ export default function PayScreen() {
     
     // Auto return to app after 3 seconds
     const timer = setTimeout(() => {
-      router.push('/app-navigation');
+      router.push('/app');
     }, 3000);
     return () => clearTimeout(timer);
   }, [router, amount]);
@@ -43,6 +59,19 @@ export default function PayScreen() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden no-scroll">
+      {/* Persistent Background - Same as /app and /cash routes */}
+      <div className="fixed inset-0 z-0">
+        <HybridBackground 
+          scale={1.2} 
+          enableInteractions={true}
+          lavaOpacity={0.3}
+          showLavaBubbles={true}
+        />
+      </div>
+
+      {/* Gradient Overlay - Same as /app and /cash routes */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30 z-[1] pointer-events-none" />
+
       {/* Sozu Cash Logo */}
       <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
         <img 
@@ -51,6 +80,16 @@ export default function PayScreen() {
           className="w-20"
         />
       </div>
+
+      {/* Mobile Lock Button - Top Left */}
+      <button
+        onClick={() => router.push('/app')}
+        className="absolute top-8 left-4 z-20 text-white/70 hover:text-white transition-colors pointer-events-auto md:hidden"
+        aria-label="Lock wallet"
+        title="Lock Wallet"
+      >
+        <Lock size={24} />
+      </button>
 
       {/* Main Content */}
       <motion.div
@@ -61,7 +100,7 @@ export default function PayScreen() {
         
         <div className="relative z-20 text-center w-80 mx-auto pt-20 pointer-events-auto" style={{ backgroundColor: 'transparent' }}>
           {/* Glassmorphism Card */}
-          <div className="border border-white/10 rounded-3xl p-8 shadow-2xl w-full h-96 flex items-center justify-center pointer-events-none backdrop-blur-[10px]">
+          <div className="border border-white/10 rounded-3xl p-8 shadow-2xl w-full h-96 flex items-center justify-center pointer-events-none backdrop-blur-[10px] bg-white/5">
             
             {currentStep === 'success' && (
               /* Payment Success Screen */

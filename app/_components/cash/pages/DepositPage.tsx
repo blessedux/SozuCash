@@ -1,0 +1,133 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { Input } from '../../ui/Input';
+import { Button } from '../../ui/Button';
+import { useBalance } from '../../../_context/BalanceContext';
+
+export function DepositPage() {
+  const [depositAmount, setDepositAmount] = useState('');
+  const [isConfirming, setIsConfirming] = useState(false);
+  const { confirmDeposit, formatBalance, setPendingDeposit } = useBalance();
+
+  const handleDepositAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9.]/g, '');
+    setDepositAmount(value);
+  };
+
+  const handleDepositSubmit = () => {
+    const amount = parseFloat(depositAmount);
+    if (depositAmount && amount > 0) {
+      setPendingDeposit(amount);
+      setIsConfirming(true);
+
+      // Auto-confirm after 4 seconds
+      setTimeout(() => {
+        confirmDeposit();
+        setIsConfirming(false);
+        setDepositAmount('');
+      }, 4000);
+    }
+  };
+
+  // Clear state when unmounting
+  useEffect(() => {
+    return () => {
+      setDepositAmount('');
+      setIsConfirming(false);
+    };
+  }, []);
+
+  return (
+    <div className="w-full h-full flex flex-col justify-center">
+      {!isConfirming ? (
+        <>
+          {/* Title */}
+          <motion.h1 
+            initial={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="text-lg font-bold text-white mb-4 text-center drop-shadow-lg"
+          >
+            Deposit
+          </motion.h1>
+
+          {/* Amount Input Field */}
+          <div className="relative mb-6 bg-transparent">
+            <Input
+              type="text"
+              inputMode="decimal"
+              value={depositAmount}
+              onChange={handleDepositAmountChange}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleDepositSubmit();
+                }
+              }}
+              placeholder="0.00"
+              className="w-full border border-white/20 text-white text-4xl font-bold text-center py-8 px-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 placeholder-white/30 pointer-events-auto shadow-lg bg-transparent"
+            />
+            {depositAmount && (
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50 text-lg">
+                USD
+              </div>
+            )}
+          </div>
+
+          {/* Enter Button */}
+          <Button
+            onClick={handleDepositSubmit}
+            disabled={!depositAmount || parseFloat(depositAmount) <= 0}
+            className="w-full font-semibold py-4 px-6 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-[15px] bg-white/10 border border-white/20 shadow-lg"
+          >
+            Enter
+          </Button>
+        </>
+      ) : (
+        /* Confirmation Screen */
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="w-full h-full flex flex-col justify-center items-center text-center"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 10, delay: 0.2 }}
+            className="w-20 h-20 mx-auto mb-4 bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-400/30"
+          >
+            <span className="text-green-400 text-4xl">✓</span>
+          </motion.div>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-2xl font-bold text-white mb-3"
+          >
+            Deposit Confirmed!
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="text-white/70 mb-4"
+          >
+            {formatBalance(parseFloat(depositAmount))} has been added to your balance.
+          </motion.p>
+          <button
+                onClick={handleDepositSubmit}
+                disabled={isConfirming}
+                className="w-full font-semibold py-4 px-6 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-[15px] bg-white/10 border border-white/20 shadow-lg"
+              >
+                Confirm
+              </button>
+        </motion.div>
+      )}
+    </div>
+  );
+}

@@ -1,14 +1,29 @@
 'use client';
-
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { AnimatedTransition } from '../_components/shared/AnimatedTransition';
 
 export default function LockedScreen() {
   const [isUnlocking, setIsUnlocking] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
   const router = useRouter();
 
+  // Debug logging
+  useEffect(() => {
+    console.log('🔍 LockedScreen component mounted');
+    console.log('🔍 Component state:', { isUnlocking });
+    return () => {
+      console.log('🔍 LockedScreen component unmounting');
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log('🔍 isUnlocking changed:', isUnlocking);
+  }, [isUnlocking]);
+
   const handleUnlock = async () => {
+    console.log('🔍 Unlock button clicked');
     setIsUnlocking(true);
     
     // Simulate authentication process with better timing
@@ -18,91 +33,95 @@ export default function LockedScreen() {
     router.push('/cash');
   };
 
+  // Add app-route class to body for CSS styling (but not no-scroll)
+  React.useEffect(() => {
+    console.log('🔍 Adding app-route class to body');
+    document.body.classList.add('app-route');
+    console.log('🔍 Body classes after adding app-route:', document.body.className);
+    return () => {
+      console.log('🔍 Removing app-route class from body');
+      document.body.classList.remove('app-route');
+    };
+  }, []);
+
+  console.log('🔍 LockedScreen rendering, isUnlocking:', isUnlocking);
+
   return (
     <div className="relative w-full h-screen overflow-hidden no-scroll">
-      {/* Content Overlay */}
-      <div className="relative z-10 w-full h-full flex items-center justify-center px-4 pointer-events-none" style={{ backgroundColor: 'transparent' }}>
-        <div className="text-center w-80 mx-auto" style={{ backgroundColor: 'transparent' }}>
-          {/* Glassmorphism Card */}
-          <div className="border border-white/10 rounded-3xl p-8 shadow-2xl pointer-events-none h-96 flex flex-col w-full">
-          {/* Logo */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="mb-8"
+      {/* Gradient Overlay - Ensure it doesn't block pointer events */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30 z-[1] pointer-events-none" />
+      
+      {/* Content */}
+      <div className="relative z-20 w-full h-full flex items-center justify-center px-4 pointer-events-none">
+        <div className="text-center w-80 mx-auto pointer-events-auto">
+          {/* Glassmorphic Card - Fully transparent, no blur */}
+          <div 
+            className={`glassmorphic-card border border-white/20 rounded-3xl p-8 shadow-2xl h-96 flex flex-col w-full transition-opacity duration-500 ${
+              isMinimized ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'
+            }`}
           >
-            <img 
-              src="/sozu-logo.png" 
-              alt="Sozu Cash" 
-              className="h-24 mx-auto mb-6"
-            />
-          </motion.div>
+            {/* Logo - Top section */}
+            <div className="flex-shrink-0 mb-8">
+              <img src="/sozu-logo.png" alt="Sozu Cash" className="h-24 mx-auto" />
+            </div>
+            
+            {/* Unlock Button - Perfectly centered */}
+            <div className="flex-1 flex items-center justify-center mb-8">
+              <button
+                onClick={handleUnlock}
+                disabled={isUnlocking}
+                className={`border border-white/30 text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-200 pointer-events-auto backdrop-blur-[20px] bg-white/20 min-h-[56px] flex items-center justify-center ${
+                  isUnlocking ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/30 active:scale-95'
+                }`}
+              >
+                <div className="flex items-center justify-center space-x-3 min-w-[200px] bg-transparent">
+                  {isUnlocking && (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin bg-transparent" />
+                  )}
+                  <span className="text-lg bg-transparent text-white">{isUnlocking ? 'Unlocking...' : 'Unlock with Passkeys'}</span>
+                </div>
+              </button>
+            </div>
 
-          {/* Unlock Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-          >
-            <button
-              onClick={handleUnlock}
-              disabled={isUnlocking}
-              className={`w-full border border-white/20 text-white font-semibold py-4 px-6 rounded-2xl transition-all duration-200 pointer-events-auto backdrop-blur-[10px] min-h-[56px] flex items-center justify-center ${
-                isUnlocking 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'hover:bg-white/5 active:scale-95'
-              }`}
-            >
-              <div className="flex items-center justify-center space-x-2 min-w-[200px]">
-                {isUnlocking && (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
-                  />
-                )}
-                <span>{isUnlocking ? 'Unlocking...' : 'Unlock with Passkeys'}</span>
-              </div>
-            </button>
-          </motion.div>
-
-          {/* Support Button */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 1.0 }}
-            className="mt-auto pt-6"
-          >
-            <button 
-              onClick={() => window.open('https://t.me/blessedux', '_blank')}
-              className="w-full text-black font-semibold py-3 px-6 rounded-2xl transition-all duration-200 pointer-events-auto hover:bg-white/5 active:scale-95"
-            >
-              Get Support
-            </button>
-          </motion.div>
+            {/* Get Support Link - Bottom of card */}
+            <div className="flex-shrink-0 text-center">
+              <a 
+                href="https://t.me/blessedux" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-black font-medium text-sm hover:text-gray-700 transition-colors"
+              >
+                Get Support
+              </a>
+            </div>
           </div>
-        </div>
-       </div>
-
-      {/* Status Bar */}
-      <div className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center px-6 py-4">
-        <div className="text-white/70 text-sm">9:41</div>
-        <div className="flex items-center space-x-1">
-          <div className="w-6 h-3 border border-white/70 rounded-sm">
-            <div className="w-4 h-1 bg-white/70 rounded-sm m-0.5"></div>
-          </div>
-          <div className="text-white/70 text-xs">100%</div>
         </div>
       </div>
 
-      {/* Back to Landing */}
-      <button 
+      {/* Back to Landing - Bottom Left */}
+      <motion.button 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
         onClick={() => router.push('/')}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 text-white/50 hover:text-white/70 transition-colors text-sm"
+        className="absolute bottom-8 left-8 z-20 text-white/50 hover:text-white/70 transition-colors text-sm pointer-events-auto"
       >
         ← Back to Landing
-      </button>
+      </motion.button>
+
+      {/* Wallet Toggle Button - Bottom Right */}
+      <motion.button 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.7 }}
+        onClick={() => setIsMinimized(!isMinimized)}
+        className="absolute bottom-8 right-8 z-20 text-white/50 hover:text-white/70 transition-colors text-sm pointer-events-auto p-2 rounded-full hover:bg-white/10"
+        title={isMinimized ? "Show wallet" : "Minimize wallet"}
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+        </svg>
+      </motion.button>
     </div>
   );
 }

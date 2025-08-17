@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useBalance } from '../../../_context/BalanceContext';
+import { useNavigation } from '../../../_context/NavigationContext';
 import { useWallet } from '../../../_context/WalletContext';
 import { Button } from '../../ui/Button';
 import { Card } from '../../ui/Card';
-import { AnimatedTransition } from '../../shared/AnimatedTransition';
 
 export function WalletPage() {
   const [copiedAddress, setCopiedAddress] = useState(false);
@@ -32,26 +34,29 @@ export function WalletPage() {
   };
 
   return (
-    <AnimatedTransition className="h-full flex flex-col overflow-hidden">
-      {/* Title */}
-      <motion.h1 
-        initial={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
-        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-        exit={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="text-lg font-bold text-white mb-4 text-center flex-shrink-0"
-      >
-        Wallet
-      </motion.h1>
-      
-      {/* Profile Picture */}
-      <div className="flex justify-center mb-3 flex-shrink-0">
-        <div className="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center overflow-hidden">
-          <img 
-            src={userProfile.image} 
-            alt={userProfile.name}
-            className="w-full h-full object-cover"
-          />
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="flex-shrink-0 p-6">
+        {/* Title */}
+        <motion.h1 
+          initial={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          exit={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-lg font-bold text-white mb-4 text-center flex-shrink-0"
+        >
+          Wallet
+        </motion.h1>
+        
+        {/* Profile Picture */}
+        <div className="flex justify-center mb-3 flex-shrink-0">
+          <div className="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center overflow-hidden">
+            <img 
+              src={userProfile.image} 
+              alt={userProfile.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
       </div>
 
@@ -63,7 +68,7 @@ export function WalletPage() {
             <p className="text-white/50 text-xs mb-1">Wallet Address</p>
             <button 
               onClick={handleCopyAddress}
-              className="w-full px-2 py-1.5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-center space-x-2 pointer-events-auto backdrop-blur-[20px] bg-gray-800/60"
+              className="w-full px-2 py-1.5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-center space-x-2 pointer-events-auto backdrop-blur-[15px] bg-white/10 border border-white/20"
             >
               <code className="text-white/70 text-xs break-all">
                 {truncateAddress(walletData.address)}
@@ -122,6 +127,6 @@ export function WalletPage() {
           </div>
         </div>
       </div>
-    </AnimatedTransition>
+    </div>
   );
 }

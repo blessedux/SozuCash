@@ -132,9 +132,11 @@ export default function SplineBackground({
   return (
     <div 
       ref={containerRef}
-      className={`fixed inset-0 z-0 overflow-hidden spline-background pointer-events-auto ${className}`}
+      className={`fixed inset-0 z-0 overflow-hidden spline-background ${className}`}
       style={{ 
         cursor: enableInteractions ? 'default' : 'none',
+        pointerEvents: 'auto',
+        zIndex: 0
       }}
     >
       <iframe 
@@ -143,14 +145,23 @@ export default function SplineBackground({
         frameBorder='0' 
         width='100%' 
         height='100%'
-        className="w-full h-full pointer-events-auto"
+        className="w-full h-full"
         style={{ 
           transform: `scale(${scale})`,
-          transition: 'opacity 0.3s ease-in-out'
+          pointerEvents: 'auto',
+          transition: 'opacity 0.3s ease-in-out',
+          border: 'none',
+          outline: 'none'
         }}
         allow="autoplay; fullscreen"
         allowFullScreen
         title="Spline Background Animation"
+        onLoad={() => {
+          // Ensure iframe is ready for interactions
+          if (iframeRef.current) {
+            iframeRef.current.style.pointerEvents = 'auto';
+          }
+        }}
       />
     </div>
   );

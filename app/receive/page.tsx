@@ -1,9 +1,15 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { motion, PanInfo, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, PanInfo } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { QrCode, Wifi, CheckCircle, ArrowLeft } from 'lucide-react';
+import { AnimatedTransition } from '../_components/shared/AnimatedTransition';
+import { Input } from '../_components/ui/Input';
+import { Button } from '../_components/ui/Button';
+import { useBalance } from '../_context/BalanceContext';
+import { useNavigation } from '../_context/NavigationContext';
+import HybridBackground from '../_components/HybridBackground';
+import { Wifi, QrCode, CheckCircle, Lock } from 'lucide-react';
 import QRCodeDisplay from '../_components/QRCodeDisplay';
 
 export default function ReceiveScreen() {
@@ -76,6 +82,13 @@ export default function ReceiveScreen() {
   ]);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const { setCurrentVerticalPage } = useNavigation();
+  const { processDepositFromURL } = useBalance();
+
+  // Set current vertical page to receive (2) when page mounts
+  useEffect(() => {
+    setCurrentVerticalPage(2);
+  }, [setCurrentVerticalPage]);
 
   // Check for amount parameter in URL
   // Handle URL parameters and payment simulation
@@ -89,6 +102,10 @@ export default function ReceiveScreen() {
       if (amountParam) {
         console.log('URL parameter detected:', amountParam);
         setAmount(amountParam);
+        
+        // Process the deposit amount from URL to add to balance
+        processDepositFromURL(amountParam);
+        console.log(`Deposit amount $${amountParam} processed and added to balance`);
         
         // Check if this is send mode
         if (modeParam === 'send' && toParam) {
@@ -113,13 +130,20 @@ export default function ReceiveScreen() {
         setReceivedAmount(amount);
         setPaymentReceived(true);
         setShowPaymentConfirmation(true);
+        
+        // Add the confirmed deposit amount to the balance
+        const depositAmount = parseFloat(amount);
+        if (!isNaN(depositAmount) && depositAmount > 0) {
+          processDepositFromURL(amount);
+          console.log(`Confirmed deposit: $${depositAmount} added to balance`);
+        }
       }, 4000);
       return () => {
         console.log('Clearing payment simulation timer');
         clearTimeout(timer);
       };
     }
-  }, [amount, paymentReceived, sendMode]);
+  }, [amount, paymentReceived, sendMode, processDepositFromURL]);
 
   // For send mode, immediately show confirmation
   useEffect(() => {
@@ -232,8 +256,8 @@ export default function ReceiveScreen() {
 
   const handleBackNavigation = () => {
     if (paymentReceived) {
-      // If payment is received, go back to app navigation
-      router.push('/app-navigation');
+      // If payment is received, go back to main cash interface
+      router.push('/cash');
     } else if (showQRCode) {
       // If on QR code screen, go back to ready to receive screen
       setShowQRCode(false);
@@ -241,8 +265,8 @@ export default function ReceiveScreen() {
       // If on ready to receive screen, go back to amount input
       setShowQR(false);
     } else {
-      // If on amount input screen, go back to app navigation
-      router.push('/app-navigation');
+      // If on amount input screen, go back to main cash interface
+      router.push('/cash');
     }
   };
 
@@ -259,8 +283,8 @@ export default function ReceiveScreen() {
         // If on ready to receive screen, go back to amount input
         setShowQR(false);
       } else {
-        // If on amount input screen, go back to app navigation
-        router.push('/app-navigation');
+        // If on amount input screen, go back to main cash interface
+        router.push('/cash');
       }
     }
   };
@@ -302,6 +326,17 @@ export default function ReceiveScreen() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden no-scroll">
+      {/* Hybrid Background - Same beautiful effect as demo */}
+      <HybridBackground 
+        scale={1.2} 
+        enableInteractions={true}
+        lavaOpacity={0.3}
+        showLavaBubbles={true}
+      />
+      
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30 z-[1] pointer-events-none" />
+
       {/* Sozu Cash Logo */}
       <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
         <img 
@@ -310,6 +345,16 @@ export default function ReceiveScreen() {
           className="w-20"
         />
       </div>
+
+      {/* Mobile Lock Button - Top Left */}
+      <button
+        onClick={() => router.push('/app')}
+        className="absolute top-8 left-4 z-20 text-white/70 hover:text-white transition-colors pointer-events-auto md:hidden"
+        aria-label="Lock wallet"
+        title="Lock Wallet"
+      >
+        <Lock size={24} />
+      </button>
 
 
 
@@ -476,7 +521,8 @@ export default function ReceiveScreen() {
                     setShowPaymentConfirmation(false);
                     setPaymentReceived(false);
                     setReceivedAmount('');
-                    router.push('/app-navigation');
+                    // Navigate back to the main cash interface instead of locked screen
+                    router.push('/cash');
                   }}
                   className="w-full bg-white text-black py-3 rounded-2xl font-semibold text-base hover:bg-gray-100 active:scale-95 transition-all pointer-events-auto flex-shrink-0"
                 >

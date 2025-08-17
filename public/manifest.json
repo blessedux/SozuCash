@@ -41,7 +41,7 @@
       "name": "Send Payment",
       "short_name": "Send",
       "description": "Send a payment via NFC or QR",
-      "url": "/app-navigation",
+              "url": "/cash",
       "icons": [
         {
           "src": "/android-chrome-192x192.png",
