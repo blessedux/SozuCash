@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { UserSearch } from '../features/UserSearch';
-import { PaymentForm } from '../features/PaymentForm';
 import { useBalance } from '../../../_context/BalanceContext';
 import { useNavigation } from '../../../_context/NavigationContext';
-import { Wifi } from 'lucide-react'; // Added missing import for Wifi icon
+import { UserSearch } from '../features/UserSearch';
+import { DynamicBalance } from '../DynamicBalance';
+import { Wifi } from 'lucide-react';
 
 interface UserProfile {
   pfp: string;
@@ -20,7 +20,7 @@ export function PayPage() {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [sendPaymentSuccess, setSendPaymentSuccess] = useState(false);
   const router = useRouter();
-  const { balance, formatBalance, addToBalance } = useBalance();
+  const { balance, formatBalance, addToBalance, updateTrigger, forceUpdate } = useBalance();
   const { setCurrentVerticalPage, currentPage } = useNavigation();
 
   // Debug balance updates
@@ -33,6 +33,15 @@ export function PayPage() {
     console.log('PayPage - Re-rendering due to balance change:', balance);
   }, [balance]);
 
+  // Force re-render when update triggers change
+  useEffect(() => {
+    console.log('PayPage - Force update triggered:', updateTrigger);
+  }, [updateTrigger]);
+
+  useEffect(() => {
+    console.log('PayPage - Additional force update triggered:', forceUpdate);
+  }, [forceUpdate]);
+
   // Debug component mount/unmount
   useEffect(() => {
     console.log('PayPage - Component mounted with balance:', balance);
@@ -41,46 +50,29 @@ export function PayPage() {
     };
   }, [balance]);
 
-  // Temporary test function
-  const testBalanceUpdate = () => {
-    console.log('Testing balance update - current balance:', balance);
-    addToBalance(100);
-    console.log('Added $100 to balance');
-  };
+  // Force balance refresh when component mounts or when returning from deposit
+  useEffect(() => {
+    console.log('PayPage - Component mounted/updated, current balance:', balance);
+    // Force a re-render to ensure we have the latest balance
+  }, [balance, updateTrigger, forceUpdate]);
 
   const handleUserSelect = (user: UserProfile) => { setSelectedUser(user); };
-  const handlePaymentComplete = (amount: string) => {
+
+  const handleSendPayment = () => {
     setSendPaymentSuccess(true);
-    console.log('Payment completed:', { amount, recipient: selectedUser?.handle });
-  };
-  const resetPayment = () => {
-    setShowSendScreen(false);
-    setSelectedUser(null);
-    setSendPaymentSuccess(false);
+    setTimeout(() => {
+      setSendPaymentSuccess(false);
+      setShowSendScreen(false);
+      setSelectedUser(null);
+    }, 2000);
   };
 
-  // Handle balance click - navigate to Invest page
   const handleBalanceClick = () => {
-    // Navigate to Invest page (vertical page 2) if we're on Deposit page (currentPage 1)
-    // Otherwise, navigate to Deposit page first, then to Invest
-    if (currentPage === 1) {
-      // We're on Deposit page, go to Invest
-      setCurrentVerticalPage(2);
-    } else {
-      // We're on Pay page, first go to Deposit, then to Invest
-      setCurrentVerticalPage(1); // Go to Deposit
-      setTimeout(() => {
-        setCurrentVerticalPage(2); // Then go to Invest
-      }, 100);
-    }
+    setCurrentVerticalPage(1); // Navigate to Invest page
   };
 
-  // Handle NFC button click - navigate to /pay and then back to /cash
-  const handleNFCClick = async () => {
-    // Navigate to /pay
+  const handleNFCButtonClick = () => {
     router.push('/pay');
-    
-    // Wait 5 seconds, then navigate back to /cash
     setTimeout(() => {
       router.push('/cash');
     }, 5000);
@@ -110,28 +102,16 @@ export function PayPage() {
               Pay
             </motion.h1>
             
-            {/* USD Balance Display */}
-            <div className="text-center">
-              <p className="text-white/70 text-sm mb-2">USD</p>
-              <button
-                onClick={handleBalanceClick} // Navigate to Invest page
-                className="text-5xl font-bold text-white hover:text-blue-400 transition-colors cursor-pointer pointer-events-auto drop-shadow-lg"
-                title="Click to view investment options"
-              >
-                {formatBalance(balance)}
-              </button>
-              <p className="text-white/50 text-xs mt-1">
-                Total Balance
-              </p>
-              <p className="text-white/40 text-xs mt-1 italic">
-                Tap balance to invest
-              </p>
-            </div>
+            {/* Dynamic Balance Display */}
+            <DynamicBalance 
+              onClick={handleBalanceClick}
+              title="Click to view investment options"
+            />
 
             {/* NFC Payment Icon */}
             <div className="flex justify-center">
               <button
-                onClick={handleNFCClick}
+                onClick={handleNFCButtonClick}
                 className="w-20 h-20 border border-white/20 rounded-full flex items-center justify-center hover:bg-white/10 hover:scale-105 transition-all cursor-pointer pointer-events-auto bg-transparent"
                 title="Tap to go to payment page"
               >
@@ -148,17 +128,6 @@ export function PayPage() {
               className="text-white text-sm hover:text-white mt-4"
             >
               Or send money to a user ↓
-            </motion.button>
-
-            {/* Temporary Test Button */}
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              onClick={testBalanceUpdate}
-              className="text-red-400 text-xs hover:text-red-300 mt-2"
-            >
-              Test: Add $100
             </motion.button>
           </div>
         </motion.div>
@@ -190,11 +159,56 @@ export function PayPage() {
                 />
               ) : (
                 /* Payment Form */
-                <PaymentForm
-                  recipient={selectedUser}
-                  onPaymentComplete={handlePaymentComplete}
-                  onCancel={() => setSelectedUser(null)}
-                />
+                <div className="space-y-6">
+                  <motion.div 
+                    className="text-center"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <span className="text-white text-xl font-bold">
+                        {selectedUser.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-semibold text-white mb-2">{selectedUser.name}</h3>
+                    <p className="text-white/60 text-sm">@{selectedUser.handle}</p>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <button
+                      onClick={handleSendPayment}
+                      className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-lg"
+                    >
+                      Send Payment
+                    </button>
+                  </motion.div>
+
+                  {sendPaymentSuccess && (
+                    <motion.div
+                      className="text-center p-4 bg-green-500/20 border border-green-500/30 rounded-lg"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <p className="text-green-400 font-semibold">Payment sent successfully!</p>
+                    </motion.div>
+                  )}
+
+                  <motion.button
+                    onClick={() => setSelectedUser(null)}
+                    className="w-full py-3 px-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white hover:bg-white/20 transition-colors"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    Choose Different User
+                  </motion.button>
+                </div>
               )}
             </>
           ) : (
@@ -217,7 +231,11 @@ export function PayPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                onClick={resetPayment}
+                onClick={() => {
+                  setShowSendScreen(false);
+                  setSelectedUser(null);
+                  setSendPaymentSuccess(false);
+                }}
                 className="text-white/70 hover:text-white transition-colors"
               >
                 Send another payment →

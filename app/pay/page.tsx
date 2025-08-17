@@ -49,7 +49,7 @@ export default function PayScreen() {
   }, [router, amount]);
 
   const handleBack = () => {
-    router.back();
+    router.push('/cash');
   };
 
   const formatAmount = (value: string) => {
@@ -83,10 +83,10 @@ export default function PayScreen() {
 
       {/* Mobile Lock Button - Top Left */}
       <button
-        onClick={() => router.push('/app')}
+        onClick={() => router.push('/cash')}
         className="absolute top-8 left-4 z-20 text-white/70 hover:text-white transition-colors pointer-events-auto md:hidden"
-        aria-label="Lock wallet"
-        title="Lock Wallet"
+        aria-label="Back to wallet"
+        title="Back to Wallet"
       >
         <Lock size={24} />
       </button>

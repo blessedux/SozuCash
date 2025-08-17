@@ -59,9 +59,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-    setIsAuthenticated(false);
-    router.push('/app');
+    try {
+      // Clear authentication state from localStorage
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      
+      // Update state
+      setIsAuthenticated(false);
+      
+      // Navigate to authentication screen
+      router.push('/app');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      
+      // Fallback: try to navigate anyway
+      try {
+        router.push('/app');
+      } catch (navError) {
+        console.error('Navigation error during logout:', navError);
+        // Last resort: force page reload
+        window.location.href = '/app';
+      }
+    }
   };
 
   return (

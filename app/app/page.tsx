@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { AnimatedTransition } from '../_components/shared/AnimatedTransition';
 import { useAuth } from '../_context/AuthContext';
+import HybridBackground from '../_components/HybridBackground';
 
 export default function LockedScreen() {
   const [isMinimized, setIsMinimized] = useState(false);
@@ -46,7 +47,19 @@ export default function LockedScreen() {
   if (isLoading) {
     return (
       <div className="relative w-full h-screen overflow-hidden no-scroll">
+        {/* Persistent Background - Same as /pay and /cash routes */}
+        <div className="fixed inset-0 z-0">
+          <HybridBackground 
+            scale={1.2} 
+            enableInteractions={true}
+            lavaOpacity={0.3}
+            showLavaBubbles={true}
+          />
+        </div>
+
+        {/* Gradient Overlay - Same as /pay and /cash routes */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30 z-[1] pointer-events-none" />
+        
         <div className="relative z-20 w-full h-full flex items-center justify-center px-4 pointer-events-none">
           <div className="text-center w-80 mx-auto pointer-events-auto">
             <div className="glassmorphic-card border border-white/20 rounded-3xl p-8 shadow-2xl h-96 flex flex-col w-full">
@@ -69,7 +82,17 @@ export default function LockedScreen() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden no-scroll">
-      {/* Gradient Overlay - Ensure it doesn't block pointer events */}
+      {/* Persistent Background - Same as /pay and /cash routes */}
+      <div className="fixed inset-0 z-0">
+        <HybridBackground 
+          scale={1.2} 
+          enableInteractions={true}
+          lavaOpacity={0.3}
+          showLavaBubbles={true}
+        />
+      </div>
+
+      {/* Gradient Overlay - Same as /pay and /cash routes */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30 z-[1] pointer-events-none" />
       
       {/* Content */}

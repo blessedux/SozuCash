@@ -6,12 +6,14 @@ import { useRouter } from 'next/navigation';
 import { Input } from '../../ui/Input';
 import { Button } from '../../ui/Button';
 import { useBalance } from '../../../_context/BalanceContext';
+import { useNavigation } from '../../../_context/NavigationContext';
 
 export function DepositPage() {
   const [depositAmount, setDepositAmount] = useState('');
   const [isConfirming, setIsConfirming] = useState(false);
   const [confirmedAmount, setConfirmedAmount] = useState<number | null>(null);
   const { confirmDeposit, formatBalance, setPendingDeposit, balance } = useBalance();
+  const { setCurrentPage } = useNavigation();
 
   // Debug balance updates
   useEffect(() => {
@@ -41,6 +43,12 @@ export function DepositPage() {
           setIsConfirming(false);
           setDepositAmount('');
           setConfirmedAmount(null);
+          
+          // Navigate directly to Pay screen after deposit completion
+          setTimeout(() => {
+            console.log('DepositPage - Navigating directly to Pay screen');
+            setCurrentPage(0); // Go directly to Pay screen
+          }, 300); // Reduced delay for faster navigation
         }, 500); // Show confirmation for 500ms more
       }, 2000);
     }

@@ -11,6 +11,9 @@ interface BalanceContextType {
   confirmDeposit: () => void;
   processDepositFromURL: (amount: string) => void;
   resetBalance: () => void;
+  updateTrigger: number; // Added for force update
+  forceUpdate: number; // Added for force update
+  refreshBalance: () => void; // Added for manual refresh
 }
 
 const BalanceContext = createContext<BalanceContextType | undefined>(undefined);
@@ -23,6 +26,7 @@ export function BalanceProvider({ children }: { children: React.ReactNode }) {
   const [pendingDeposit, setPendingDeposit] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
   const [updateTrigger, setUpdateTrigger] = useState(0); // Force re-renders
+  const [forceUpdate, setForceUpdate] = useState(0); // Additional force update
 
   // Set mounted state after hydration
   useEffect(() => {
@@ -53,6 +57,7 @@ export function BalanceProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(BALANCE_STORAGE_KEY, balance.toString());
       // Force a re-render of all components using this context
       setUpdateTrigger(prev => prev + 1);
+      setForceUpdate(prev => prev + 1);
     }
   }, [balance, mounted]);
 
@@ -68,6 +73,8 @@ export function BalanceProvider({ children }: { children: React.ReactNode }) {
       console.log('New balance will be:', newBalance);
       return newBalance;
     });
+    // Force immediate update
+    setForceUpdate(prev => prev + 1);
   }, [balance]);
 
   const formatBalance = useCallback((amount: number) => {
@@ -87,6 +94,7 @@ export function BalanceProvider({ children }: { children: React.ReactNode }) {
       setPendingDeposit(null);
       // Force immediate update
       setUpdateTrigger(prev => prev + 1);
+      setForceUpdate(prev => prev + 1);
       console.log('Deposit confirmed, updateTrigger incremented');
     }
   }, [pendingDeposit, addToBalance, balance]);
@@ -111,6 +119,13 @@ export function BalanceProvider({ children }: { children: React.ReactNode }) {
     }
   }, [mounted]);
 
+  // Manual refresh function for external triggers
+  const refreshBalance = useCallback(() => {
+    console.log('BalanceContext - Manual refresh triggered');
+    setUpdateTrigger(prev => prev + 1);
+    setForceUpdate(prev => prev + 1);
+  }, []);
+
   return (
     <BalanceContext.Provider 
       value={{ 
@@ -121,7 +136,10 @@ export function BalanceProvider({ children }: { children: React.ReactNode }) {
         setPendingDeposit,
         confirmDeposit,
         processDepositFromURL,
-        resetBalance
+        resetBalance,
+        updateTrigger,
+        forceUpdate,
+        refreshBalance
       }}
     >
       {children}

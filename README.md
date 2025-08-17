@@ -1,4 +1,4 @@
-a# Sozu Cash - NFC Payment PWA
+# Sozu Cash - NFC Payment PWA
 
 A Progressive Web App (PWA) for NFC-first payments with one-tap flows on Mantle Network.
 

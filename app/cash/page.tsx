@@ -109,26 +109,25 @@ function CashPageContent() {
   const { setCurrentVerticalPage, currentPage, currentVerticalPage, navigateHorizontal, navigateVertical } = useNavigation();
   const { handleDragStart, handleDragEnd } = useSwipe();
 
+  // Enhanced swipe gesture handling - Hybrid touch/mouse system
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null);
+  const [touchActive, setTouchActive] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [lastGestureTime, setLastGestureTime] = useState(0);
+  const [hasNavigatedThisGesture, setHasNavigatedThisGesture] = useState(false);
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
+  const gestureCooldown = 800; // Same cooldown as trackpad
+
   // Check authentication and redirect if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push('/app');
     }
   }, [isAuthenticated, isLoading, router]);
-
-  // Show loading state while checking authentication
-  if (isLoading) {
-    return (
-      <div className="w-full h-screen flex items-center justify-center bg-black">
-        <div className="text-white text-lg">Loading...</div>
-      </div>
-    );
-  }
-
-  // Don't render if not authenticated (will redirect)
-  if (!isAuthenticated) {
-    return null;
-  }
 
   // Set app-route class on body for consistent background styling
   useEffect(() => {
@@ -144,19 +143,6 @@ function CashPageContent() {
     setCurrentVerticalPage(0);
     // Don't set currentPage here - let it use the default from NavigationContext (0 = Pay)
   }, [setCurrentVerticalPage]);
-
-  // Enhanced swipe gesture handling - Hybrid touch/mouse system
-  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
-  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null);
-  const [touchActive, setTouchActive] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
-  const [lastGestureTime, setLastGestureTime] = useState(0);
-  const [hasNavigatedThisGesture, setHasNavigatedThisGesture] = useState(false);
-
-  // Minimum swipe distance (in px)
-  const minSwipeDistance = 50;
-  const gestureCooldown = 800; // Same cooldown as trackpad
 
   // Detect if we're on desktop (for trackpad gestures)
   useEffect(() => {
@@ -401,6 +387,7 @@ function CashPageContent() {
         case 'Escape':
           if (window.innerWidth >= 768) {
             event.preventDefault();
+            // Use a more robust logout approach
             try {
               logout();
             } catch (error) {
@@ -451,6 +438,20 @@ function CashPageContent() {
   useEffect(() => {
     // Navigation state changes are now handled silently
   }, [currentPage, currentVerticalPage]);
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-black">
+        <div className="text-white text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated (will redirect)
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <WalletProvider>
