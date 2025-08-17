@@ -29,7 +29,7 @@ export function SettingsPage() {
         <SettingsMenu onClose={() => {}} />
         
         {/* Balance Display and Reset (for testing) */}
-        <div className="p-4 bg-white/5 border-t border-white/10">
+        <div className="p-4 bg-white/10 border-t border-white/10">
           <div className="text-center mb-3">
             <p className="text-white/50 text-sm">Current Balance</p>
             <p className="text-2xl font-bold text-white">{formatBalance(balance)}</p>

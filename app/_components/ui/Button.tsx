@@ -29,8 +29,8 @@ export function Button({
   const baseStyles = 'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-50 disabled:cursor-not-allowed';
   
   const variantStyles = {
-    primary: 'border border-white/20 text-white backdrop-blur-[15px] bg-white/10 hover:bg-white/20',
-    secondary: 'border border-white/20 text-white hover:bg-white/20 backdrop-blur-[15px] bg-white/10',
+    primary: 'border border-white/20 text-white backdrop-blur-[25px] bg-white/10 hover:bg-white/20',
+    secondary: 'border border-white/20 text-white hover:bg-white/20 backdrop-blur-[25px] bg-white/10',
     ghost: 'text-white hover:bg-white/10',
   };
 

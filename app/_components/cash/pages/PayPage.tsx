@@ -55,10 +55,10 @@ export function PayPage() {
     // Navigate to /pay
     router.push('/pay');
     
-    // Wait a moment, then navigate back to /cash
+    // Wait 5 seconds, then navigate back to /cash
     setTimeout(() => {
       router.push('/cash');
-    }, 500);
+    }, 5000);
   };
 
   return (
@@ -70,7 +70,7 @@ export function PayPage() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -50 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="w-full h-full flex flex-col justify-center items-center"
+          className="w-full h-full flex flex-col justify-center items-center rounded-3xl"
         >
           {/* Main Content Container - Positioned in bottom half */}
           <div className="flex flex-col items-center space-y-8 w-full max-w-xs">
@@ -133,7 +133,7 @@ export function PayPage() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 50 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="w-full h-full flex flex-col justify-center"
+          className="w-full h-full flex flex-col justify-center rounded-3xl"
         >
           {!sendPaymentSuccess ? (
             <>

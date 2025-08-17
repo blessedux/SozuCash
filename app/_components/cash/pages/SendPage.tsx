@@ -61,11 +61,11 @@ export function SendPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
-              className="text-center space-y-4"
+              className="text-center space-y-4 max-w-xs mx-auto"
             >
               <div className="text-white/70 mb-4">
-                <p className="text-sm mb-2">Connect your X account to send money to users</p>
-                <p className="text-xs text-white/50">Search for users by their X handle</p>
+                <p className="text-sm mb-2">Connect X to send money</p>
+                <p className="text-xs text-white/50">Search users by X handle</p>
               </div>
               <button
                 onClick={handleConnectX}

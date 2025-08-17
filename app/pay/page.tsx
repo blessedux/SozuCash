@@ -26,7 +26,7 @@ export default function PayScreen() {
     setCurrentVerticalPage(1);
   }, [setCurrentVerticalPage]);
 
-  // Add payment to tracking and auto return to app after 3 seconds
+  // Add payment to tracking and auto return to cash after 5 seconds
   useEffect(() => {
     // Add payment to local storage for demo purposes
     const paymentHistory = JSON.parse(localStorage.getItem('paymentHistory') || '[]');
@@ -41,10 +41,10 @@ export default function PayScreen() {
     paymentHistory.unshift(newPayment);
     localStorage.setItem('paymentHistory', JSON.stringify(paymentHistory));
     
-    // Auto return to app after 3 seconds
+    // Auto return to cash after 5 seconds (matching NFC button timing)
     const timer = setTimeout(() => {
-      router.push('/app');
-    }, 3000);
+      router.push('/cash');
+    }, 5000);
     return () => clearTimeout(timer);
   }, [router, amount]);
 

@@ -68,7 +68,7 @@ export function WalletPage() {
             <p className="text-white/50 text-xs mb-1">Wallet Address</p>
             <button 
               onClick={handleCopyAddress}
-              className="w-full px-2 py-1.5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-center space-x-2 pointer-events-auto backdrop-blur-[15px] bg-white/10 border border-white/20"
+              className="w-full px-2 py-1.5 rounded-lg hover:bg-white/20 transition-all duration-200 flex items-center justify-center space-x-2 pointer-events-auto border border-white/20"
             >
               <code className="text-white/70 text-xs break-all">
                 {truncateAddress(walletData.address)}

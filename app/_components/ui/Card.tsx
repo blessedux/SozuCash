@@ -21,10 +21,10 @@ export function Card({
 }: CardProps) {
   const getBlurClass = (blurLevel: number) => {
     switch (blurLevel) {
-      case 1: return 'backdrop-blur-[15px]'; // 15px blur
-      case 2: return 'backdrop-blur-[15px]'; // 15px blur
-      case 3: return 'backdrop-blur-[15px]'; // 15px blur
-      default: return 'backdrop-blur-[15px]'; // Default to 15px
+      case 1: return 'backdrop-blur-[25px]'; // 25px blur - matches main card
+      case 2: return 'backdrop-blur-[25px]'; // 25px blur - matches main card
+      case 3: return 'backdrop-blur-[25px]'; // 25px blur - matches main card
+      default: return 'backdrop-blur-[25px]'; // Default to 25px - matches main card
     }
   };
 
@@ -33,6 +33,7 @@ export function Card({
     border-white/10 
     rounded-3xl 
     shadow-2xl 
+    bg-white/10
     ${getBlurClass(blurLevel)}
     transition-all 
     duration-200

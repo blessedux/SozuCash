@@ -76,12 +76,7 @@ function CashContent() {
   console.log('CashContent rendering:', { currentPage, currentVerticalPage });
 
   return (
-    <div className="w-full h-full border border-green-500 bg-red-500/20">
-      {/* Debug info */}
-      <div className="absolute top-2 left-2 text-white text-xs bg-black/50 p-1 rounded">
-        Page: {currentPage} | Vertical: {currentVerticalPage}
-      </div>
-      
+    <div className="w-full h-full">
       {/* Main horizontal navigation content - hidden when showing vertical content */}
       {currentVerticalPage === 0 && (
         <SmoothTransition key={`main-${currentPage}`} className="w-full h-full">
@@ -150,7 +145,6 @@ function CashPageContent() {
         case 'A':
         case 'ArrowLeft':
           event.preventDefault();
-          console.log('Left arrow/A key pressed - navigating left');
           navigateHorizontal('left');
           break;
 
@@ -158,7 +152,6 @@ function CashPageContent() {
         case 'D':
         case 'ArrowRight':
           event.preventDefault();
-          console.log('Right arrow/D key pressed - navigating right');
           navigateHorizontal('right');
           break;
 
@@ -167,7 +160,6 @@ function CashPageContent() {
         case 'W':
         case 'ArrowUp':
           event.preventDefault();
-          console.log('Up arrow/W key pressed - navigating up');
           navigateVertical('up');
           break;
 
@@ -175,7 +167,6 @@ function CashPageContent() {
         case 'S':
         case 'ArrowDown':
           event.preventDefault();
-          console.log('Down arrow/S key pressed - navigating down');
           navigateVertical('down');
           break;
       }
@@ -187,13 +178,13 @@ function CashPageContent() {
 
   // Debug navigation changes
   useEffect(() => {
-    console.log('Navigation state:', { currentPage, currentVerticalPage });
+    // Navigation state changes are now handled silently
   }, [currentPage, currentVerticalPage]);
 
   return (
     <WalletProvider>
       <BalanceProvider>
-      <div className="relative w-full h-screen overflow-hidden no-scroll">
+      <div className="relative w-full h-screen overflow-hidden no-scroll cash-page">
         {/* Gradient Overlay - Ensure it doesn't block pointer events */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30 z-[1] pointer-events-none" />
 
@@ -228,27 +219,18 @@ function CashPageContent() {
           <Camera size={24} />
         </button>
 
-        {/* Current Screen Indicator - Top Center */}
-        <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-15 text-center">
-          <div className="text-white/50 text-sm font-medium">
-            {currentPage === 0 ? 'Pay' : currentPage === 1 ? 'Deposit' : 'Wallet'}
-          </div>
-        </div>
-
         {/* Main Content */}
-        <div className="relative z-5 w-full h-full flex items-center justify-center px-4 pointer-events-none">
-          <div className="text-center w-80 mx-auto pointer-events-auto">
+        <div className="relative z-10 w-full h-full flex items-center justify-center px-4 pointer-events-none">
+          <div className="text-center w-80 mx-auto pointer-events-none">
             {/* Glassmorphic Card Container - Apply swipe gestures here */}
             <div 
-              className="border-2 border-red-500 rounded-3xl p-8 shadow-2xl h-96 flex items-center justify-center backdrop-blur-[25px] bg-white/30 shadow-white/20"
+              className="border border-white/40 rounded-3xl p-8 shadow-2xl h-96 flex items-center justify-center shadow-white/20 debug-card glassmorphic-card"
               onTouchStart={(e) => {
-                console.log('Touch start detected');
                 const touch = e.touches[0];
                 const startX = touch.clientX;
                 const startY = touch.clientY;
                 
                 const handleTouchEnd = (e: TouchEvent) => {
-                  console.log('Touch end detected');
                   const touch = e.changedTouches[0];
                   const endX = touch.clientX;
                   const endY = touch.clientY;
@@ -256,27 +238,21 @@ function CashPageContent() {
                   const deltaY = endY - startY;
                   const threshold = 50;
                   
-                  console.log('Swipe delta:', { deltaX, deltaY, threshold });
-                  
                   if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > threshold) {
                     // Horizontal swipe
                     if (deltaX > 0) {
-                      console.log('Swipe right - navigating left');
                       // Swipe right - go left in carousel
                       navigateHorizontal('left');
                     } else {
-                      console.log('Swipe left - navigating right');
                       // Swipe left - go right in carousel
                       navigateHorizontal('right');
                     }
                   } else if (Math.abs(deltaY) > threshold) {
                     // Vertical swipe
                     if (deltaY > 0) {
-                      console.log('Swipe down - navigating to sub-screen');
                       // Swipe down - go to sub-screen
                       navigateVertical('down');
                     } else {
-                      console.log('Swipe up - navigating to main screen');
                       // Swipe up - go back to main screen
                       navigateVertical('up');
                     }
@@ -287,20 +263,34 @@ function CashPageContent() {
                 
                 document.addEventListener('touchend', handleTouchEnd);
               }}
+              onMouseEnter={(e) => {
+                // Only capture events when mouse is over the card
+                e.currentTarget.style.pointerEvents = 'auto';
+                console.log('🎯 Card entered - events captured');
+              }}
+              onMouseLeave={(e) => {
+                // Allow events to pass through when mouse leaves the card
+                e.currentTarget.style.pointerEvents = 'none';
+                console.log('🎯 Card left - events passed through to background');
+              }}
+              onMouseMove={(e) => {
+                // Only handle card-specific mouse events when over the card
+                if (e.currentTarget.style.pointerEvents === 'auto') {
+                  // Card is active, handle events here
+                  e.stopPropagation();
+                }
+              }}
               style={{
-                // Allow pointer events to pass through to background when not actively interacting
-                pointerEvents: 'auto',
+                // Start with pointer events disabled to allow Spline interactions
+                pointerEvents: 'none',
                 isolation: 'isolate',
-                // Ensure proper contrast and visibility
-                backgroundColor: 'rgba(255, 255, 255, 0.4)',
-                boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.5)'
+                // Ensure proper contrast and visibility with much more transparency
+                boxShadow: '0 25px 50px -12px rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.3)'
               }}
             >
-              <div className="w-full h-full border border-blue-500 flex items-center justify-center">
-                <SmoothTransition key={`${currentPage}-${currentVerticalPage}`} className="w-full h-full">
-                  <CashContent />
-                </SmoothTransition>
-              </div>
+              <SmoothTransition key={`${currentPage}-${currentVerticalPage}`} className="w-full h-full">
+                <CashContent />
+              </SmoothTransition>
             </div>
           </div>
         </div>
@@ -308,10 +298,10 @@ function CashPageContent() {
         {/* Navigation Instructions - Desktop Only */}
         {window.innerWidth >= 768 && (
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-15 text-center">
-            <p className="text-white/50 text-sm mb-1">
+            <p className="text-white text-sm mb-1 drop-shadow-lg font-medium">
               Press ESC to lock wallet
             </p>
-            <p className="text-white/50 text-sm">
+            <p className="text-white text-sm drop-shadow-lg font-medium">
               Use arrow keys or AWSD to navigate
             </p>
           </div>

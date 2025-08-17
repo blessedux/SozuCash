@@ -128,7 +128,7 @@ export function InvestPage() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleFundSelect(fund.id)}
-                className="bg-white/5 backdrop-blur-md border border-white/20 rounded-2xl p-4 cursor-pointer transition-all duration-200 hover:bg-white/10"
+                className="backdrop-blur-[25px] bg-white/10 border border-white/20 rounded-2xl p-4 cursor-pointer transition-all duration-200 hover:bg-white/20"
               >
                 <div className="flex items-center space-x-3 mb-3">
                   <div className={`p-2 rounded-lg bg-gradient-to-r ${fund.color}`}>
@@ -153,7 +153,7 @@ export function InvestPage() {
                   {fund.features.map((feature, index) => (
                     <span
                       key={index}
-                      className="px-2 py-1 bg-white/10 rounded-full text-white/70 text-xs"
+                      className="px-2 py-1 backdrop-blur-[25px] bg-white/10 rounded-full text-white/70 text-xs"
                     >
                       {feature}
                     </span>

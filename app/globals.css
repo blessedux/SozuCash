@@ -79,14 +79,25 @@
 
   /* Ensure SplineBackground has proper interaction handling */
   .spline-background {
+    z-index: -1 !important;
     pointer-events: auto !important;
-    z-index: 0 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
   }
 
   .spline-background iframe {
-    pointer-events: auto !important;
+    z-index: -1 !important;
     border: none !important;
     outline: none !important;
+    pointer-events: auto !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
   }
 
   /* Ensure LavaLamp overlay doesn't block SplineBackground interactions */
@@ -97,6 +108,15 @@
 
   .lava-lamp-overlay canvas {
     pointer-events: none !important;
+  }
+
+  /* Debug indicator for Spline events */
+  .spline-debug-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    pointer-events: none;
   }
 
   /* Force SplineBackground to be interactive */
@@ -250,15 +270,15 @@
   }
   
   .btn-secondary {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-3 px-6 rounded-xl hover:bg-white/20 transition-all duration-200;
+    @apply bg-white/10 backdrop-blur-[25px] border border-white/20 text-white font-semibold py-3 px-6 rounded-xl hover:bg-white/20 transition-all duration-200;
   }
   
   .card {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-6;
+    @apply bg-white/10 backdrop-blur-[25px] border border-white/20 rounded-2xl p-6;
   }
   
   .input-field {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500;
+    @apply bg-white/10 backdrop-blur-[25px] border border-white/20 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500;
   }
 }
 
@@ -269,7 +289,7 @@
   }
   
   .glass-effect {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20;
+    @apply bg-white/10 backdrop-blur-[25px] border border-white/20;
   }
   
   .nfc-highlight {
@@ -523,4 +543,206 @@ html:has(.test-page) {
 .hybrid-background {
   background-color: transparent !important;
   z-index: 0 !important;
+}
+
+/* Main card reference styling - this is the standard all elements should match */
+.cash-page .glassmorphic-card {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  backdrop-filter: blur(25px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 25px 50px -12px rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Card content should be COMPLETELY transparent - no backgrounds, no blur */
+.cash-page .glassmorphic-card > *,
+.cash-page .glassmorphic-card [class*="content"],
+.cash-page .glassmorphic-card [class*="Content"],
+.cash-page .glassmorphic-card .card-content,
+.cash-page .glassmorphic-card .CardContent,
+.cash-page .glassmorphic-card .CashContent {
+  background-color: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+/* Ensure ALL content elements are completely transparent */
+.cash-page [class*="CashContent"],
+.cash-page [class*="cash-content"],
+.cash-page [class*="Cash-Content"],
+.cash-page [class*="cash-Content"],
+.cash-page .CashContent,
+.cash-page .cash-content,
+.cash-page .Cash-Content,
+.cash-page .cash-Content {
+  background-color: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Ensure ALL content elements AND their children are completely transparent */
+.cash-page [class*="CashContent"] *,
+.cash-page [class*="cash-content"] *,
+.cash-page [class*="Cash-Content"] *,
+.cash-page [class*="cash-Content"] *,
+.cash-page .CashContent *,
+.cash-page .cash-content *,
+.cash-page .Cash-Content *,
+.cash-page .cash-Content * {
+  background-color: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Ensure page components are transparent */
+.cash-page [class*="Page"],
+.cash-page [class*="page"],
+.cash-page .PayPage,
+.cash-page .DepositPage,
+.cash-page .WalletPage,
+.cash-page .SendPage,
+.cash-page .InvestPage,
+.cash-page .SettingsPage {
+  background-color: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Ensure ANY element with "content" in its class is transparent */
+.cash-page [class*="content"]:not([class*="text-"]),
+.cash-page [class*="Content"]:not([class*="text-"]),
+.cash-page [class*="CONTENT"]:not([class*="text-"]) {
+  background-color: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Cash page specific styling to ensure consistency - ONLY for specific elements */
+.cash-page .glassmorphic-card,
+.cash-page [class*="backdrop-blur"]:not([class*="text-"]):not([class*="content"]):not([class*="Content"]),
+.cash-page [class*="bg-white"]:not([class*="text-"]):not([class*="border-"]):not([class*="shadow-"]):not([class*="content"]):not([class*="Content"]) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  backdrop-filter: blur(25px) !important;
+}
+
+/* Ensure all motion components in cash page have consistent styling - EXCLUDE content */
+.cash-page .motion-div:not([class*="content"]):not([class*="Content"]),
+.cash-page [class*="motion"]:not([class*="text-"]):not([class*="border-"]):not([class*="shadow-"]):not([class*="content"]):not([class*="Content"]) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  backdrop-filter: blur(25px) !important;
+}
+
+/* Target ONLY specific UI elements that should have the glassmorphic effect - EXCLUDE content */
+.cash-page button:not([class*="text-"]):not([class*="border-"]):not([class*="content"]):not([class*="Content"]),
+.cash-page .card:not([class*="content"]):not([class*="Content"]),
+.cash-page .glassmorphic:not([class*="content"]):not([class*="Content"]),
+.cash-page [class*="glass"]:not([class*="content"]):not([class*="Content"]),
+.cash-page [class*="card"]:not([class*="content"]):not([class*="Content"]) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  backdrop-filter: blur(25px) !important;
+}
+
+/* Force ALL interactive elements to use the same background and blur - EXCLUDE content */
+.cash-page button:not([class*="content"]):not([class*="Content"]),
+.cash-page .card:not([class*="content"]):not([class*="Content"]),
+.cash-page .glassmorphic:not([class*="content"]):not([class*="Content"]),
+.cash-page [class*="glass"]:not([class*="content"]):not([class*="Content"]),
+.cash-page [class*="card"]:not([class*="content"]):not([class*="Content"]) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  backdrop-filter: blur(25px) !important;
+}
+
+/* Ensure ALL form elements and inputs have consistent styling - EXCLUDE content */
+.cash-page input:not([class*="content"]):not([class*="Content"]),
+.cash-page textarea:not([class*="content"]):not([class*="Content"]),
+.cash-page select:not([class*="content"]):not([class*="Content"]),
+.cash-page button:not([class*="content"]):not([class*="Content"]),
+.cash-page div[class*="input"]:not([class*="content"]):not([class*="Content"]),
+.cash-page div[class*="form"]:not([class*="content"]):not([class*="Content"]),
+.cash-page div[class*="search"]:not([class*="content"]):not([class*="Content"]) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  backdrop-filter: blur(25px) !important;
+}
+
+/* Ensure ALL motion components have consistent styling - EXCLUDE content */
+.cash-page [class*="motion"]:not([class*="text-"]):not([class*="content"]):not([class*="Content"]),
+.cash-page .motion-div:not([class*="content"]):not([class*="Content"]),
+.cash-page .motion-button:not([class*="content"]):not([class*="Content"]),
+.cash-page .motion-input:not([class*="content"]):not([class*="Content"]) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  backdrop-filter: blur(25px) !important;
+}
+
+/* Ensure ALL backdrop-blur elements have consistent styling - EXCLUDE content */
+.cash-page [class*="backdrop-blur"]:not([class*="content"]):not([class*="Content"]) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  backdrop-filter: blur(25px) !important;
+}
+
+/* Ensure ALL bg-white elements have consistent styling - EXCLUDE content */
+.cash-page [class*="bg-white"]:not([class*="text-"]):not([class*="border-"]):not([class*="shadow-"]):not([class*="content"]):not([class*="Content"]) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  backdrop-filter: blur(25px) !important;
+}
+
+/* Ensure text elements have transparent backgrounds */
+.cash-page [class*="text-"],
+.cash-page p,
+.cash-page h1,
+.cash-page h2,
+.cash-page h3,
+.cash-page h4,
+.cash-page h5,
+.cash-page h6,
+.cash-page span,
+.cash-page div[class*="text-"],
+.cash-page button[class*="text-"],
+.cash-page a[class*="text-"],
+.cash-page label[class*="text-"],
+.cash-page input[class*="text-"],
+.cash-page textarea[class*="text-"],
+.cash-page select[class*="text-"] {
+  background-color: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background-image: none !important;
+}
+
+/* Ensure navigation text is white with high specificity */
+.cash-page .absolute.bottom-8 p,
+.cash-page [class*="bottom-8"] p,
+.cash-page .z-15 p {
+  color: white !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+  font-weight: 500 !important;
+}
+
+/* Debug styles for troubleshooting */
+.debug-card {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  backdrop-filter: blur(25px) !important;
+  border: 2px solid rgba(255, 255, 255, 0.4) !important;
 }

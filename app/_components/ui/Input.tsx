@@ -34,7 +34,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
     pointer-events-auto 
     transition-all 
     duration-200
-    backdrop-blur-[10px]
+    backdrop-blur-[25px]
   `;
 
   const sizeStyles = 'py-4 px-6';
@@ -66,7 +66,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
             border 
             border-white/20 
             rounded-xl 
-            backdrop-blur-[15px]
+            backdrop-blur-[25px]
             focus:outline-none 
             focus:ring-2 
             focus:ring-white/30 

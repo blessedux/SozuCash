@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -158,61 +158,766 @@ export default function PersistentBackground() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [splineLoaded, setSplineLoaded] = useState(false);
+  const [isInteractingWithUI, setIsInteractingWithUI] = useState(false);
+
+  // Debug state for tracking event flow
+  const [eventCount, setEventCount] = useState(0);
+  const [lastEventTime, setLastEventTime] = useState<number>(0);
+  const [lastEventSent, setLastEventSent] = useState<number>(0);
+
+  // Throttle events to prevent flooding (only send every 100ms)
+  const THROTTLE_MS = 100;
+
+  // Simulate actual DOM events on the Spline iframe
+  const simulateSplineEvents = useCallback((e: MouseEvent) => {
+    if (!iframeRef.current || !splineLoaded) return;
+    
+    try {
+      // Get iframe position
+      const rect = iframeRef.current.getBoundingClientRect();
+      
+      // Calculate relative position within iframe
+      const relativeX = e.clientX - rect.left;
+      const relativeY = e.clientY - rect.top;
+      
+      // Create and dispatch mouse events directly on the iframe
+      const mouseMoveEvent = new MouseEvent('mousemove', {
+        clientX: relativeX,
+        clientY: relativeY,
+        movementX: e.movementX,
+        movementY: e.movementY,
+        bubbles: true,
+        cancelable: true
+      });
+      
+      // Try to dispatch on the iframe element itself
+      iframeRef.current.dispatchEvent(mouseMoveEvent);
+      
+      // Also try to dispatch on the iframe's document if accessible
+      try {
+        if (iframeRef.current.contentDocument) {
+          const iframeMouseEvent = new MouseEvent('mousemove', {
+            clientX: relativeX,
+            clientY: relativeY,
+            movementX: e.movementX,
+            movementY: e.movementY,
+            bubbles: true,
+            cancelable: true
+          });
+          iframeRef.current.contentDocument.dispatchEvent(iframeMouseEvent);
+        }
+      } catch (error) {
+        // CORS restriction - this is expected
+      }
+      
+      // NEW: Try different event types that might wake up Spline
+      const eventTypes = ['mouseover', 'mouseenter', 'pointermove', 'pointerover'];
+      eventTypes.forEach(eventType => {
+        try {
+          if (iframeRef.current) {
+            const customEvent = new MouseEvent(eventType, {
+              clientX: relativeX,
+              clientY: relativeY,
+              bubbles: true,
+              cancelable: true
+            });
+            iframeRef.current.dispatchEvent(customEvent);
+            console.log(`🎯 Dispatched ${eventType} event on Spline iframe`);
+          }
+        } catch (error) {
+          console.log(`❌ Failed to dispatch ${eventType}:`, error);
+        }
+      });
+      
+      console.log('🎯 Simulated DOM events on Spline iframe:', { relativeX, relativeY });
+      
+    } catch (error) {
+      console.error('❌ Failed to simulate Spline events:', error);
+    }
+  }, [splineLoaded]);
+
+  // Enhanced event handler with timing and counting
+  const handleIframeMouseMove = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const now = Date.now();
+    setEventCount(prev => prev + 1);
+    setLastEventTime(now);
+    
+    console.log(`🎯 Spline iframe mouse move! #${eventCount + 1} at ${now}`);
+    
+    // Check if events are being throttled
+    if (lastEventTime > 0) {
+      const timeDiff = now - lastEventTime;
+      if (timeDiff > 100) { // More than 100ms between events
+        console.log(`⚠️ Event gap detected: ${timeDiff}ms between events`);
+      }
+    }
+  }, [eventCount, lastEventTime]);
+
+  // Global event handler for Spline interactions
+  const handleGlobalMouseMove = useCallback((e: MouseEvent) => {
+    if (!iframeRef.current || !splineLoaded) {
+      console.log('Spline not ready:', { iframeExists: !!iframeRef.current, splineLoaded });
+      return;
+    }
+
+    // Check if we're interacting with UI elements
+    const target = e.target as HTMLElement;
+    const isUIElement = target.closest('[data-ui-element]') || 
+                       target.closest('button') || 
+                       target.closest('input') || 
+                       target.closest('a') ||
+                       target.closest('.pointer-events-auto');
+    
+    setIsInteractingWithUI(!!isUIElement);
+
+    // Get viewport dimensions
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // Normalize coordinates to 0-1 range
+    const normalizedX = e.clientX / viewportWidth;
+    const normalizedY = e.clientY / viewportHeight;
+    
+    // Calculate mouse velocity for dynamic interactions
+    const deltaX = e.movementX / viewportWidth;
+    const deltaY = e.movementY / viewportHeight;
+    
+    // Throttle events to prevent flooding
+    const now = Date.now();
+    if (now - lastEventSent < THROTTLE_MS) {
+      return; // Skip this event
+    }
+    setLastEventSent(now);
+    
+    // More aggressive debug logging
+    if (Math.random() < 0.1) { // Log 10% of events to see more activity
+      console.log('🎯 Spline Event:', {
+        type: 'mouseMove',
+        x: normalizedX.toFixed(3),
+        y: normalizedY.toFixed(3),
+        deltaX: deltaX.toFixed(4),
+        deltaY: deltaY.toFixed(4),
+        isUIElement: !!isUIElement,
+        iframeExists: !!iframeRef.current,
+        splineLoaded: splineLoaded
+      });
+    }
+    
+    // Send enhanced mouse data to Spline iframe (THROTTLED)
+    try {
+      const message = {
+        type: 'mouseMove',
+        x: normalizedX,
+        y: normalizedY,
+        deltaX: deltaX,
+        deltaY: deltaY,
+        viewportWidth: viewportWidth,
+        viewportHeight: viewportHeight,
+        isUIElement: !!isUIElement,
+        timestamp: now
+      };
+      
+      console.log('📤 Sending to Spline (THROTTLED):', message);
+      
+      iframeRef.current.contentWindow?.postMessage(message, '*');
+      
+      // Also try alternative event formats that Spline might expect
+      iframeRef.current.contentWindow?.postMessage({
+        type: 'mousemove',
+        clientX: e.clientX,
+        clientY: e.clientY,
+        movementX: e.movementX,
+        movementY: e.movementY
+      }, '*');
+      
+      // Try Spline-specific event format
+      iframeRef.current.contentWindow?.postMessage({
+        type: 'spline:mouseMove',
+        x: normalizedX,
+        y: normalizedY,
+        deltaX: deltaX,
+        deltaY: deltaY
+      }, '*');
+      
+      // Try generic event format
+      iframeRef.current.contentWindow?.postMessage({
+        type: 'event',
+        name: 'mouseMove',
+        data: {
+          x: normalizedX,
+          y: normalizedY,
+          deltaX: deltaX,
+          deltaY: deltaY
+        }
+      }, '*');
+      
+      // NEW: Also try simulating actual DOM events (THROTTLED)
+      simulateSplineEvents(e);
+      
+    } catch (error) {
+      console.error('❌ Failed to send message to Spline:', error);
+    }
+  }, [splineLoaded, lastEventSent, simulateSplineEvents]);
+
+  const handleGlobalMouseEnter = useCallback(() => {
+    if (!iframeRef.current || !splineLoaded) return;
+    
+    iframeRef.current.contentWindow?.postMessage({
+      type: 'mouseEnter',
+      timestamp: Date.now()
+    }, '*');
+  }, [splineLoaded]);
+
+  const handleGlobalMouseLeave = useCallback(() => {
+    if (!iframeRef.current || !splineLoaded) return;
+    
+    iframeRef.current.contentWindow?.postMessage({
+      type: 'mouseLeave',
+      timestamp: Date.now()
+    }, '*');
+  }, [splineLoaded]);
+
+  const handleGlobalMouseDown = useCallback((e: MouseEvent) => {
+    if (!iframeRef.current || !splineLoaded) return;
+    
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const normalizedX = e.clientX / viewportWidth;
+    const normalizedY = e.clientY / viewportHeight;
+    
+    iframeRef.current.contentWindow?.postMessage({
+      type: 'mouseDown',
+      x: normalizedX,
+      y: normalizedY,
+      button: e.button,
+      timestamp: Date.now()
+    }, '*');
+  }, [splineLoaded]);
+
+  const handleGlobalMouseUp = useCallback((e: MouseEvent) => {
+    if (!iframeRef.current || !splineLoaded) return;
+    
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const normalizedX = e.clientX / viewportWidth;
+    const normalizedY = e.clientY / viewportHeight;
+    
+    iframeRef.current.contentWindow?.postMessage({
+      type: 'mouseUp',
+      x: normalizedX,
+      y: normalizedY,
+      button: e.button,
+      timestamp: Date.now()
+    }, '*');
+  }, [splineLoaded]);
+
+  const handleGlobalWheel = useCallback((e: WheelEvent) => {
+    if (!iframeRef.current || !splineLoaded) return;
+    
+    iframeRef.current.contentWindow?.postMessage({
+      type: 'wheel',
+      deltaX: e.deltaX,
+      deltaY: e.deltaY,
+      deltaZ: e.deltaZ,
+      timestamp: Date.now()
+    }, '*');
+  }, [splineLoaded]);
+
+  // Try to access Spline's internal API and force interactions
+  const forceSplineInteractions = useCallback(() => {
+    if (!iframeRef.current || !splineLoaded) return;
+    
+    try {
+      console.log('🧪 Attempting to force Spline interactions...');
+      
+      const iframe = iframeRef.current;
+      
+      // Method 1: Try to access Spline's global object
+      try {
+        const splineWindow = iframe.contentWindow as any;
+        
+        // Look for common Spline properties
+        const splineProps = ['spline', 'SPLINE', 'Spline', 'scene', 'Scene', 'app', 'App'];
+        splineProps.forEach(prop => {
+          if (splineWindow && splineWindow[prop]) {
+            console.log(`🎯 Found Spline property: ${prop}`, splineWindow[prop]);
+            
+            const obj = splineWindow[prop];
+            
+            // Try to enable interactions
+            if (typeof obj.enableInteractions === 'function') {
+              obj.enableInteractions();
+              console.log(`🎯 Enabled interactions on ${prop}`);
+            }
+            
+            if (typeof obj.setInteractive === 'function') {
+              obj.setInteractive(true);
+              console.log(`🎯 Set ${prop} to interactive`);
+            }
+          }
+        });
+        
+      } catch (error) {
+        console.log('🔒 Cannot access Spline window (CORS)');
+      }
+      
+      // Method 2: Try to inject a script into the iframe
+      try {
+        if (iframe.contentDocument) {
+          const script = document.createElement('script');
+          script.textContent = `
+            console.log('🎯 Script injected into Spline iframe');
+            
+            // Try to find and enable Spline interactions
+            if (window.spline) {
+              console.log('🎯 Found window.spline:', window.spline);
+              if (window.spline.enableInteractions) {
+                window.spline.enableInteractions();
+                console.log('🎯 Enabled Spline interactions');
+              }
+            }
+            
+            // Add event listeners to test if events are working
+            document.addEventListener('mousemove', (e) => {
+              console.log('🎯 Spline iframe received mousemove:', e.clientX, e.clientY);
+            });
+            
+            document.addEventListener('click', (e) => {
+              console.log('🎯 Spline iframe received click:', e.clientX, e.clientY);
+            });
+          `;
+          
+          iframe.contentDocument.head.appendChild(script);
+          console.log('🎯 Script injected successfully');
+        }
+      } catch (error) {
+        console.log('🔒 Cannot inject script (CORS)');
+      }
+      
+    } catch (error) {
+      console.error('❌ Failed to force Spline interactions:', error);
+    }
+  }, [splineLoaded]);
+
+
+  // Set up event listeners and Spline interaction
+  useEffect(() => {
+    if (!splineLoaded) return;
+    
+    console.log('🎯 Setting up working Spline event system...');
+    
+    const iframe = iframeRef.current;
+    const container = containerRef.current;
+    if (!iframe || !container) return;
+
+    let isMouseDown = false;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      // Calculate mouse velocity for more dynamic interactions
+      const deltaX = x - lastMouseX;
+      const deltaY = y - lastMouseY;
+      
+      // Update event counter and timestamp
+      const now = Date.now();
+      setEventCount(prev => prev + 1);
+      setLastEventTime(now);
+      
+      // METHOD 1: Try direct DOM event dispatch on iframe
+      try {
+        // Create a new mouse event with coordinates relative to the iframe
+        const mouseEvent = new MouseEvent('mousemove', {
+          clientX: e.clientX,
+          clientY: e.clientY,
+          screenX: e.screenX,
+          screenY: e.screenY,
+          bubbles: true,
+          cancelable: true,
+          view: window
+        });
+        
+        // Dispatch directly on the iframe element
+        iframe.dispatchEvent(mouseEvent);
+        console.log(`🎯 Dispatched direct mousemove event on iframe #${eventCount + 1}`);
+        
+        // Also try dispatching on the iframe's contentWindow if accessible
+        if (iframe.contentWindow) {
+          try {
+            iframe.contentWindow.dispatchEvent(mouseEvent);
+            console.log(`🎯 Dispatched mousemove event on iframe contentWindow #${eventCount + 1}`);
+          } catch (error) {
+            console.log('🔒 Cannot dispatch on contentWindow (CORS)');
+          }
+        }
+        
+      } catch (error) {
+        console.log('❌ Direct event dispatch failed:', error);
+      }
+      
+      // METHOD 2: Also try postMessage as backup
+      iframe.contentWindow?.postMessage({
+        type: 'mouseMove',
+        x: x / rect.width,  // Normalize coordinates
+        y: y / rect.height,
+        deltaX: deltaX / rect.width,
+        deltaY: deltaY / rect.height,
+        isHovered: true,
+        isMouseDown: isMouseDown
+      }, '*');
+      
+      lastMouseX = x;
+      lastMouseY = y;
+    };
+
+    const handleMouseEnter = () => {
+      // Update event counter
+      setEventCount(prev => prev + 1);
+      setLastEventTime(Date.now());
+      
+      // METHOD 1: Direct DOM event dispatch
+      try {
+        const mouseEvent = new MouseEvent('mouseenter', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        });
+        iframe.dispatchEvent(mouseEvent);
+        console.log(`🎯 Dispatched direct mouseenter event on iframe #${eventCount + 1}`);
+      } catch (error) {
+        console.log('❌ Direct mouseenter dispatch failed:', error);
+      }
+      
+      // METHOD 2: PostMessage backup
+      iframe.contentWindow?.postMessage({
+        type: 'mouseEnter',
+        isHovered: true
+      }, '*');
+    };
+
+    const handleMouseLeave = () => {
+      // Update event counter
+      setEventCount(prev => prev + 1);
+      setLastEventTime(Date.now());
+      
+      // METHOD 1: Direct DOM event dispatch
+      try {
+        const mouseEvent = new MouseEvent('mouseleave', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        });
+        iframe.dispatchEvent(mouseEvent);
+        console.log(`🎯 Dispatched direct mouseleave event on iframe #${eventCount + 1}`);
+      } catch (error) {
+        console.log('❌ Direct mouseleave dispatch failed:', error);
+      }
+      
+      // METHOD 2: PostMessage backup
+      iframe.contentWindow?.postMessage({
+        type: 'mouseLeave',
+        isHovered: false
+      }, '*');
+    };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      isMouseDown = true;
+      
+      // Update event counter
+      setEventCount(prev => prev + 1);
+      setLastEventTime(Date.now());
+      
+      const rect = container.getBoundingClientRect();
+      iframe.contentWindow?.postMessage({
+        type: 'mouseDown',
+        x: (e.clientX - rect.left) / rect.width,
+        y: (e.clientY - rect.top) / rect.height
+      }, '*');
+      
+      console.log(`🎯 Mouse down event #${eventCount + 1}`);
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      isMouseDown = false;
+      
+      // Update event counter
+      setEventCount(prev => prev + 1);
+      setLastEventTime(Date.now());
+      
+      const rect = container.getBoundingClientRect();
+      iframe.contentWindow?.postMessage({
+        type: 'mouseUp',
+        x: (e.clientX - rect.left) / rect.width,
+        y: (e.clientY - rect.top) / rect.height
+      }, '*');
+      
+      console.log(`🎯 Mouse up event #${eventCount + 1}`);
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      
+      // Update event counter
+      setEventCount(prev => prev + 1);
+      setLastEventTime(Date.now());
+      
+      const touch = e.touches[0];
+      const rect = container.getBoundingClientRect();
+      iframe.contentWindow?.postMessage({
+        type: 'touchStart',
+        x: (touch.clientX - rect.left) / rect.width,
+        y: (touch.clientY - rect.top) / rect.height
+      }, '*');
+      
+      console.log(`🎯 Touch start event #${eventCount + 1}`);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      
+      // Update event counter
+      setEventCount(prev => prev + 1);
+      setLastEventTime(Date.now());
+      
+      const touch = e.touches[0];
+      const rect = container.getBoundingClientRect();
+      iframe.contentWindow?.postMessage({
+        type: 'touchMove',
+        x: (touch.clientX - rect.left) / rect.width,
+        y: (touch.clientY - rect.top) / rect.height
+      }, '*');
+      
+      console.log(`🎯 Touch move event #${eventCount + 1}`);
+    };
+
+    // Add event listeners to the container
+    container.addEventListener('mousemove', handleMouseMove, { passive: true });
+    container.addEventListener('mouseenter', handleMouseEnter);
+    container.addEventListener('mouseleave', handleMouseLeave);
+    container.addEventListener('mousedown', handleMouseDown);
+    container.addEventListener('mouseup', handleMouseUp);
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    // Add simple message listener for Spline responses
+    const handleMessage = (event: MessageEvent) => {
+      if (event.source !== iframe.contentWindow) return;
+      console.log('📨 Message from Spline:', event.data);
+    };
+    window.addEventListener('message', handleMessage);
+
+    // Cleanup function
+    return () => {
+      container.removeEventListener('mousemove', handleMouseMove);
+      container.removeEventListener('mouseenter', handleMouseEnter);
+      container.removeEventListener('mouseleave', handleMouseLeave);
+      container.removeEventListener('mousedown', handleMouseDown);
+      container.removeEventListener('mouseup', handleMouseUp);
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [splineLoaded]);
+
+
 
   return (
-    <div className="fixed inset-0 z-0">
+    <div className="fixed inset-0 z-[-1]">
+      {/* Debug Indicator */}
+      {splineLoaded && (
+        <div className="fixed top-4 left-4 z-[9999] pointer-events-none">
+          <div className="bg-black/50 text-white px-3 py-2 rounded-lg text-sm font-mono">
+            🎯 Spline Active
+            <br />
+            Events: {eventCount}
+            <br />
+            Last: {lastEventTime > 0 ? `${Date.now() - lastEventTime}ms ago` : 'None'}
+            <br />
+            Status: {isInteractingWithUI ? 'UI' : 'Background'}
+            <br />
+            Z-Index: -1
+            <br />
+            <span className="text-green-400">✅ Working Event System</span>
+            <br />
+            <span className="text-blue-400">🎯 Container Events Active</span>
+          </div>
+        </div>
+      )}
+
+      {/* Spline Interaction Test Indicator */}
+      {splineLoaded && (
+        <div className="fixed top-4 right-4 z-[9999] pointer-events-none">
+          <div className="bg-green-500/80 text-white px-3 py-2 rounded-lg text-sm font-mono">
+            🎯 Working Spline Events
+            <br />
+            Move mouse over background
+            <br />
+            Check console for logs
+            <br />
+            <span className="text-yellow-400">Using Container Events</span>
+          </div>
+        </div>
+      )}
+
+      {/* Event Debug Indicator */}
+      {splineLoaded && (
+        <div className="fixed bottom-4 left-4 z-[9999] pointer-events-none">
+          <div className="bg-red-500/80 text-white px-3 py-2 rounded-lg text-sm font-mono">
+            🧪 Event Debug Mode
+            <br />
+            Move mouse to see events
+            <br />
+            Check console for logs
+            <br />
+            <span className="text-yellow-400">Direct + PostMessage</span>
+          </div>
+        </div>
+      )}
+
       {/* Spline Background (Base Layer) */}
       <div 
         ref={containerRef}
-        className="fixed inset-0 z-0 overflow-hidden spline-background"
+        className="fixed inset-0 z-[-1] overflow-hidden spline-background"
         style={{ 
           cursor: 'default',
-          pointerEvents: 'auto',
-          zIndex: 8,
-          // Ensure Spline can receive pointer events when not blocked
+          pointerEvents: 'auto', // Allow events to reach the iframe
+          zIndex: -1,
           isolation: 'isolate'
         }}
       >
         <iframe 
           ref={iframeRef}
-          src='https://my.spline.design/animatedshapeblend-vPAPkDf3zXbvMSVXAIjlDWIm/' 
+          src='https://my.spline.design/animatedshapeblend-vPAPkDf3zXbvMSVXAIjlDWIm/'
           frameBorder='0' 
           width='100%' 
           height='100%'
-          className="w-full h-full"
-          style={{ 
+          className="w-full h-full hover:opacity-90 transition-opacity"
+          style={{
             transform: 'scale(1.2)',
-            pointerEvents: 'auto',
+            pointerEvents: 'auto', // Enable direct interaction
             transition: 'opacity 0.3s ease-in-out',
             border: 'none',
             outline: 'none',
-            // Ensure iframe can receive all pointer events
-            zIndex: 8
+            zIndex: -1,
+            cursor: 'default'
           }}
           allow="autoplay; fullscreen"
           allowFullScreen
           title="Spline Background Animation"
+          onClick={(e) => {
+            e.stopPropagation();
+            console.log('🎯 Spline iframe clicked!');
+          }}
+          onMouseMove={(e) => {
+            e.stopPropagation();
+            console.log('🎯 Spline iframe mouse move!', e.clientX, e.clientY);
+            // Also send to global handler for Spline communication
+            handleIframeMouseMove(e as any);
+          }}
+          onMouseEnter={(e) => {
+            e.stopPropagation();
+            console.log('🎯 Spline iframe mouse enter!');
+          }}
+          onMouseLeave={(e) => {
+            e.stopPropagation();
+            console.log('🎯 Spline iframe mouse leave!');
+          }}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            console.log('🎯 Spline iframe mouse down!');
+          }}
+          onMouseUp={(e) => {
+            e.stopPropagation();
+            console.log('🎯 Spline iframe mouse up!');
+          }}
           onLoad={() => {
-            console.log('Persistent Spline iframe loaded successfully');
+            console.log('✅ Persistent Spline iframe loaded successfully');
             setSplineLoaded(true);
+            
+            // Debug: Check iframe properties
             if (iframeRef.current) {
+              console.log('🎯 Iframe properties:');
+              console.log('- pointerEvents:', iframeRef.current.style.pointerEvents);
+              console.log('- zIndex:', iframeRef.current.style.zIndex);
+              console.log('- className:', iframeRef.current.className);
+              console.log('- src:', iframeRef.current.src);
+              
+              // Force pointer events to be sure
               iframeRef.current.style.pointerEvents = 'auto';
-              // Force pointer events to be enabled
-              iframeRef.current.style.zIndex = '8';
+              iframeRef.current.style.cursor = 'default';
+              
+              // Try to add a click event listener to test if events are reaching the iframe
+              iframeRef.current.addEventListener('click', (e) => {
+                console.log('🎯 Iframe received click event!', e);
+              });
+              
+              iframeRef.current.addEventListener('mousemove', (e) => {
+                console.log('🎯 Iframe received mousemove event!', e.clientX, e.clientY);
+              });
+              
+              console.log('🎯 Added event listeners to iframe for testing');
+            }
+            
+            // Test iframe access
+            try {
+              console.log('🧪 Testing iframe access...');
+              console.log('Iframe contentWindow:', iframeRef.current?.contentWindow ? 'global' : 'null');
+              console.log('Iframe contentDocument:', iframeRef.current?.contentDocument ? 'accessible' : 'null');
+              
+              if (iframeRef.current?.contentWindow) {
+                console.log('🧪 Testing iframe interactivity...');
+                console.log('Iframe pointerEvents style:', iframeRef.current.style.pointerEvents);
+                console.log('Iframe zIndex style:', iframeRef.current.style.zIndex);
+                console.log('Iframe className:', iframeRef.current.className);
+                console.log('Iframe src:', iframeRef.current.src);
+                
+                // Test if we can send a simple message
+                iframeRef.current.contentWindow.postMessage({
+                  type: 'test',
+                  message: 'Hello from React!',
+                  timestamp: Date.now()
+                }, '*');
+                
+                console.log('🧪 Initializing Spline scene...');
+                
+                // Send initialization message
+                iframeRef.current.contentWindow.postMessage({
+                  type: 'SPLINE_INIT',
+                  action: 'enableInteractions',
+                  config: {
+                    enableMouseEvents: true,
+                    enableTouchEvents: true,
+                    enableKeyboardEvents: true
+                  }
+                }, '*');
+                
+                // Try to force interactions after a delay
+                setTimeout(() => {
+                  forceSplineInteractions();
+                }, 2000);
+                
+              }
+            } catch (error) {
+              console.log('🔒 Iframe access restricted (CORS):', error instanceof Error ? error.message : String(error));
             }
           }}
           onError={(e) => {
-            console.error('Persistent Spline iframe failed to load:', e);
+            console.error('❌ Persistent Spline iframe failed to load:', e);
           }}
         />
       </div>
 
       {/* Lava Lamp Overlay */}
       <div 
-        className="fixed inset-0 z-[1] pointer-events-none lava-lamp-overlay"
+        className="fixed inset-0 z-[-1] pointer-events-none lava-lamp-overlay"
         style={{ 
           mixBlendMode: 'overlay',
-          opacity: 0.3,
+          opacity: 1.0,
           pointerEvents: 'none'
         }}
       >
